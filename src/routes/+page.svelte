@@ -5,15 +5,13 @@
         getUsersCharacters,
         supabase,
     } from "$lib/GenericFunctions";
-    import { onMount } from "svelte";
     import "../app.scss";
     import { goto } from "$app/navigation";
     import CharacterPreview from "$lib/Components/Generic/CharacterPreview.svelte";
+    import { onMount } from "svelte";
 
     export let data;
-    // $supabase = data.supabase;
 
-    $: user = data.user?.user;
     let activeTab: string = "";
 
     let userNames: string[];
@@ -26,18 +24,20 @@
 
     let shown = false;
 
-    $: if ($supabase) {
-        
-        getUserNames().then((s) => {
-            if (!s) return;
-            users = s;
-            userNames = users.map((x) => x.display_name).sort();
-        });
+    onMount(() => {
+        if ($supabase) {
+            getUserNames().then((s) => {
+                if (!s) return;
+                users = s;
+                userNames = users.map((x) => x.display_name).sort();
+            });
 
-        getUsersCharacters().then(s => characters = s!);
-    }
-    
-    $: userAuthorized = users?.find((x) => x.id === user.id);
+            getUsersCharacters().then((s) => (characters = s!));
+        }
+    });
+
+    $: user = data.user?.user;
+    $: userAuthorized = user ? users?.find((x) => x.id === user.id) : false;
     $: filteredCharacters = characters?.filter((x) => x.owner_id === activeTab);
 </script>
 
@@ -52,27 +52,21 @@
                     </p>
                 </div>
                 <div class="column custom-column" style="flex: none;">
-                    {#if user && $supabase}<button
-                            class="custom-box custom-button"
-                            on:click={async () => {
-                                shown = true;
-                            }}>Create New Character</button
-                        >
+                    {#if user && $supabase}
+                        <button class="custom-box custom-button" on:click={async () => { shown = true;}}>
+                            Create New Character
+                        </button>
                     {/if}
                 </div>
                 <div class="column custom-column" style="flex: none;">
-                    {#if !user}<button
-                            class="custom-box custom-button"
-                            on:click={async () => {
-                                if (!$supabase) return;
-                                await $supabase.auth.signInWithOAuth({
-                                    provider: "google",
-                                    options: {
-                                        redirectTo: window.location.href,
-                                    },
-                                });
-                            }}>Log in</button
-                        >
+                    {#if !user}
+                        <button class="custom-box custom-button" on:click={async () => {
+                            if (!$supabase) return;
+                            await $supabase.auth.signInWithOAuth({
+                                provider: "google",
+                                options: { redirectTo: window.location.href },
+                            });
+                        }}>Log in</button>
                     {:else}
                         <!-- svelte-ignore a11y-missing-attribute -->
                         <img
@@ -85,16 +79,12 @@
             <div class="custom-tabs is-boxed">
                 <ul style="display: flex; flex-direction: row;">
                     {#if users}
-                        {#each users.sort((a, b) => {
-                            return a.display_name.localeCompare(b.display_name);
-                        }) as tab}
+                        {#each users.sort((a, b) => { return a.display_name.localeCompare(b.display_name); }) as tab}
                             <li class:is-active={activeTab === tab.id}>
                                 <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
-                                <a
-                                    on:click={() => {
-                                        activeTab = tab.id;
-                                    }}>{tab.display_name}</a
-                                >
+                                <a on:click={() => { activeTab = tab.id;}}>
+                                    {tab.display_name}
+                                </a>
                             </li>
                         {/each}
                     {/if}
@@ -119,22 +109,16 @@
 </div>
 <div class="modal {shown ? 'is-active' : ''}">
     <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
-    <div
-        class="modal-background"
-        on:click={() => {
-            shown = false;
-        }}
-    ></div>
+    <div class="modal-background" on:click={() => {
+        shown = false;
+    }}/>
     <div class="modal-content" style="width: 24rem;">
         <div class="custom-box column" style="width: 23rem;">
             <div class="custom-title">Make a New Character</div>
             <div class="custom-subtitle">Name</div>
             <input bind:value={character_name} />
             <div class="row">
-                <div
-                    class="column"
-                    style="padding-left: 0px; padding-right: 0px;"
-                >
+                <div class="column" style="padding-left: 0px; padding-right: 0px;">
                     <div class="custom-subtitle">Class</div>
                     <input
                         list="classes"
@@ -143,32 +127,23 @@
                         bind:value={character_class}
                     />
                     <datalist id="classes">
-                        <option value="Artificer"> </option><option
-                            value="Barbarian"
-                        >
-                        </option><option value="Bard"> </option><option
-                            value="Cleric"
-                        >
-                        </option><option value="Druid"> </option><option
-                            value="Fighter"
-                        >
-                        </option><option value="Monk"> </option><option
-                            value="Paladin"
-                        >
-                        </option><option value="Ranger"> </option><option
-                            value="Rogue"
-                        >
-                        </option><option value="Sorcerer"> </option><option
-                            value="Warlock"
-                        >
-                        </option><option value="Wizard"> </option></datalist
-                    >
+                        <option value="Artificer"/>
+                        <option value="Barbarian"/>
+                        <option value="Bard"/>
+                        <option value="Cleric"/>
+                        <option value="Druid"/>
+                        <option value="Fighter"/>
+                        <option value="Monk"/>
+                        <option value="Paladin"/>
+                        <option value="Ranger"/>
+                        <option value="Rogue"/>
+                        <option value="Sorcerer"/>
+                        <option value="Warlock"/>
+                        <option value="Wizard"/>
+                    </datalist>
                 </div>
                 <div style="width: 1rem;" />
-                <div
-                    class="column"
-                    style="padding-left: 0px; padding-right: 0px;"
-                >
+                <div class="column" style="padding-left: 0px; padding-right: 0px;">
                     <div class="custom-subtitle">Level</div>
                     <input
                         type="number"
@@ -180,21 +155,17 @@
                 </div>
             </div>
             <button
-                class="custom-box custom-button {!userAuthorized
-                    ? 'disabled'
-                    : ''}"
+                class="custom-box custom-button {!userAuthorized ? 'disabled' : ''}"
                 style="border-width: 1px; border: solid 1px;"
                 on:click={async () => {
                     if (userAuthorized && $supabase) {
-                        await $supabase
-                            .from("characters")
-                            .upsert({
-                                data: createNewCharacter(
-                                    character_class,
-                                    character_level,
-                                ),
-                                name: character_name,
-                            });
+                        await $supabase.from("characters").upsert({
+                            data: createNewCharacter(
+                                character_class,
+                                character_level,
+                            ),
+                            name: character_name,
+                        });
                         goto(
                             `https://justin.pakj.games/${character_name}/edit`,
                         );

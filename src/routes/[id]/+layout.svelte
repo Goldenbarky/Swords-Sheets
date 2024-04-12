@@ -2,7 +2,6 @@
     import "../../app.scss";
     import { theme } from "$lib/Theme";
     import MainPage from '$lib/Pages/MainPage.svelte';
-    import { supabase } from "$lib/GenericFunctions";
     
     export let data;
 </script>

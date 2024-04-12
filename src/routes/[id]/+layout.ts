@@ -6,7 +6,7 @@ import { theme } from "$lib/Theme";
 export const load: LayoutLoad = async ({ fetch, data, depends, params: { id }, parent }) => {
     const { supabase, session } = await parent();
 
-    if(!session) redirect(303, "/");
+    //if(!session) redirect(303, "/");
     
     const { data:sheets, error } = await supabase.from("characters").select("*").eq("name", id).single();
 
