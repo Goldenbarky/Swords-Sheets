@@ -145,8 +145,8 @@
         background-color: var(--background);
     }
     .hero {
-        padding-bottom: 0px; 
-        padding-top: 0.5rem; 
+        padding-bottom: 0px !important; 
+        padding-top: 0.5rem !important; 
         background-color: var(--primary); 
         border-bottom: 1px solid var(--border);
     }
