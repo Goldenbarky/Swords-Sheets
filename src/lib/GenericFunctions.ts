@@ -1,7 +1,11 @@
 import type { SupabaseClient } from "@supabase/supabase-js";
 import { theme } from "./Theme";
+import { writable } from "svelte/store";
 
-export let supabase:SupabaseClient | null = null;
+let privateSupabase:SupabaseClient | null;
+export let supabase = writable<SupabaseClient | null>(null);
+supabase.subscribe(s => privateSupabase = s);
+
 let character_sheet:CharacterSheet | null;
 let character_id:string | null;
 let character: { name: any; data?: CharacterSheet; id?: string; };
@@ -26,11 +30,9 @@ export const getPB = () => {
 }
 
 export const getAbilityModifier = (ability:keyof AbilityScoreType) => {
-    return scoreToModifier(character_sheet!.Stats.Ability_Scores[ability]);
-}
+    if (!character_sheet) return 0;
 
-export const setSupabase = (s:SupabaseClient) => {
-    supabase = s;
+    return scoreToModifier(character_sheet.Stats.Ability_Scores[ability]);
 }
 
 export const setCharacter = (ch:{data:CharacterSheet, name:string, id:string}) => {
@@ -161,45 +163,44 @@ export const createNewCharacter = (character_class:string, level:number) => {
 }
 
 export const updateDatabase = async () => {
-    if(!supabase) {
-        return;
-    }
+    if (!privateSupabase) return;
 
-    await supabase.from("characters").update({data:character_sheet}).eq("id", character_id).select('*');
+    await privateSupabase.from("characters").update({data:character_sheet}).eq("id", character_id).select('*');
 }
 
 export const updateName = async () => {
-	if(!supabase) return;
+    if (!privateSupabase) return;
 
-	await supabase.from("characters").update({name:character.name}).eq("id", character_id);
+	await privateSupabase.from("characters").update({name:character.name}).eq("id", character_id);
 }
 
 export const updateTheme = async () => {
-    if(!supabase) {
-        return;
-    }
-
-    await supabase.from("characters").update({theme:colors}).eq("id", character_id).select('*');
+    if (!privateSupabase) return;
+    
+    await privateSupabase.from("characters").update({theme:colors}).eq("id", character_id).select('*');
 }
 
 export const resetColors = async () => {
-    if(!supabase) return;
-    const {data} = await supabase?.from("characters").select("theme").eq("id", character_id).single();
+    if (!privateSupabase) return;
+    
+    const {data} = await privateSupabase?.from("characters").select("theme").eq("id", character_id).single();
 
     if(!data) return;
     theme.set(data.theme);
 }
 
 export const getUserNames = async () => {
-    if(!supabase) return;
-    const {data} = await supabase.from("users").select("*");
+    if (!privateSupabase) return;
+    
+    const {data} = await privateSupabase.from("users").select("*");
 
     return data;
 }
 
 export const getUsersCharacters = async () => {
-    if(!supabase) return;
-    const {data} = await supabase.from("characters").select("*");
+    if (!privateSupabase) return;
+    
+    const {data} = await privateSupabase.from("characters").select("*");
 
     return data;
 }

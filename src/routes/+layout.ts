@@ -2,8 +2,7 @@ import type { LayoutLoad } from "./$types";
 
 import { browser } from '$app/environment';
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public'
-import { createBrowserClient, isBrowser, parse } from '@supabase/ssr'
-import { setSupabase } from "$lib/GenericFunctions";
+import { combineChunks, createBrowserClient, isBrowser, parse } from '@supabase/ssr'
 
 export const load: LayoutLoad = async ({ fetch, data, depends }) => {
     depends('supabase:auth');
@@ -23,47 +22,23 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
     const spellsCombined = spellJsons.flatMap(x => x['spell']);
 
     const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-        global: {
-            fetch,
-        },
         cookies: {
             get(key) {
                 if (!isBrowser()) {
                     return JSON.stringify(data.session);
                 }
-
-                const cookie = parse(document.cookie);
-                return cookie[key];
+                const cookie = combineChunks(key, (name) => {
+                    const cookies = parse(document.cookie);
+                    return cookies[name];
+                });
+                return cookie;
             },
         },
     });
-
-    supabase.auth.onAuthStateChange((event, session) => {
-        if (!browser) return;
-
-        if (session && session.provider_token) {
-            window.localStorage.setItem('oauth_provider_token', session.provider_token);
-        }
-
-        if (session && session.provider_refresh_token) {
-            window.localStorage.setItem('oauth_provider_refresh_token', session.provider_refresh_token);
-        }
-
-        if (event === 'SIGNED_OUT') {
-            window.localStorage.removeItem('oauth_provider_token');
-            window.localStorage.removeItem('oauth_provider_refresh_token');
-        }
-    });
-
-
-    setSupabase(supabase);
-    const {
-        data: { session },
-    } = await supabase.auth.getSession();
-
     return { 
         supabase, 
-        session,
+        session: data.session,
+        user: data.user,
         spells: spellsCombined
     };
 }
