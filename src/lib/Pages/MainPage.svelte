@@ -15,9 +15,7 @@
     export let spells:any;
 
     let user: User | undefined | null;
-    $: if ($supabase) {
-        $supabase.auth.getUser().then(s => user = s.data.user);
-    }
+    onMount(async () => user = (await $supabase?.auth.getUser())?.data.user);
     onMount(async () => {
         setCharacter(sheet);
     });
