@@ -1,0 +1,96 @@
+<script lang="ts">
+    import TitleDescription from "$lib/Components/Generic/TitleDescription.svelte";
+    import { updateDatabase } from "$lib/GenericFunctions";
+    import { mode } from "$lib/Theme";
+
+    export let title:string;
+    export let features:{Title:string, Description:{Subtitle:string, Paragraph:string}[]}[];
+
+    const removeFeature = (list:{Title:string, Description:{Subtitle:string, Paragraph:string}[]}[], title:string) => {
+        return list.filter(x => x.Title !== title);
+    }
+</script>
+
+<div class="box custom-box">
+    <div class="custom-title">{title}</div>
+    {#each features as feature, i}
+        <TitleDescription
+            bind:title={feature.Title}
+            bind:description={feature.Description}
+            removeFunction={() => features = removeFeature(features, feature.Title)}
+        />
+        <div style="height:0.5rem;"/>
+    {/each}
+    {#if $mode === "edit"}
+        <div class="row">
+            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.5rem;" on:click={() => {
+                features = [...features, {Title:"", Description:[{Subtitle:"", Paragraph:""}]}];
+                updateDatabase();
+            }}>+</button>
+            <div>
+                <div style="width:100%;">
+                    <div class="custom-subtitle placeholder" on:focusout={updateDatabase}>New Feature</div>
+                </div>
+            </div>
+        </div>
+    {/if}
+</div>
+
+<style lang="scss">
+    .custom-title {
+        @extend .title !optional;
+        font-size: x-large;
+        justify-content: center;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--secondary);
+    }
+    .custom-subtitle {
+        @extend .title !optional;
+        font-size: large;
+        text-align: left;
+        width: fit-content;
+        border-bottom: 1px solid var(--border);
+        color: var(--secondary);
+        cursor: default;
+        user-select: none;
+    }
+    .custom-box {
+        border: 2px solid var(--border);
+        padding: 0.75rem;
+        padding-top: 0rem;
+        background-color: var(--background);
+    }
+    .row {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        width: 100%;
+    }
+    .custom-button {
+        padding-bottom: 2px;
+        background-color: var(--background);
+        color: var(--text);
+        margin-bottom: 0.2rem;
+        margin-top: 0.2rem;
+        border-width: 1px;
+        user-select: none;
+        color: var(--secondary);
+        font-size: small;
+        cursor: pointer;
+    }
+    .custom-tiny-button {
+        display: flex;
+        width: 0.1rem;
+        height: 1rem;
+        padding: 0rem 0.4rem 0rem 0.4rem;
+        justify-content: flex-end;
+        margin-top: 0.3rem;
+        margin-right: 0.3rem;
+    }
+    .custom-button:hover {
+        background-color: var(--background_hover);
+    }
+</style>

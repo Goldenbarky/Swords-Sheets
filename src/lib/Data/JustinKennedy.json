@@ -1,0 +1,357 @@
+{
+  "Class": "Paladin",
+  "Level": 0,
+  "Stats": {
+    "Speed": 20,
+    "Health": {
+      "Max": "4",
+      "Temp": "0",
+      "Current": "2",
+      "Hit_Dice": "0"
+    },
+    "Armor_Class": 8,
+    "Proficiencies": {
+      "Armor": [
+        "Heavy Armor",
+        "Shields"
+      ],
+      "Tools": [
+        "Cook's Utensils",
+        "Painter's Supplies"
+      ],
+      "Skills": {
+        "Arcana": "",
+        "Nature": "",
+        "History": "",
+        "Insight": "P",
+        "Stealth": "",
+        "Medicine": "",
+        "Religion": "",
+        "Survival": "",
+        "Athletics": "",
+        "Deception": "E",
+        "Acrobatics": "",
+        "Perception": "",
+        "Persuasion": "",
+        "Performance": "P",
+        "Intimidation": "",
+        "Investigation": "P",
+        "Slight of Hand": "",
+        "Animal Handling": "P"
+      },
+      "Weapons": [
+        "Greatswords",
+        "Glaives"
+      ],
+      "Languages": [
+        "Common"
+      ],
+      "Saving_Throws": {
+        "Wisdom": "P",
+        "Charisma": "P",
+        "Strength": "",
+        "Dexterity": "",
+        "Constitution": "",
+        "Intelligence": ""
+      }
+    },
+    "Ability_Scores": {
+      "Wisdom": 16,
+      "Charisma": 14,
+      "Strength": "12",
+      "Dexterity": 7,
+      "Constitution": 5,
+      "Intelligence": 16
+    },
+    "Proficiency_Bonus": 2
+  },
+  "Features": {
+    "Class": [
+      {
+        "Title": "Spellcasting",
+        "Description": [
+          {
+            "Subtitle": "",
+            "Paragraph": "The Wizard table shows how many spell slots you have to cast your wizard spells of 1st level and higher. To cast one of these spells, you must expend a slot of the spell's level or higher. You regain all expended spell slots when you finish a long rest."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "You prepare the list of wizard spells that are available for you to cast. To do so, choose a number of wizard spells from your spellbook equal to your Intelligence modifier + your wizard level (minimum of one spell). The spells must be of a level for which you have spell slots."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "For example, if you're a 3rd-level wizard, you have four 1st-level and two 2nd-level spell slots. With an Intelligence of 16, your list of prepared spells can include six spells of 1st or 2nd level, in any combination, chosen from your spellbook. If you prepare the 1st-level spell magic missile, you can cast it using a 1st-level or a 2nd-level slot. Casting the spell doesn't remove it from your list of prepared spells."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "You can change your list of prepared spells when you finish a long rest. Preparing a new list of wizard spells requires time spent studying your spellbook and memorizing the incantations and gestures you must make to cast the spell: at least 1 minute per spell level for each spell on your list."
+          }
+        ]
+      },
+      {
+        "Title": "Arcane Recovery",
+        "Description": [
+          {
+            "Subtitle": "",
+            "Paragraph": "You have learned to regain some of your magical energy by studying your spellbook. Once per day when you finish a short rest, you can choose expended spell slots to recover. The spell slots can have a combined level that is equal to or less than half your wizard level (rounded up), and none of the slots can be 6th level or higher."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "You can recover one additional levels worth of spells from the Arcane Grimoire."
+          }
+        ]
+      },
+      {
+        "Title": "Ritual Casting",
+        "Description": [
+          {
+            "Subtitle": "",
+            "Paragraph": "You can cast a wizard spell as a ritual if that spell has the ritual tag and you have the spell in your spellbook. You don't need to have the spell prepared."
+          }
+        ]
+      },
+      {
+        "Title": "Devour",
+        "Description": [
+          {
+            "Subtitle": "",
+            "Paragraph": "You’ve learned to devour spells and magical effects. As a bonus action you can touch a creature, object, or magical effect caused by a spell and make an Intelligence check, DC 10 + the spell’s level. On a successful check, the spell ends on the target and you devour it. You have disadvantage on the check if the spell is cast with a higher level spell slot than you have access to."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "After devouring a spell, choose one of the following devour options:"
+          },
+          {
+            "Subtitle": "Repurpose",
+            "Paragraph": "Regain an expended spell slot of a level less than the level of the devoured spell."
+          },
+          {
+            "Subtitle": "Collect",
+            "Paragraph": "The devoured spell counts as a wizard spell for you, and as a spell you know and have prepared. You can cast the devoured spell once before you complete a long rest, without spending material components and using a spell slot of an appropriate level. You can choose this effect a number of times equal to your proficiency bonus, and regain all expended uses when you complete a long rest."
+          },
+          {
+            "Subtitle": "Absorb",
+            "Paragraph": "You gain a number of temporary hit points equal to three times the devoured spell’s level."
+          }
+        ]
+      }
+    ],
+    "Feats": [
+      {
+        "Title": "Chef",
+        "Description": [
+          {
+            "Subtitle": "",
+            "Paragraph": "Increase your Constitution or Wisdom by 1, to a maximum of 20."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "You gain proficiency with cook's utensils if you don't already have it."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "As part of a short rest, you can cook special food, provided you have ingredients and cook's utensils on hand. You can prepare enough of this food for a number of creatures equal to 4 + your proficiency bonus. At the end of the short rest, any creature who eats the food and spends one or more Hit Dice to regain hit points regains an extra 1d8 hit points."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "With one hour of work or when you finish a long rest, you can cook a number of treats equal to your proficiency bonus. These special treats last 8 hours after being made. A creature can use a bonus action to eat one of those treats to gain temporary hit points equal to your proficiency bonus."
+          }
+        ]
+      },
+      {
+        "Title": "Actor",
+        "Description": [
+          {
+            "Subtitle": "",
+            "Paragraph": "Increase your Charisma score by 1, to a maximum of 20."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "You have advantage on Charisma (Deception) and Charisma (Performance) checks when trying to pass yourself off as a different person."
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "You can mimic the speech of another person or the sounds made by other creatures. You must have heard the person speaking, or heard the creature make the sound, for at least 1 minute. A successful Wisdom (Insight) check contested by your Charisma (Deception) check allows a listener to determine that the effect is faked."
+          }
+        ]
+      }
+    ],
+    "Racial": [
+      {
+        "Title": "Human Determination",
+        "Description": [
+          {
+            "Subtitle": "",
+            "Paragraph": "When you make an attack roll, an ability check, or a saving throw, you can do so with advantage. Once you use this ability, you can’t use it again until you finish a short or long rest."
+          }
+        ]
+      },
+      {
+        "Title": "Protagonist Energy",
+        "Description": [
+          {
+            "Subtitle": "",
+            "Paragraph": "You are cursed with never being able to fulfill your dreams of being a great villain"
+          },
+          {
+            "Subtitle": "",
+            "Paragraph": "You have disadvantage on intimidation checks and advantage on persuasion checks"
+          }
+        ]
+      }
+    ]
+  },
+  "Equipment": {
+    "Armor": {
+      "Base": 13,
+      "Name": "Studded Leather",
+      "Bonus": 0,
+      "Limit": "",
+      "Ability": "Dexterity"
+    },
+    "Shields": [
+      {
+        "Base": 2,
+        "Name": "Shield",
+        "Bonus": 0,
+        "Entries": {
+          "Title": "",
+          "Description": []
+        }
+      }
+    ],
+    "Weapons": [
+      {
+        "Name": "Warhammer of Frightening",
+        "Ability": "Strength",
+        "Entries": [
+          {
+            "Subtitle": "Freightening Display",
+            "Paragraph": "While wielding this weapon you may use an action to instill fear in your enemies. Each creature within 15ft that can see you must make a DC 12 Charisma save or be freightened. Affected creatures may re-attempt their save at the end of their turn"
+          }
+        ],
+        "Base_Damage": {
+          "Dice": "1d10",
+          "Type": "Bludgeoning"
+        },
+        "Extra_Damage": [
+          {
+            "Dice": "1d6",
+            "Type": "Psychic",
+            "Damage": "2d4"
+          }
+        ]
+      }
+    ],
+    "Inventory": [
+      {
+        "Name": "Hershey's Drops",
+        "Amount": 12
+      },
+      {
+        "Name": "Dice Set",
+        "Amount": 20
+      }
+    ],
+    "Valuables": [
+      {
+        "Name": "Gold Pieces",
+        "Amount": 0
+      },
+      {
+        "Name": "Revivify Diamonds",
+        "Amount": 1
+      },
+      {
+        "Name": "Health Potions",
+        "Amount": 3
+      }
+    ],
+    "Magic_Items": [
+      {
+        "Name": "Diet Coke of Thought",
+        "Attuned": true,
+        "Entries": {
+          "Title": "",
+          "Description": [
+            {
+              "Subtitle": "",
+              "Paragraph": "After taking a drink from this item your mind will function more smoothly. You have advantage on Charisma and Intelligence checks related to creativity."
+            },
+            {
+              "Subtitle": "",
+              "Paragraph": "After using this item 5 different times you become addicted and attuned to the item. If you are already attuned to the max number of items you must chose one other than the Diet Coke to lost attunement to. While addicted, at each dawn you suffer one level of exhaustion until you drink from this item. Greater Restoration will remove this addiction."
+            }
+          ]
+        }
+      }
+    ]
+  },
+  "Spellcasting": {
+    "Bonus": 0,
+    "Spells": {
+      "0": [
+        {
+          "Prepared": true,
+          "Spell_Name": "Friends"
+        },
+        {
+          "Prepared": true,
+          "Spell_Name": "Guidance"
+        }
+      ],
+      "1": [
+        {
+          "Prepared": false,
+          "Spell_Name": "Bless"
+        },
+        {
+          "Prepared": false,
+          "Spell_Name": "Charm Person"
+        }
+      ],
+      "2": [
+        {
+          "Prepared": false,
+          "Spell_Name": "Borrowed Knowledge"
+        }
+      ],
+      "3": [
+        {
+          "Prepared": false,
+          "Spell_Name": "Create Food and Water"
+        }
+      ],
+      "4": [],
+      "5": [],
+      "6": [],
+      "7": [],
+      "8": [],
+      "9": []
+    },
+    "Ability": "Wisdom",
+    "Spell_Slots": {
+      "1": 5,
+      "2": 4,
+      "3": 3,
+      "4": 3,
+      "5": 2,
+      "6": 1,
+      "7": 1,
+      "8": 1,
+      "9": 1
+    },
+    "Max_Prepared": 10,
+    "Slots_Expended": {
+      "1": 5,
+      "2": 2,
+      "3": 3,
+      "4": 3,
+      "5": 1,
+      "6": 1,
+      "7": 1,
+      "8": 0,
+      "9": 1
+    }
+  }
+}
