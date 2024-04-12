@@ -15,9 +15,13 @@
     export let spells:any;
 
     let user: User | undefined | null;
-    onMount(async () => user = (await supabase?.auth.getUser())?.data.user);
+    $: if ($supabase) {
+        $supabase.auth.getUser().then(s => user = s.data.user);
+    }
+    onMount(async () => {
+        setCharacter(sheet);
+    });
 
-    setCharacter(sheet);
 
     let tabs = ["Stats", "Features", "Equipment", "Spellcasting", "Notes", "Theme"];
     let tabParam = $page.url.searchParams.get('activetab');
@@ -53,8 +57,8 @@
             </div>
             <div class="column custom-column" style="flex: none;">
                 {#if !user}<button class="custom-box custom-button" on:click={async () => {
-                    if (!supabase) return;
-                    await supabase.auth.signInWithOAuth({
+                    if (!$supabase) return;
+                    await $supabase.auth.signInWithOAuth({
                     provider: 'google',
                     options: { redirectTo: window.location.href }
                 });
