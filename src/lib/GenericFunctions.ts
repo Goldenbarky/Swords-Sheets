@@ -2,9 +2,11 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { theme } from "./Theme";
 import { writable } from "svelte/store";
 
-let privateSupabase:SupabaseClient | null;
-export let supabase = writable<SupabaseClient | null>(null);
-supabase.subscribe(s => privateSupabase = s);
+let supabase: SupabaseClient | undefined;
+export let supabaseObject = (supa?: SupabaseClient) => {
+    if (supa) supabase = supa;
+    return supabase;
+};
 
 let character_sheet:CharacterSheet | null;
 let character_id:string | null;
@@ -163,44 +165,67 @@ export const createNewCharacter = (character_class:string, level:number) => {
 }
 
 export const updateDatabase = async () => {
-    if (!privateSupabase) return;
+    if (!supabase) return;
 
-    await privateSupabase.from("characters").update({data:character_sheet}).eq("id", character_id).select('*');
+    await supabase.from("characters").update({data:character_sheet}).eq("id", character_id).select('*');
 }
 
 export const updateName = async () => {
-    if (!privateSupabase) return;
+    if (!supabase) return;
 
-	await privateSupabase.from("characters").update({name:character.name}).eq("id", character_id);
+	await supabase.from("characters").update({name:character.name}).eq("id", character_id);
 }
 
 export const updateTheme = async () => {
-    if (!privateSupabase) return;
+    if (!supabase) return;
     
-    await privateSupabase.from("characters").update({theme:colors}).eq("id", character_id).select('*');
+    await supabase.from("characters").update({theme:colors}).eq("id", character_id).select('*');
 }
 
 export const resetColors = async () => {
-    if (!privateSupabase) return;
+    if (!supabase) return;
     
-    const {data} = await privateSupabase?.from("characters").select("theme").eq("id", character_id).single();
+    const {data} = await supabase.from("characters").select("theme").eq("id", character_id).single();
 
     if(!data) return;
     theme.set(data.theme);
 }
 
 export const getUserNames = async () => {
-    if (!privateSupabase) return;
+    if (!supabase) return;
     
-    const {data} = await privateSupabase.from("users").select("*");
+    const {data} = await supabase.from("users").select("*");
 
     return data;
 }
 
 export const getUsersCharacters = async () => {
-    if (!privateSupabase) return;
+    if (!supabase) return;
     
-    const {data} = await privateSupabase.from("characters").select("*");
+    const {data} = await supabase.from("characters").select("*");
 
     return data;
 }
+
+export const upsertNewCharacter = async (character_class: string, character_level: number, character_name: string) => {
+    if (!supabase) return; 
+
+    await supabase.from("characters").upsert({
+        data: createNewCharacter(
+            character_class,
+            character_level,
+        ),
+        name: character_name,
+    });
+};
+
+export const signInWithGoogle = async () => {
+    if (!supabase) return;
+    
+    await supabase.auth.signInWithOAuth({
+        provider: "google",
+        options: {
+            redirectTo: window.location.href,
+        },
+    });
+};
