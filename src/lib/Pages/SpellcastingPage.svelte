@@ -6,7 +6,7 @@
     import NumberLabel from "$lib/Components/Generic/NumberLabel.svelte";
     import Divider from "$lib/Components/Helpers/Divider.svelte";
     import Spell from "$lib/Components/Spell.svelte";
-    import { bonusToString, scoreToModifier, updateDatabase } from "$lib/GenericFunctions";
+    import { bonusToString, scoreToModifier, updateDatabase, getPB } from "$lib/GenericFunctions";
     import { mode, theme } from "$lib/Theme";
 
     export let spells:Record<string, unknown>[];
@@ -46,7 +46,7 @@
         let ability = character.Spellcasting.Ability;
         let ability_mod = scoreToModifier(character.Stats.Ability_Scores[ability]);
         let bonus = character.Spellcasting.Bonus;
-        let pb = character.Stats.Proficiency_Bonus;
+        let pb = getPB();
 
         return bonusToString(ability_mod + pb + bonus);
     }
@@ -55,7 +55,7 @@
         let ability = character.Spellcasting.Ability;
         let ability_mod = scoreToModifier(character.Stats.Ability_Scores[ability]);
         let bonus = character.Spellcasting.Bonus;
-        let pb = character.Stats.Proficiency_Bonus;
+        let pb = getPB();
 
         return 8 + ability_mod + pb + bonus;
     }
