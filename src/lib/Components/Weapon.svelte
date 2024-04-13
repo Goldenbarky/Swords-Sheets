@@ -35,10 +35,18 @@
 <div class="container" style="width: 100%;">
     <div class="row" style="width:100%;">
         <div style="display: flex; flex-direction: column; position: absolute; left: -19px; height: 0;">
-            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.45rem;" on:click={() => {
-                removeFunction();
-                updateDatabase();
-            }}>-</button>
+            {#if $mode === 'edit'}
+                <button 
+                    class="custom-box custom-button custom-tiny-button" 
+                    style="margin-top:0.45rem;" 
+                    on:click={() => {
+                        removeFunction();
+                        updateDatabase();
+                    }}
+                >
+                    -
+                </button>
+            {/if}
         </div>
         <div style="position: relative; width:100%;">
             <div class="custom-box" style="padding-top: 0.5rem; width:100%;">

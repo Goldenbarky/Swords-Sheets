@@ -21,7 +21,7 @@
     <div class="column custom-column center">
         <div style="width: 100%; display: flex; flex-direction: column; align-items:center;">
             <div class="custom-title" style="width:100%;">Weapons</div>
-            {#each character.Equipment.Weapons as weapon}
+            {#each character.Equipment.Weapons as weapon (weapon)}
                 <Weapon
                     bind:weapon={weapon}
                     removeFunction={() => {removeWeapon(weapon)}}
