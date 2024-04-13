@@ -20,6 +20,7 @@
         align-content: center;
         justify-content: center;
         align-items: center;
+        text-align: center;
         flex-direction: column;
         margin-bottom: 10px;
     }
