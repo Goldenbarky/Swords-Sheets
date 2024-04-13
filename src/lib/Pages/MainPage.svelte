@@ -1,21 +1,21 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { setCharacter, supabase, updateDatabase, updateName } from '$lib/GenericFunctions';
+    import { setCharacter, signInWithGoogle, updateDatabase, updateName } from '$lib/GenericFunctions';
     import EquipmentPage from '$lib/Pages/EquipmentPage.svelte';
     import FeaturesPage from "$lib/Pages/FeaturesPage.svelte";
     import SpellcastingPage from "$lib/Pages/SpellcastingPage.svelte";
     import StatsPage from "$lib/Pages/StatsPage.svelte";
     import { mode } from '$lib/Theme';
     import type { User } from '@supabase/supabase-js';
-    import { onMount } from 'svelte';
+    import { getContext, onMount } from 'svelte';
     import ThemePage from './ThemePage.svelte';
 
     export let sheet:any;
     export let spells:any;
 
-    let user: User | undefined | null;
-    onMount(async () => user = (await $supabase?.auth.getUser())?.data.user);
+    let user: User | undefined = getContext<{ user: User | undefined }>('user').user;
+
     onMount(async () => {
         setCharacter(sheet);
     });
@@ -54,13 +54,11 @@
                 </div>
             </div>
             <div class="column custom-column" style="flex: none;">
-                {#if !user}<button class="custom-box custom-button" on:click={async () => {
-                    if (!$supabase) return;
-                    await $supabase.auth.signInWithOAuth({
-                    provider: 'google',
-                    options: { redirectTo: window.location.href }
-                });
-                }}>Log in</button>
+                {#if !user}
+                    <button class="custom-box custom-button" 
+                        on:click={async () => await signInWithGoogle()}>
+                        Log in
+                    </button>
                 {:else}
                     <!-- svelte-ignore a11y-missing-attribute -->
                     <img src={user.user_metadata.avatar_url} class="profile-pic"/>

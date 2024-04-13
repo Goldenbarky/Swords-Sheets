@@ -5,9 +5,12 @@ declare global {
     namespace App {
         // interface Error {}
         interface Locals {
-            supabaseServerClient: SupabaseClient<Database>,
-            session: Session | null | undefined,
-            user: { user: User } | null
+            supabase: SupabaseClient
+            safeGetSession(): Promise<{ session: Session | null; user: User | null }>
+        }
+        interface PageData {
+            session: Session | null
+            user: User | null
         }
         // interface PageData {}
         // interface PageState {}
@@ -15,4 +18,4 @@ declare global {
     }
 }
 
-export {};
+export { };
