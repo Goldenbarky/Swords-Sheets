@@ -22,9 +22,10 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
     const spellsCombined = spellJsons.flatMap(x => x['spell']);
 
     const supabase = createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
-        global: {
-            fetch,
-        },
+        // ONLY CAUSES ISSUES, IDK
+        // global: {
+        //     fetch,
+        // },
         cookies: {
             get(key) {
                 if (!isBrowser()) {

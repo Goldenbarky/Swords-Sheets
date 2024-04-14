@@ -104,7 +104,7 @@
 </script>
 
 <div class="container">
-    <div class="box custom-box" style="flex-grow: 1; padding-right: 0.25rem; min-width: fit-content;">
+    <div class="box custom-box" style="flex-grow: 1; padding-right: 0.25rem; min-width: fit-content; max-width: 30rem;">
         <div class="row">
             {#if spell.level === 0}
                 <div class="custom-subtitle cantrip">{spell["name"]}</div>
@@ -150,7 +150,7 @@
         </i></p>
     </div>
     {#if shown}
-        <div class="box custom-box dropdown">
+        <div class="box custom-box dropdown" style="max-width: 28.5rem;">
             <div class="container">
                 <StringLabel
                 label="Casting Time"
