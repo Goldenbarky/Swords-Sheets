@@ -2,7 +2,7 @@
 import { redirect } from "@sveltejs/kit";
 import type { LayoutLoad } from "./$types";
 import { theme } from "$lib/Theme";
-import { supabaseObject } from "$lib/GenericFunctions";
+import { setCharacter, supabaseObject } from "$lib/GenericFunctions";
 
 export const load: LayoutLoad = async ({ fetch, data, depends, params: { id }, parent }) => {
     const { supabase, session } = await parent();
@@ -10,6 +10,8 @@ export const load: LayoutLoad = async ({ fetch, data, depends, params: { id }, p
     supabaseObject(supabase);
     
     const { data:sheets, error } = await supabase.from("characters").select("*").eq("name", id).single();
+
+    if(!error) setCharacter(sheets);
 
     if(sheets && sheets["theme"] && theme) theme.set(sheets["theme"]);
 

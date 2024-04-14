@@ -3,7 +3,7 @@
   "version": "0.0.1",
   "private": true,
   "scripts": {
-    "dev": "bun run vite dev",
+    "dev": "bunx --bun vite",
     "build": "bun x vite build",
     "css-build": "node-sass --omit-source-map-url src/sass/mystyles.scss src/css/mystyles.css",
     "preview": "vite preview",
