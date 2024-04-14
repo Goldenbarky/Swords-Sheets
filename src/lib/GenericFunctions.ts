@@ -41,7 +41,13 @@ export const setCharacter = (ch:{data:CharacterSheet, name:string, id:string}) =
     character_sheet = ch.data;
 	character_id = ch.id;
 	character = ch;
+
+    
 }
+
+// const backsetKeys = (object: any) => {
+//     Object.keys(object).map(x => )
+// }
 
 export const createNewCharacter = (character_class:string, level:number) => {
     return {
