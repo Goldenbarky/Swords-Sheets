@@ -1,6 +1,8 @@
 <script lang="ts">
     import { updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
+    import { SOURCES, dndzone } from "svelte-dnd-action";
+    import DraggableHandle from "$lib/Components/Icons/DraggableHandle.svelte";
 
     export let title:string;
     export let description:{
@@ -8,29 +10,68 @@
         "Paragraph":string
     }[];
     export let removeFunction:any = () => { };
+
+    $: newList = description.map(x => ({...x, id: crypto.randomUUID()}));
+
+    let dragDisabled = true;
+
+    const handleConsider = (e: { detail: { items: any; info: { source: any; trigger: any; }; }; }) => {
+		const {items: newItems, info: {source, trigger}} = e.detail;
+		newList = newItems;
+	}
+
+	const handleFinalize = async (e: { detail: { items: any; info: { source: any; }; }; }) => {
+		const {items: newItems, info: {source}} = e.detail;
+        
+		description = newItems.map((x: { [x: string]: any; }) => ({ 'Subtitle': x['Subtitle'], 'Paragraph': x['Paragraph'] }));
+        newList = newItems;
+		// Ensure dragging is stopped on drag finish via pointer (mouse, touch)
+		if (source === SOURCES.POINTER) {
+			dragDisabled = true;
+		}
+
+        await updateDatabase();
+	}
+
 </script>
 {#if $mode === "edit"}
     <div class="row" style="align-items: flex-start;">
-        <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.5rem;" on:click={() => {
-            removeFunction();
-            updateDatabase();
-        }}>-</button>
+        <button 
+            class="custom-box custom-button custom-tiny-button" 
+            style="margin-top:0.5rem;" 
+            on:click={async () => {
+                removeFunction();
+                await updateDatabase();
+            }}
+        >
+            -
+        </button>
         <div style="width:100%;">
             <div style="width:100%;">
                 <div class="custom-title placeholder" on:focusout={updateDatabase} bind:innerText={title} contenteditable="true" placeholder="Title"/>
             </div>
-            {#each description as paragraph}
-                <div class="row">
-                    <button class="custom-box custom-button custom-tiny-button" on:click={() => {
-                        description = description.filter(x => x !== paragraph);
-                        updateDatabase();
-                    }}>-</button>
-                    <div style="margin-top: 0.2rem;">
-                        <p class="placeholder" style="color:var(--secondary);" on:focusout={updateDatabase} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Subtitle"/>
-                        <p class="placeholder" on:focusout={updateDatabase} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"/>
+            <div use:dndzone={{ items: newList, dragDisabled }} on:consider={handleConsider} on:finalize={handleFinalize}>
+                {#each newList as paragraph (paragraph.id)}
+                    <div class="row">
+                        <button 
+                            class="custom-box custom-button custom-tiny-button" 
+                            on:click={async () => {
+                                description = description.filter(x => x !== paragraph);
+                                await updateDatabase();
+                            }}
+                        >
+                            -
+                        </button>
+                        <div style="margin-top: 0.2rem;">
+                            <p class="placeholder" style="color:var(--secondary);" on:focusout={updateDatabase} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Subtitle"/>
+                            <p class="placeholder" on:focusout={updateDatabase} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"/>
+                        </div>
+                        <div style="display: flex; place-content: end; flex-grow: 1">
+                            <DraggableHandle bind:dragDisabled/>
+                        </div>
                     </div>
-                </div>
-            {/each}
+                {/each}
+            </div>
         </div>
     </div>
     <div style="display: flex; justify-content: center;">
