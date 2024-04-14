@@ -34,12 +34,14 @@
 </script>
 <div class="container" style="width: 100%;">
     <div class="row" style="width:100%;">
-        <div style="display: flex; flex-direction: column; position: absolute; left: -19px; height: 0;">
-            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.45rem;" on:click={() => {
-                removeFunction();
-                updateDatabase();
-            }}>-</button>
-        </div>
+        {#if $mode === "edit"}
+            <div style="display: flex; flex-direction: column; position: absolute; left: -19px; height: 0;">
+                <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.45rem;" on:click={() => {
+                    removeFunction();
+                    updateDatabase();
+                }}>-</button>
+            </div>
+        {/if}
         <div style="position: relative; width:100%;">
             <div class="custom-box" style="padding-top: 0.5rem; width:100%;">
                 <div class="row" style="width: 100%; {$mode === "edit" ? "min-height:6.5rem;" : ""}">

@@ -174,7 +174,7 @@
                         <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                         <div class="custom-button" style="font-size:medium;" on:click={() => {
                             if(!character.Spellcasting.Spells[spell.level].find(x => spell.name === x.Spell_Name)) {
-                                character.Spellcasting.Spells[spell.level] = [...character.Spellcasting.Spells[spell.level], ({"Spell_Name":spell.name, "Prepared":false})];
+                                character.Spellcasting.Spells[spell.level] = [...character.Spellcasting.Spells[spell.level], ({"Spell_Name":spell.name, "Prepared":false})].sort((a, b) => a.Spell_Name.localeCompare(b.Spell_Name));
                                 if(spell.level !== 0) spells_known++;
                                 updateDatabase();
                             }
