@@ -9,6 +9,7 @@ test('authenticate', async ({ page }) => {
     await page.goto('/');
     await page.getByText('Aven').click();
     await page.getByText('Puck Level 12 Echo Knight').isVisible();
+    await page.waitForTimeout(5000);
     await page.getByRole('button', { name: 'Log in' }).click();
 
     await page.waitForURL('/');
