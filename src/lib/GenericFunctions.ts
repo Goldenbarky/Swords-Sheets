@@ -3,12 +3,15 @@ import { theme } from "./Theme";
 import { writable } from "svelte/store";
 import { PUBLIC_SITE_URL } from "$env/static/public";
 import { invalidateAll } from "$app/navigation";
+import type { User } from '@supabase/gotrue-js';
 
 let supabase: SupabaseClient | undefined;
 export let supabaseObject = (supa?: SupabaseClient) => {
     if (supa) supabase = supa;
     return supabase;
 };
+
+export let user = writable<User | null>(null);
 
 let character_sheet: CharacterSheet | null;
 let character_id: string | null;

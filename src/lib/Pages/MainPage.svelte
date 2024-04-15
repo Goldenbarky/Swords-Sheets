@@ -1,20 +1,25 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { signInWithGoogle, updateDatabase, updateName } from '$lib/GenericFunctions';
+    import { setCharacter, signInWithGoogle, updateDatabase, updateName, user as writeUser } from '$lib/GenericFunctions';
     import EquipmentPage from '$lib/Pages/EquipmentPage.svelte';
     import FeaturesPage from "$lib/Pages/FeaturesPage.svelte";
     import SpellcastingPage from "$lib/Pages/SpellcastingPage.svelte";
     import StatsPage from "$lib/Pages/StatsPage.svelte";
     import { mode } from '$lib/Theme';
     import type { User } from '@supabase/supabase-js';
-    import { getContext } from 'svelte';
+    import { getContext, onMount } from 'svelte';
     import ThemePage from './ThemePage.svelte';
 
     export let sheet:any;
     export let spells:any;
 
-    let user: User | undefined = getContext<{ user: User | undefined }>('user').user;
+    let origUser = getContext<{ user: User } | null>('user')?.user;
+    $: user = origUser ?? $writeUser;
+
+    onMount(async () => {
+        setCharacter(sheet);
+    });
 
 
     let tabs = ["Stats", "Features", "Equipment", "Spellcasting", "Notes", "Theme"];
