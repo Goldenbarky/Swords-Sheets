@@ -11,4 +11,5 @@ vite.config.ts.timestamp-*
 /blob-report/
 /playwright/.cache/
 .env.test
+!.env.production
 bun.lockb

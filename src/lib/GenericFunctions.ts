@@ -231,10 +231,17 @@ export const upsertNewCharacter = async (character_class: string, character_leve
 export const signInWithGoogle = async () => {
     if (!supabase) return;
 
-    await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-            redirectTo: `${PUBLIC_SITE_URL}auth/callback?next=${window.location.pathname}`,
-        },
-    });
+    if (process.env.PW_TEST_USERNAME && process.env.PW_TEST_PASSWORD) {
+        await supabase.auth.signInWithPassword({
+            email: process.env.PW_TEST_USERNAME,
+            password: process.env.PW_TEST_PASSWORD
+        });
+    } else {
+        await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: `${PUBLIC_SITE_URL}${window.location.pathname.substring(1)}`,
+            },
+        });
+    }
 };
