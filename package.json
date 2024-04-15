@@ -10,7 +10,7 @@
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
     "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
     "vitest": "vitest",
-    "playwright": "playwright test"
+    "pw": "playwright test"
   },
   "devDependencies": {
     "@playwright/test": "^1.43.1",

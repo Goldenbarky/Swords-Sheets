@@ -9,21 +9,9 @@ test('authenticate', async ({ page }) => {
     await page.goto('/');
     await page.getByText('Aven').click();
     await page.getByRole('button', { name: 'Log in' }).click();
-    await page.waitForURL('https://accounts.google.com/**');
-
-    // Old Google sign in form
-    await page.getByLabel('Email or phone').fill(username);
-    await page.getByRole('button', { name: 'Next' }).click();
-    await page.getByLabel('Enter your password').fill(password);
-    await page.getByRole('button', { name: 'Next' }).click();
-
-    const html = await page.locator('body').innerHTML();
-
-    await page.waitForTimeout(3000);
-    if(page.url().includes("google")) await page.getByRole('button', { name: 'Continue' }).click();
 
     await page.waitForURL('/');
   
-    expect(page.getByRole("img")).toBeVisible();
+    await expect(page.getByRole('button', { name: 'Create New Character' })).toBeVisible();
     //await page.context().storageState({ path: authFile });
   });
