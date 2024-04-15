@@ -4,18 +4,6 @@ const authFile = 'playwright/.auth/user.json';
 const username = process.env.PW_TEST_USERNAME || "";
 const password = process.env.PW_TEST_PASSWORD || "";
 
-console.log(username);
-
-// import { chromium } from 'playwright-extra';
-// // Load the stealth plugin and use defaults (all tricks to hide playwright usage)
-// import stealth from 'puppeteer-extra-plugin-stealth';
-
-// // Add the plugin to playwright
-// chromium.use(stealth);
-
-// const browser = await chromium.launch({ headless: true });
-// const page = await browser.newPage();
-
 test('authenticate', async ({ page }) => {
     // Perform authentication steps. Replace these actions with your own.
     await page.goto('/');
@@ -28,7 +16,11 @@ test('authenticate', async ({ page }) => {
     await page.getByRole('button', { name: 'Next' }).click();
     await page.getByLabel('Enter your password').fill(password);
     await page.getByRole('button', { name: 'Next' }).click();
-    await page.getByRole('button', { name: 'Continue' }).click();
+
+    const html = await page.locator('body').innerHTML();
+
+    await page.waitForTimeout(3000);
+    if(page.url().includes("google")) await page.getByRole('button', { name: 'Continue' }).click();
 
     await page.waitForURL('/');
   
