@@ -50,10 +50,10 @@ export const createNewCharacter = (character_class:string, level:number) => {
         "Stats": {
           "Speed": 30,
           "Health": {
-            "Max": "0",
-            "Temp": "0",
-            "Current": "0",
-            "Hit_Dice": "0"
+            "Max": 0,
+            "Temp": 0,
+            "Current": 0,
+            "Hit_Dice": 0
           },
           "Proficiencies": {
             "Armor": [],
@@ -114,7 +114,7 @@ export const createNewCharacter = (character_class:string, level:number) => {
               "Name": "Unarmored",
               "Bonus": 0,
               "Limit": "",
-              "Ability": "Dexterity"
+              "Ability": "Dexterity" as keyof AbilityScoreType
             },
             "Shields": [],
             "Weapons": [],

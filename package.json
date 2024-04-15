@@ -8,12 +8,16 @@
     "css-build": "node-sass --omit-source-map-url src/sass/mystyles.scss src/css/mystyles.css",
     "preview": "vite preview",
     "check": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json",
-    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch"
+    "check:watch": "svelte-kit sync && svelte-check --tsconfig ./tsconfig.json --watch",
+    "vitest": "vitest",
+    "playwright": "playwright test"
   },
   "devDependencies": {
+    "@playwright/test": "^1.43.1",
     "@sveltejs/adapter-node": "^4.0.1",
     "@sveltejs/kit": "^2.0.0",
     "@sveltejs/vite-plugin-svelte": "^3.0.0",
+    "@types/node": "^20.12.7",
     "bulma": "^0.9.4",
     "node-sass": "^9.0.0",
     "sass": "^1.71.0",
