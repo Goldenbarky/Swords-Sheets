@@ -8,6 +8,7 @@ test('authenticate', async ({ page }) => {
     // Perform authentication steps. Replace these actions with your own.
     await page.goto('/');
     await page.getByText('Aven').click();
+    await page.getByText('Puck Level 12 Echo Knight').isVisible();
     await page.getByRole('button', { name: 'Log in' }).click();
 
     await page.waitForURL('/');
