@@ -20,6 +20,8 @@
     "@types/node": "^20.12.7",
     "bulma": "^0.9.4",
     "node-sass": "^9.0.0",
+    "playwright-extra": "^4.3.6",
+    "puppeteer-extra-plugin-stealth": "^2.11.2",
     "sass": "^1.71.0",
     "svelte": "^4.2.7",
     "svelte-awesome-color-picker": "^3.0.6",
