@@ -2,6 +2,8 @@
     import TitleDescription from "$lib/Components/Generic/TitleDescription.svelte";
     import { updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
+    import DraggableHandle from '$lib/Components/Icons/DraggableHandle.svelte';
+    import { SOURCES, dndzone } from "svelte-dnd-action";
 
     export let title:string;
     export let features:{Title:string, Description:{Subtitle:string, Paragraph:string}[]}[];
@@ -9,11 +11,12 @@
     const removeFeature = (list:{Title:string, Description:{Subtitle:string, Paragraph:string}[]}[], title:string) => {
         return list.filter(x => x.Title !== title);
     }
+
 </script>
 
 <div class="box custom-box">
     <div class="custom-title">{title}</div>
-    {#each features as feature, i}
+    {#each features as feature, i (feature)}
         <TitleDescription
             bind:title={feature.Title}
             bind:description={feature.Description}
@@ -23,10 +26,16 @@
     {/each}
     {#if $mode === "edit"}
         <div class="row">
-            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.5rem;" on:click={() => {
-                features = [...features, {Title:"", Description:[{Subtitle:"", Paragraph:""}]}];
-                updateDatabase();
-            }}>+</button>
+            <button 
+                class="custom-box custom-button custom-tiny-button" 
+                style="margin-top:0.5rem;" 
+                on:click={async () => {
+                    features = [...features, {Title:"", Description:[{Subtitle:"", Paragraph:""}]}];
+                    await updateDatabase();
+                }}
+            >
+                +
+            </button>
             <div>
                 <div style="width:100%;">
                     <div class="custom-subtitle placeholder" on:focusout={updateDatabase}>New Feature</div>
