@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { signInWithGoogle, updateDatabase, updateName } from '$lib/GenericFunctions';
+    import { setCharacter, signInWithGoogle, updateDatabase, updateName, user as writeUser } from '$lib/GenericFunctions';
     import EquipmentPage from '$lib/Pages/EquipmentPage.svelte';
     import FeaturesPage from "$lib/Pages/FeaturesPage.svelte";
     import SpellcastingPage from "$lib/Pages/SpellcastingPage.svelte";
@@ -14,7 +14,8 @@
     export let sheet:any;
     export let spells:any;
 
-    let user: User | undefined = getContext<{ user: User | undefined }>('user').user;
+    let origUser = getContext<{ user: User } | null>('user')?.user;
+    $: user = origUser ?? $writeUser;
 
 
     let tabs = ["Stats", "Features", "Equipment", "Spellcasting", "Notes", "Theme"];

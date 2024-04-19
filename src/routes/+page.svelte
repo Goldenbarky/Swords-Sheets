@@ -5,6 +5,7 @@
         supabaseObject,
         upsertNewCharacter,
         signInWithGoogle,
+        user as writeUser,
     } from "$lib/GenericFunctions";
     import "../app.scss";
     import { goto } from "$app/navigation";
@@ -36,7 +37,7 @@
         getUsersCharacters().then((s) => (characters = s!));
     });
 
-    $: user = data.user;
+    $: user = $writeUser ?? data.user;
     $: userAuthorized = user ? users?.find((x) => x.id === user.id) : false;
     $: filteredCharacters = characters?.filter((x) => x.owner_id === activeTab);
 </script>
