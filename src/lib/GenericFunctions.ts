@@ -232,6 +232,7 @@ export const upsertNewCharacter = async (character_class: string, character_leve
 
 
 export const signInWithGoogle = async () => {
+    console.log(process.env.PW_TEST_USERNAME);
     if (!supabase) return;
 
     if (process.env.PW_TEST_USERNAME && process.env.PW_TEST_PASSWORD) {

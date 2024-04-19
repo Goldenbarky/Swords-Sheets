@@ -8,6 +8,7 @@ jobs:
   test:
     timeout-minutes: 60
     runs-on: ubuntu-latest
+    environment: test
     steps:
     - name: setup bun
       uses: oven-sh/setup-bun@v1
@@ -25,8 +26,8 @@ jobs:
     - name: Run Playwright tests
       run: npx playwright test
       env:
-        PW_TEST_USERNAME: ${{ secrets.pw_username }}
-        PW_TEST_PASSWORD: ${{ secrets.pw_password }}
+        PW_TEST_USERNAME: ${{ secrets.PW_TEST_USERNAME }}
+        PW_TEST_PASSWORD: ${{ secrets.PW_TEST_PASSWORD }}
     - uses: actions/upload-artifact@v4
       if: always()
       with:
