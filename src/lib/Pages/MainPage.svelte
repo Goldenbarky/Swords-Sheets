@@ -8,7 +8,7 @@
     import StatsPage from "$lib/Pages/StatsPage.svelte";
     import { mode } from '$lib/Theme';
     import type { User } from '@supabase/supabase-js';
-    import { getContext } from 'svelte';
+    import { getContext, onMount } from 'svelte';
     import ThemePage from './ThemePage.svelte';
 
     export let sheet:any;
@@ -16,6 +16,10 @@
 
     let origUser = getContext<{ user: User } | null>('user')?.user;
     $: user = origUser ?? $writeUser;
+
+    onMount(async () => {
+        setCharacter(sheet);
+    });
 
 
     let tabs = ["Stats", "Features", "Equipment", "Spellcasting", "Notes", "Theme"];

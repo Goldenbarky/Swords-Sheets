@@ -59,55 +59,55 @@ export const createNewCharacter = (character_class: string, level: number) => {
         "Class": character_class,
         "Level": level,
         "Stats": {
-            "Speed": 30,
-            "Health": {
-                "Max": "0",
-                "Temp": "0",
-                "Current": "0",
-                "Hit_Dice": "0"
+          "Speed": 30,
+          "Health": {
+            "Max": 0,
+            "Temp": 0,
+            "Current": 0,
+            "Hit_Dice": 0
+          },
+          "Proficiencies": {
+            "Armor": [],
+            "Tools": [],
+            "Skills": {
+              "Arcana": "",
+              "Nature": "",
+              "History": "",
+              "Insight": "",
+              "Stealth": "",
+              "Medicine": "",
+              "Religion": "",
+              "Survival": "",
+              "Athletics": "",
+              "Deception": "",
+              "Acrobatics": "",
+              "Perception": "",
+              "Persuasion": "",
+              "Performance": "",
+              "Intimidation": "",
+              "Investigation": "",
+              "Slight of Hand": "",
+              "Animal Handling": ""
             },
-            "Proficiencies": {
-                "Armor": [],
-                "Tools": [],
-                "Skills": {
-                    "Arcana": "",
-                    "Nature": "",
-                    "History": "",
-                    "Insight": "",
-                    "Stealth": "",
-                    "Medicine": "",
-                    "Religion": "",
-                    "Survival": "",
-                    "Athletics": "",
-                    "Deception": "",
-                    "Acrobatics": "",
-                    "Perception": "",
-                    "Persuasion": "",
-                    "Performance": "",
-                    "Intimidation": "",
-                    "Investigation": "",
-                    "Slight of Hand": "",
-                    "Animal Handling": ""
-                },
-                "Weapons": [],
-                "Languages": [],
-                "Saving_Throws": {
-                    "Wisdom": "",
-                    "Charisma": "",
-                    "Strength": "",
-                    "Dexterity": "",
-                    "Constitution": "",
-                    "Intelligence": ""
-                }
-            },
-            "Ability_Scores": {
-                "Wisdom": 10,
-                "Charisma": 10,
-                "Strength": 10,
-                "Dexterity": 10,
-                "Constitution": 10,
-                "Intelligence": 10
+            "Weapons": [],
+            "Languages": [],
+            "Saving_Throws": {
+              "Wisdom": "",
+              "Charisma": "",
+              "Strength": "",
+              "Dexterity": "",
+              "Constitution": "",
+              "Intelligence": ""
             }
+          },
+          "Ability_Scores": {
+            "Wisdom": 10,
+            "Charisma": 10,
+            "Strength": 10,
+            "Dexterity": 10,
+            "Constitution": 10,
+            "Intelligence": 10
+          }
         },
         "Features": {
             "Class": [
@@ -121,11 +121,11 @@ export const createNewCharacter = (character_class: string, level: number) => {
         },
         "Equipment": {
             "Armor": {
-                "Base": 10,
-                "Name": "Unarmored",
-                "Bonus": 0,
-                "Limit": "",
-                "Ability": "Dexterity"
+              "Base": 10,
+              "Name": "Unarmored",
+              "Bonus": 0,
+              "Limit": "",
+              "Ability": "Dexterity" as keyof AbilityScoreType
             },
             "Shields": [],
             "Weapons": [],
@@ -232,12 +232,20 @@ export const upsertNewCharacter = async (character_class: string, character_leve
 
 
 export const signInWithGoogle = async () => {
+    console.log(process.env.PW_TEST_USERNAME);
     if (!supabase) return;
 
-    await supabase.auth.signInWithOAuth({
-        provider: "google",
-        options: {
-            redirectTo: `${PUBLIC_SITE_URL}${window.location.pathname.substring(1)}`//`${PUBLIC_SITE_URL}auth/callback?next=${window.location.pathname}`,
-        },
-    });
+    if (process.env.PW_TEST_USERNAME && process.env.PW_TEST_PASSWORD) {
+        await supabase.auth.signInWithPassword({
+            email: process.env.PW_TEST_USERNAME,
+            password: process.env.PW_TEST_PASSWORD
+        });
+    } else {
+        await supabase.auth.signInWithOAuth({
+            provider: "google",
+            options: {
+                redirectTo: `${PUBLIC_SITE_URL}${window.location.pathname.substring(1)}`,
+            },
+        });
+    }
 };

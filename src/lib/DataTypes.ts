@@ -3,7 +3,6 @@ type CharacterSheet = {
     "Level":number,
     "Stats":{
         "Ability_Scores":AbilityScoreType,
-        "Proficiency_Bonus":number,
         "Proficiencies":Proficiencies,
         "Health":{
             "Current":number,
@@ -11,7 +10,6 @@ type CharacterSheet = {
             "Temp":number,
             "Hit_Dice":number
         },
-        "Armor_Class":number,
         "Speed":number
     },
     "Features":{
