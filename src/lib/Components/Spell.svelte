@@ -40,7 +40,7 @@
         }[]
     };
 
-    export let prepared:boolean = false;
+    export let prepared:string = "false";
     export let onChange:Function;
     export let removeFunction:Function;
 
@@ -111,11 +111,11 @@
             {:else}
                 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                 <div class="custom-subtitle {$mode !== "use" ? "disable" : ""}" on:click={() => {
-                    prepared = !prepared;
+                    prepared = String(!Boolean(prepared))
                     updateDatabase();
                     onChange(prepared);
                 }}>
-                {#if prepared}<span class="highlighted">{spell["name"]}</span>
+                {#if prepared !== "false"}<span class="highlighted">{spell["name"]}</span>
                 {:else}{spell["name"]}
                 {/if}
                 </div>

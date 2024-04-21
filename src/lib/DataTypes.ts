@@ -140,7 +140,7 @@ type MagicItem = {
 
 type Spell = {
     "Spell_Name":string,
-    "Prepared":boolean
+    "Prepared":string
 }
 
 type TitleDescription = {
