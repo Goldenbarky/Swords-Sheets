@@ -229,7 +229,7 @@
             />
         </div>
         <div class="custom-box" style="width:17rem; padding:0px;">
-            <NumberLabel bind:number={character.Stats.Health.Temp} label="Temp HP" edit_modes={["use"]}/>
+            <NumberLabel bind:number={character.Stats.Health.Temp} label="Temp HP" number_edit_modes={["use"]}/>
         </div>
         <div class="custom-box" style="width:17rem; padding:0px;">
             <NumberLabel number={calcAC()} label={"Armor Class"}/>
