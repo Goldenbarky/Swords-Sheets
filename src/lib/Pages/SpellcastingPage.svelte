@@ -66,7 +66,7 @@
         Object.keys(character.Spellcasting.Spells).forEach(level => {
             if(level !== "0") {
                 character.Spellcasting.Spells[level].forEach(spell => {
-                    if(spell.Prepared === "true") prepared++;
+                    if(String(spell.Prepared) === "true") prepared++;
                 });
             }
         });
@@ -101,8 +101,9 @@
     let save_dc = calcSaveDC();
     let spells_known = calcKnown();
 
-    const changePrepared = (prepared:bool) => {
-        if(prepared) num_prepared++;
+    const changePrepared = (prepared:string, changeToAlways:boolean = false) => {
+        if(changeToAlways && prepared === "true") num_prepared--;
+        else if(prepared === "true") num_prepared++;
         else num_prepared--;
     }
 

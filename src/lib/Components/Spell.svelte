@@ -108,14 +108,16 @@
         <div class="row">
             {#if spell.level === 0}
                 <div class="custom-subtitle cantrip">{spell["name"]}</div>
+            {:else if prepared === "always"}
+                <div class="custom-subtitle cantrip always-prepared">{spell["name"]}</div>
             {:else}
                 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                 <div class="custom-subtitle {$mode !== "use" ? "disable" : ""}" on:click={() => {
-                    prepared = String(!Boolean(prepared))
+                    prepared = prepared === "true" ? "false" : "true";
                     updateDatabase();
                     onChange(prepared);
                 }}>
-                {#if prepared !== "false"}<span class="highlighted">{spell["name"]}</span>
+                {#if String(prepared) !== "false"}<span class="highlighted">{spell["name"]}</span>
                 {:else}{spell["name"]}
                 {/if}
                 </div>
@@ -133,6 +135,16 @@
                     </div>
                 {/each}
                 {#if $mode === "edit"}
+                    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+                    <div class="spell-detail custom-button {prepared === "always" ? "" : "not-selected"}" on:click={() => {
+                        onChange(prepared, true);
+                        prepared = "always";
+                        updateDatabase();
+                    }}>A
+                        <div class="box tooltip-box">
+                            <div class="tooltip-text">Always Prepared</div>
+                        </div>
+                    </div>
                     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                     <div class="spell-detail custom-button" on:click={removeFunction(spell.name, spell.level)}>X
                         <div class="box tooltip-box">
@@ -252,6 +264,9 @@
         cursor: default !important;
         color: var(--secondary) !important;
     }
+    .always-prepared {
+        border-bottom: 1px solid var(--border);
+    }
     .tooltip-box {
         border: 2px solid var(--border);
         padding: 0.75rem;
@@ -271,6 +286,9 @@
         visibility: hidden;
         text-align: right;
         color: var(--secondary)
+    }
+    .not-selected {
+        color: var(--text) !important;
     }
     .spell-detail:hover .tooltip-box {
         visibility: visible;
