@@ -1,7 +1,7 @@
 <script lang="ts">
     import { bonusToString, getAbilityModifier, getPB, updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
-    import AbilitySelector from "./Generic/AbilitySelector.svelte";
+    import AbilitySelector from "./AbilitySelector.svelte";
     import CheckedBox from "./Generic/CheckedBox.svelte";
     import TitleDescription from "./Generic/TitleDescription.svelte";
     import Divider from "./Helpers/Divider.svelte";

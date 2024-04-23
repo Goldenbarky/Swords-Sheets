@@ -1,7 +1,7 @@
 <script lang="ts">
     import { updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
-    import AbilitySelector from "./Generic/AbilitySelector.svelte";
+    import AbilitySelector from "./AbilitySelector.svelte";
     import NumberLabel from "./Generic/NumberLabel.svelte";
 
     export let armor:Armor;
