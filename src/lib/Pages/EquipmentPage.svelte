@@ -18,7 +18,7 @@
     style="background-color: var(--background);"
 >
     <div class="edge"></div>
-    <div class="column custom-column center">
+    <div class="column custom-column padded-column center">
         <div style="width: 100%; display: flex; flex-direction: column; align-items:center;">
             <div class="custom-title" style="width:100%;">Weapons</div>
             {#each character.Equipment.Weapons as weapon (weapon)}
@@ -44,7 +44,7 @@
             {/if}
         </div>
     </div>
-    <div class="column custom-column center">
+    <div class="column custom-column padded-column center">
         <div>
             <div class="custom-title" style="width: 100%;">Armor</div>
             <Armor
@@ -164,6 +164,10 @@
         display: flex;
         align-items: center;
         background-color: var(--background);
+    }
+    .padded-column {
+        margin-left: 2rem;
+        margin-right: 2rem;
     }
     .custom-title {
         @extend .title !optional;
