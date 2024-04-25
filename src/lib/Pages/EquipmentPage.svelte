@@ -70,7 +70,7 @@
         {/each}
         {#if $mode === "edit"}
             <button class="custom-box custom-button" on:click={() => {
-                character.Equipment.Shields = [...character.Equipment.Shields, {Name: "", Base: 2, Bonus: 0, Entries: {Title: "", Description: []}}];
+                character.Equipment.Shields = [...character.Equipment.Shields, {Name: "Shield", Base: 2, Bonus: 0, Saving_Throw_Mods:{Strength: 0, Dexterity: 0, Constitution: 0, Intelligence: 0, Wisdom: 0, Charisma: 0}, Entries: {Title: "", Description: []}}];
                 updateDatabase();
             }}>Add New Armor Enhancement</button>
         {/if}
@@ -211,7 +211,7 @@
         height: 1rem;
         padding: 0rem 0.4rem 0rem 0.4rem;
         justify-content: flex-end;
-        margin-top: 0.3rem;
+        margin-top: -0.6rem;
         margin-right: 0.3rem;
     }
     .custom-tiny-button:hover ~ div {

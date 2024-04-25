@@ -2,8 +2,13 @@ import type { SupabaseClient } from "@supabase/supabase-js";
 import { theme } from "./Theme";
 import { writable } from "svelte/store";
 import { PUBLIC_SITE_URL } from "$env/static/public";
-import { invalidateAll } from "$app/navigation";
 import type { User } from '@supabase/gotrue-js';
+import merge from 'deepmerge-json';
+
+import CharacterTemplate from "$lib/Data/CharacterTemplate.json";
+import ShieldTemplate from "$lib/Data/ShieldTemplate.json";
+import WeaponTemplate from "$lib/Data/WeaponTemplate.json";
+import MagicItemTemplate from "$lib/Data/MagicItemTemplate.json";
 
 let supabase: SupabaseClient | undefined;
 export let supabaseObject = (supa?: SupabaseClient) => {
@@ -43,11 +48,31 @@ export const getAbilityModifier = (ability: keyof AbilityScoreType) => {
 }
 
 export const setCharacter = (ch: { data: CharacterSheet, name: string, id: string }) => {
-    character_sheet = ch.data;
+    character_sheet = updateJsonFormatting(ch.data);
+    
+    if(character_sheet !== ch.data) {
+        ch.data = character_sheet!;
+        updateDatabase();
+    }
+
     character_id = ch.id;
     character = ch;
+}
 
+const updateJsonFormatting = (character:CharacterSheet) => {
+    let updatedCharacter;
+    updatedCharacter = merge(CharacterTemplate, character);
 
+    updatedCharacter.Equipment.Shields = 
+        updatedCharacter.Equipment.Shields.map(x => merge(ShieldTemplate, x));
+
+    updatedCharacter.Equipment.Weapons = 
+        updatedCharacter.Equipment.Weapons.map(x => merge(WeaponTemplate, x));
+
+    updatedCharacter.Equipment.Magic_Items = 
+        updatedCharacter.Equipment.Magic_Items.map(x => merge(MagicItemTemplate, x));
+
+    return updatedCharacter;
 }
 
 // const backsetKeys = (object: any) => {
@@ -55,124 +80,11 @@ export const setCharacter = (ch: { data: CharacterSheet, name: string, id: strin
 // }
 
 export const createNewCharacter = (character_class: string, level: number) => {
-    return {
-        "Class": character_class,
-        "Level": level,
-        "Stats": {
-          "Speed": 30,
-          "Health": {
-            "Max": 0,
-            "Temp": 0,
-            "Current": 0,
-            "Hit_Dice": 0
-          },
-          "Proficiencies": {
-            "Armor": [],
-            "Tools": [],
-            "Skills": {
-              "Arcana": "",
-              "Nature": "",
-              "History": "",
-              "Insight": "",
-              "Stealth": "",
-              "Medicine": "",
-              "Religion": "",
-              "Survival": "",
-              "Athletics": "",
-              "Deception": "",
-              "Acrobatics": "",
-              "Perception": "",
-              "Persuasion": "",
-              "Performance": "",
-              "Intimidation": "",
-              "Investigation": "",
-              "Slight of Hand": "",
-              "Animal Handling": ""
-            },
-            "Weapons": [],
-            "Languages": [],
-            "Saving_Throws": {
-              "Wisdom": "",
-              "Charisma": "",
-              "Strength": "",
-              "Dexterity": "",
-              "Constitution": "",
-              "Intelligence": ""
-            }
-          },
-          "Ability_Scores": {
-            "Wisdom": 10,
-            "Charisma": 10,
-            "Strength": 10,
-            "Dexterity": 10,
-            "Constitution": 10,
-            "Intelligence": 10
-          }
-        },
-        "Features": {
-            "Class": [
-                {
-                    "Title": "",
-                    "Description": []
-                }
-            ],
-            "Feats": [],
-            "Racial": []
-        },
-        "Equipment": {
-            "Armor": {
-              "Base": 10,
-              "Name": "Unarmored",
-              "Bonus": 0,
-              "Limit": "",
-              "Ability": "Dexterity" as keyof AbilityScoreType
-            },
-            "Shields": [],
-            "Weapons": [],
-            "Inventory": [],
-            "Valuables": [],
-            "Magic_Items": []
-        },
-        "Spellcasting": {
-            "Spells": {
-                "0": [],
-                "1": [],
-                "2": [],
-                "3": [],
-                "4": [],
-                "5": [],
-                "6": [],
-                "7": [],
-                "8": [],
-                "9": []
-            },
-            "Ability": "Wisdom",
-            "Bonus": 0,
-            "Max_Prepared": 0,
-            "Spell_Slots": {
-                "1": 0,
-                "2": 0,
-                "3": 0,
-                "4": 0,
-                "5": 0,
-                "6": 0,
-                "7": 0,
-                "8": 0,
-                "9": 0
-            },
-            "Slots_Expended": {
-                "1": 0,
-                "2": 0,
-                "3": 0,
-                "4": 0,
-                "5": 0,
-                "6": 0,
-                "7": 0,
-                "8": 0,
-                "9": 0
-            }
-        }
-    }
+    let character = CharacterTemplate;
+    character.Level = level;
+    character.Class = character_class;
+
+    return character;
 }
 
 export const updateDatabase = async () => {

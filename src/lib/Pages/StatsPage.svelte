@@ -84,7 +84,10 @@
     const calcSavingBonus = (saving_throw: keyof AbilityScoreType) => {
         let proficiency = character.Stats.Proficiencies.Saving_Throws[saving_throw];
 
-        return calcBonus(saving_throw, proficiency);
+        let bonuses = 0;
+        character.Equipment.Shields.forEach(shield => bonuses += Number(shield.Saving_Throw_Mods[saving_throw]));
+
+        return calcBonus(saving_throw, proficiency) + bonuses;
     };
 
     const calcBonus = (

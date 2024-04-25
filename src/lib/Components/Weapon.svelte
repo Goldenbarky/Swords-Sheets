@@ -63,6 +63,7 @@
                                         weapon.Proficient = !weapon.Proficient;
                                         to_hit = calcToHit();
                                         damage_mod = calcDamageMod();
+                                        updateDatabase();
                                     }}
                                 />
                                 <div style="width: 0.5rem;"/>

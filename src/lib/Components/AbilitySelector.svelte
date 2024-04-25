@@ -61,7 +61,7 @@
         border-top-left-radius: 0px;
         border-top-right-radius: 0px;
         border-top: 0px;
-        top: 1px;
+        top: 2px;
     }
     .selected {
         color: var(--secondary);
