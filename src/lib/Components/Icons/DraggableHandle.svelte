@@ -7,7 +7,7 @@
 	}
 </script>
 <div class="handle" style:cursor={dragDisabled ? 'grab' : 'grabbing'} on:mousedown={startDrag}>
-
+    &#9776;
 </div>
 
 <style>
@@ -16,5 +16,6 @@
         height: 1.5rem;
         border-radius: 5px;
         background-color: var(--secondary);
+        color: var(--text);
     }
 </style>

@@ -1,5 +1,6 @@
 <script lang="ts">
     import { updateDatabase } from "$lib/GenericFunctions";
+    import DropDownArrow from "./Generic/DropDownArrow.svelte";
 
     export let category_name:string;
     export let selected_ability:keyof AbilityScoreType;
@@ -18,14 +19,9 @@
 </script>
 
 <div style="width: 100%; height: 1.2rem; position:absolute; z-index:2; bottom: -1px; display:flex; flex-direction:column; place-items:center;">
-    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions-->
-    <div class="custom-box bubble {shown ? "shown" : ""}" on:click = {() => {
-        shown = !shown
-        }}>
-        <div style="margin-top: -0.2rem; user-select: none" class="{shown ? "up-arrow" : "down-arrow"}">
-            &#60;
-        </div>
-    </div>
+    <DropDownArrow
+        bind:shown = {shown}
+    />
     <div class="custom-box dropdown" style="{shown ? "" : "visibility: hidden; pointer-events: none"}">
         <div class="column">
             <div class="custom-title">{category_name} Ability</div>
@@ -65,7 +61,7 @@
         border-top-left-radius: 0px;
         border-top-right-radius: 0px;
         border-top: 0px;
-        top: 1px;
+        top: 2px;
     }
     .selected {
         color: var(--secondary);
@@ -76,27 +72,5 @@
         padding: 0px;
         align-items: center;
     }
-    .bubble {
-        border: 2px solid var(--border);
-        border-radius: 0.5rem;
-        border-bottom-right-radius: 0px;
-        border-bottom-left-radius: 0px;
-        border-bottom: 0px;
-        padding: 0px;
-        background-color: var(--background);
-        width: 2.2rem;
-        height: 1.2rem;
-        margin-top: -0.16rem;
-    }
-    .down-arrow {
-        transform: rotate(270deg);
-        margin-left: -2px;
-    }
-    .up-arrow {
-        transform: rotate(90deg);
-        margin-right: -3px;
-    }
-    .shown {
-        border-bottom-color: var(--background);
-    }
+    
 </style>

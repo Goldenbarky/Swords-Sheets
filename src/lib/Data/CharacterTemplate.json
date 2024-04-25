@@ -1,0 +1,118 @@
+{
+    "Class": "Undefined",
+    "Level": 0,
+    "Stats": {
+      "Speed": 30,
+      "Health": {
+        "Max": 0,
+        "Temp": 0,
+        "Current": 0,
+        "Hit_Dice": 0
+      },
+      "Proficiencies": {
+        "Armor": [],
+        "Tools": [],
+        "Skills": {
+          "Arcana": "",
+          "Nature": "",
+          "History": "",
+          "Insight": "",
+          "Stealth": "",
+          "Medicine": "",
+          "Religion": "",
+          "Survival": "",
+          "Athletics": "",
+          "Deception": "",
+          "Acrobatics": "",
+          "Perception": "",
+          "Persuasion": "",
+          "Performance": "",
+          "Intimidation": "",
+          "Investigation": "",
+          "Slight of Hand": "",
+          "Animal Handling": ""
+        },
+        "Weapons": [],
+        "Languages": [],
+        "Saving_Throws": {
+          "Wisdom": "",
+          "Charisma": "",
+          "Strength": "",
+          "Dexterity": "",
+          "Constitution": "",
+          "Intelligence": ""
+        }
+      },
+      "Ability_Scores": {
+        "Wisdom": 10,
+        "Charisma": 10,
+        "Strength": 10,
+        "Dexterity": 10,
+        "Constitution": 10,
+        "Intelligence": 10
+      }
+    },
+    "Features": {
+        "Class": [
+            {
+                "Title": "",
+                "Description": []
+            }
+        ],
+        "Feats": [],
+        "Racial": []
+    },
+    "Equipment": {
+        "Armor": {
+          "Base": 10,
+          "Name": "Unarmored",
+          "Bonus": 0,
+          "Limit": "",
+          "Ability": "Dexterity"
+        },
+        "Shields": [],
+        "Weapons": [],
+        "Inventory": [],
+        "Valuables": [],
+        "Magic_Items": []
+    },
+    "Spellcasting": {
+        "Spells": {
+            "0": [],
+            "1": [],
+            "2": [],
+            "3": [],
+            "4": [],
+            "5": [],
+            "6": [],
+            "7": [],
+            "8": [],
+            "9": []
+        },
+        "Ability": "Wisdom",
+        "Bonus": 0,
+        "Max_Prepared": 0,
+        "Spell_Slots": {
+            "1": 0,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0,
+            "6": 0,
+            "7": 0,
+            "8": 0,
+            "9": 0
+        },
+        "Slots_Expended": {
+            "1": 0,
+            "2": 0,
+            "3": 0,
+            "4": 0,
+            "5": 0,
+            "6": 0,
+            "7": 0,
+            "8": 0,
+            "9": 0
+        }
+    }
+}

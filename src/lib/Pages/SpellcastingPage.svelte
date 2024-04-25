@@ -1,6 +1,6 @@
 <script lang="ts">
     //@ts-nocheck
-    import AbilitySelector from "$lib/Components/Generic/AbilitySelector.svelte";
+    import AbilitySelector from "$lib/Components/AbilitySelector.svelte";
     import CheckedBox from "$lib/Components/Generic/CheckedBox.svelte";
     import DynamicNumberLabel from "$lib/Components/Generic/DynamicNumberLabel.svelte";
     import NumberLabel from "$lib/Components/Generic/NumberLabel.svelte";
