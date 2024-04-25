@@ -18,6 +18,8 @@ export let supabaseObject = (supa?: SupabaseClient) => {
 
 export let user = writable<User | null>(null);
 
+export let savingPromise = writable<boolean>(false);
+
 let character_sheet: CharacterSheet | null;
 let character_id: string | null;
 let character: { name: any; data?: CharacterSheet; id?: string; };
@@ -50,12 +52,13 @@ export const getAbilityModifier = (ability: keyof AbilityScoreType) => {
 export const setCharacter = (ch: { data: CharacterSheet, name: string, id: string }) => {
     character_sheet = updateJsonFormatting(ch.data);
     
+    character_id = ch.id;
+    
     if(character_sheet !== ch.data) {
         ch.data = character_sheet!;
-        updateDatabase();
+        updateDatabase().then(() => {});
     }
 
-    character_id = ch.id;
     character = ch;
 }
 
@@ -64,13 +67,13 @@ const updateJsonFormatting = (character:CharacterSheet) => {
     updatedCharacter = merge(CharacterTemplate, character);
 
     updatedCharacter.Equipment.Shields = 
-        updatedCharacter.Equipment.Shields.map(x => merge(ShieldTemplate, x));
+        updatedCharacter.Equipment.Shields.map((x: any) => merge(ShieldTemplate, x));
 
     updatedCharacter.Equipment.Weapons = 
-        updatedCharacter.Equipment.Weapons.map(x => merge(WeaponTemplate, x));
+        updatedCharacter.Equipment.Weapons.map((x: any) => merge(WeaponTemplate, x));
 
     updatedCharacter.Equipment.Magic_Items = 
-        updatedCharacter.Equipment.Magic_Items.map(x => merge(MagicItemTemplate, x));
+        updatedCharacter.Equipment.Magic_Items.map((x: any) => merge(MagicItemTemplate, x));
 
     return updatedCharacter;
 }
@@ -88,9 +91,15 @@ export const createNewCharacter = (character_class: string, level: number) => {
 }
 
 export const updateDatabase = async () => {
-    if (!supabase) return;
+    savingPromise.set(true);
+}
 
-    await supabase.from("characters").update({ data: character_sheet }).eq("id", character_id).select('*');
+export const saveToDatabase = async () => {
+    if (!supabase || !character_sheet || !character_id) return 10000;
+
+    const { status } = await supabase.from("characters").update({ data: character_sheet }).eq("id", character_id).select('*');
+    
+    return status;
 }
 
 export const updateName = async () => {

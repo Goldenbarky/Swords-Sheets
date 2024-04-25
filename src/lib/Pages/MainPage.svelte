@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { setCharacter, signInWithGoogle, updateDatabase, updateName, user as writeUser } from '$lib/GenericFunctions';
+    import { saveToDatabase, savingPromise, setCharacter, signInWithGoogle, updateDatabase, updateName, user as writeUser } from '$lib/GenericFunctions';
     import EquipmentPage from '$lib/Pages/EquipmentPage.svelte';
     import FeaturesPage from "$lib/Pages/FeaturesPage.svelte";
     import SpellcastingPage from "$lib/Pages/SpellcastingPage.svelte";
@@ -10,6 +10,7 @@
     import type { User } from '@supabase/supabase-js';
     import { getContext, onMount } from 'svelte';
     import ThemePage from './ThemePage.svelte';
+    import { fade } from 'svelte/transition';
 
     export let sheet:any;
     export let spells:any;
@@ -21,6 +22,22 @@
         setCharacter(sheet);
     });
 
+    let savePromise: null | (() => Promise<number>) = null;
+
+    const finuto = async (num: number) => {
+        // oops
+
+        if (num !== 200) {
+            console.error('Saving to database: ', num);
+        } else {
+            savePromise = null;
+            $savingPromise = false;
+        }
+    }
+    
+    $: if ($savingPromise === true) {
+        savePromise = saveToDatabase;
+    }
 
     let tabs = ["Stats", "Features", "Equipment", "Spellcasting", "Notes", "Theme"];
     let tabParam = $page.url.searchParams.get('activetab');
@@ -85,20 +102,20 @@
 </section>
 {#if activeTab==="Stats"}
     <StatsPage
-        character={sheet.data}
+        bind:character={sheet.data}
     />
 {:else if activeTab==="Features"}
     <FeaturesPage
-        character={sheet.data}
+        bind:character={sheet.data}
     />
 {:else if activeTab==="Equipment"}
     <EquipmentPage
-        character={sheet.data}
+        bind:character={sheet.data}
     />
 {:else if activeTab==="Spellcasting"}
     <SpellcastingPage
         spells={spells}
-        character={sheet.data}
+        bind:character={sheet.data}
     />
 {:else if activeTab==="Notes"}
     <div>words</div>
@@ -107,7 +124,52 @@
         <ThemePage/>
     {/if}
 {/if}
+
+{#if savePromise !== null}
+    <div class="save-indicator" out:fade={{ delay: 1000 }}>
+        {#await savePromise()}
+            <div class="save-saving">
+                
+            </div>
+        {:then num}
+            {#if num === 200}
+                <div class="save-saved">
+                    
+                </div>
+            {:else}
+                <div class="save-errored">
+                    
+                </div>
+            {/if}
+            {#await finuto(num)}
+                {""}
+            {/await}
+        {/await}
+    </div>
+{/if}
 <style lang="scss">
+    .save-indicator {
+        position: absolute;
+        width: 2rem;
+        height: 2rem;
+        border-radius: 25px;
+        overflow: clip;
+        border: solid black 2px;
+        top: 20px;
+        left: 50%;
+        color: black;
+        transition: background-color 0.5s ease-in;
+    }
+    .save-indicator:has(.save-saving) {
+        background-color: yellow;
+    }
+    .save-indicator:has(.save-saved) {
+        background-color: green;
+    }
+    .save-indicator:has(.save-errored) {
+        background-color: red;
+    }
+
     .custom-title {
         color: white;
         margin:0;
