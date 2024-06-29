@@ -4,7 +4,7 @@
 </script>
 
 <div style="display: flex; flex-direction: row">
-    <div>Reorder?</div>
+    <div>{title}</div>
     <label class="switch">
         <input type="checkbox" bind:checked={toggle}/>
         <span class="slider round"></span>
