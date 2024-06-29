@@ -4,9 +4,12 @@
     import { mode } from "$lib/Theme";
     import DraggableHandle from '$lib/Components/Icons/DraggableHandle.svelte';
     import { SOURCES, dndzone } from "svelte-dnd-action";
+    import ToggleSwitch from "./Generic/ToggleSwitch.svelte";
 
     export let title:string;
     export let features:{Title:string, Description:{Subtitle:string, Paragraph:string}[]}[];
+
+    let reorderable = false;
 
     const removeFeature = (list:{Title:string, Description:{Subtitle:string, Paragraph:string}[]}[], title:string) => {
         return list.filter(x => x.Title !== title);
@@ -21,6 +24,7 @@
             bind:title={feature.Title}
             bind:description={feature.Description}
             removeFunction={() => features = removeFeature(features, feature.Title)}
+            orderable={reorderable}
         />
         <div style="height:0.5rem;"/>
     {/each}
@@ -41,6 +45,12 @@
                     <div class="custom-subtitle placeholder" on:focusout={updateDatabase}>New Feature</div>
                 </div>
             </div>
+        </div>
+        <div style="margin-top: 10px;">
+            <ToggleSwitch
+                title="Reorder?"
+                bind:toggle={reorderable}
+            />
         </div>
     {/if}
 </div>
