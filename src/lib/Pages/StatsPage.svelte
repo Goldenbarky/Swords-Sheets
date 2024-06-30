@@ -119,7 +119,8 @@
 
         let ac = Number(armor.Base) + armor.Bonus;
 
-        if((armor.Limit === "" || ability_bonus <= Number(armor.Limit)) && Number(armor.Limit) !== 0) ac += ability_bonus;
+        console.log(ability_bonus);
+        if((armor.Limit === "" || ability_bonus <= Number(armor.Limit)) && armor.Limit !== 0) ac += ability_bonus;
         else ac += Number(armor.Limit);
 
         enhancements?.forEach(shield => {
@@ -236,7 +237,7 @@
         </div>
         <div class="custom-box" style="width:17rem; padding:0px;">
             <NumberLabel number={calcAC()} label={"Armor Class"}/>
-            <NumberLabel number={character.Stats.Speed.toString()} label={"Speed"}/>
+            <NumberLabel bind:number={character.Stats.Speed} label={"Speed"} number_edit_modes={["edit"]}/>
             <NumberLabel number={bonusToString(calcBonus("Dexterity", ""))} label={"Initiative"}/>
         </div>
         <div class="custom-box" style="width: 100%;">
