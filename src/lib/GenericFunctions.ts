@@ -163,23 +163,16 @@ export const calcAC = () => {
 
     let ac = Number(armor.Base) + armor.Bonus;
 
-    console.log("AC base is " + character_sheet.Equipment.Armor.Base);
-
     if(armor.Limit === "" || (Number(armor.Limit) !== 0 && ability_bonus <= Number(armor.Limit))) {
-        console.log("AC was " + ac);
         ac += ability_bonus;
-        console.log("Added " + ability_bonus + ". AC now " + ac);
     }
     else {
         ac += Number(armor.Limit);
-        console.log("Limit: " + armor.Limit + " AC: " + ac);
     }
 
     enhancements?.forEach(shield => {
         ac += Number(shield.Base) + shield.Bonus;
     })
-
-    console.log("Final AC " + ac);
 
     return ac;
 }
