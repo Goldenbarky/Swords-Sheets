@@ -10,6 +10,7 @@
     import { mode } from "$lib/Theme";
     import * as GenericFunctions from "$lib/GenericFunctions";
     import CheckedBox from "$lib/Components/Generic/CheckedBox.svelte";
+    import Divider from "$lib/Components/Helpers/Divider.svelte";
 
     export let character: CharacterSheet;
 
@@ -47,10 +48,10 @@
             <div class="custom-title">Proficiencies</div>
             {#each proficiencies as proficiency, i}
                 {#if $mode === "edit" || character.Stats.Proficiencies[proficiency].length >= 1}
-                    <ListLabel label={proficiency} bind:list={character.Stats.Proficiencies[proficiency]}/>
-                    {#if i != proficiencies.length - 1}
-                        <div style="margin: 0rem; border-top: 1px solid var(--border); height: 1px"/>
+                    {#if i != 0}
+                        <Divider orientation="horizontal"/>
                     {/if}
+                    <ListLabel label={proficiency} bind:list={character.Stats.Proficiencies[proficiency]}/>
                 {/if}
             {/each}
         </div>
