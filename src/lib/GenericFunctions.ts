@@ -49,6 +49,136 @@ export const getAbilityModifier = (ability: keyof AbilityScoreType) => {
     return scoreToModifier(character_sheet.Stats.Ability_Scores[ability]);
 }
 
+export let abilities = [
+    "Strength",
+    "Dexterity",
+    "Constitution",
+    "Intelligence",
+    "Wisdom",
+    "Charisma",
+] as (keyof AbilityScoreType)[];
+
+export let skills = [
+    "Acrobatics",
+    "Animal Handling",
+    "Arcana",
+    "Athletics",
+    "Deception",
+    "History",
+    "Insight",
+    "Intimidation",
+    "Investigation",
+    "Medicine",
+    "Nature",
+    "Perception",
+    "Performance",
+    "Persuasion",
+    "Religion",
+    "Slight of Hand",
+    "Stealth",
+    "Survival",
+] as (keyof SkillProficiencyType)[];
+
+export let skill_score_dictionary = {
+    Acrobatics: "Dexterity",
+    "Animal Handling": "Wisdom",
+    Arcana: "Intelligence",
+    Athletics: "Strength",
+    Deception: "Charisma",
+    History: "Intelligence",
+    Insight: "Wisdom",
+    Intimidation: "Charisma",
+    Investigation: "Intelligence",
+    Medicine: "Intelligence",
+    Nature: "Wisdom",
+    Perception: "Wisdom",
+    Performance: "Charisma",
+    Persuasion: "Charisma",
+    Religion: "Intelligence",
+    "Slight of Hand": "Dexterity",
+    Stealth: "Dexterity",
+    Survival: "Wisdom",
+    Strength: "Strength",
+    Dexterity: "Dexterity",
+    Constitution: "Constitution",
+};
+
+export let passive_skills = [
+    "Insight",
+    "Investigation",
+    "Perception",
+] as (keyof SkillProficiencyType)[];
+
+export const calcSkillBonus = (skill: keyof SkillProficiencyType) => {
+    if (!character_sheet) return 0;
+
+    let proficiency = character_sheet.Stats.Proficiencies.Skills[skill];
+    let score: keyof AbilityScoreType = skill_score_dictionary[skill] as keyof AbilityScoreType;
+
+    return calcBonus(score, proficiency);
+};
+
+export const calcSavingBonus = (saving_throw: keyof AbilityScoreType) => {
+    if (!character_sheet) return 0;
+
+    let proficiency = character_sheet.Stats.Proficiencies.Saving_Throws[saving_throw];
+
+    let bonuses = 0;
+    character_sheet.Equipment.Shields.forEach(shield => bonuses += Number(shield.Saving_Throw_Mods[saving_throw]));
+
+    return calcBonus(saving_throw, proficiency) + bonuses;
+};
+
+export const calcBonus = (
+    ability: keyof AbilityScoreType,
+    proficiency: string,
+) => {
+    if (!character_sheet) return 0;
+
+    let proficiency_bonus = getPB();
+    let modifier = scoreToModifier(character_sheet.Stats.Ability_Scores[ability]) as number;
+
+    if (proficiency === "P") modifier += proficiency_bonus;
+    else if (proficiency === "E") modifier += proficiency_bonus * 2;
+
+    return modifier;
+};
+
+export const calcPassiveBonuses = (skill: keyof SkillProficiencyType) => {
+    if (!character_sheet) return 0;
+
+    let bonus = 10;
+    let observant = character_sheet.Features.Feats.find(x => x.Title === "Observant");
+
+    bonus += calcSkillBonus(skill);
+    if(["Investigation", "Perception"].includes(skill) && observant) bonus += 5;
+
+    return bonus;
+}
+
+export const calcAC = () => {
+    if (!character_sheet) return 0;
+
+    let armor = character_sheet.Equipment.Armor;
+    let ability_bonus = calcBonus(armor.Ability, "");
+    let enhancements = character_sheet.Equipment.Shields;
+
+    let ac = Number(armor.Base) + armor.Bonus;
+
+    if(armor.Limit === "" || (Number(armor.Limit) !== 0 && ability_bonus <= Number(armor.Limit))) {
+        ac += ability_bonus;
+    }
+    else {
+        ac += Number(armor.Limit);
+    }
+
+    enhancements?.forEach(shield => {
+        ac += Number(shield.Base) + shield.Bonus;
+    })
+
+    return ac;
+}
+
 export const setCharacter = (ch: { data: CharacterSheet, name: string, id: string }) => {
     character_sheet = updateJsonFormatting(ch.data);
     

@@ -1,0 +1,25 @@
+name: Vitest Tests
+on:
+  push:
+    branches: [ main, master ]
+  pull_request:
+    branches: [ main, master ]
+jobs:
+  test:
+    timeout-minutes: 60
+    runs-on: ubuntu-latest
+    environment: test
+    steps:
+    - name: setup bun
+      uses: oven-sh/setup-bun@v1
+      with:
+        bun-version: latest
+    - name: Checkout
+      uses: actions/checkout@v4
+    - name: Install dependencies
+      run: bun i
+    - uses: actions/setup-node@v4
+      with:
+        node-version: lts/*
+    - name: Run Vitest Tests
+      run: bun vitest
