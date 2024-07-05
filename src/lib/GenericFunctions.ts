@@ -4,6 +4,7 @@ import { writable } from "svelte/store";
 import { PUBLIC_SITE_URL } from "$env/static/public";
 import type { User } from '@supabase/gotrue-js';
 import merge from 'deepmerge-json';
+import { Calculation } from "./Components/Classes/DataClasses";
 
 import CharacterTemplate from "$lib/Data/CharacterTemplate.json";
 import ShieldTemplate from "$lib/Data/ShieldTemplate.json";
@@ -107,8 +108,8 @@ export let passive_skills = [
     "Perception",
 ] as (keyof SkillProficiencyType)[];
 
-export const calcSkillBonus = (skill: keyof SkillProficiencyType) => {
-    if (!character_sheet) return 0;
+export const calcSkillBonus = (skill: keyof SkillProficiencyType, verbose:boolean = false) => {
+    if (!character_sheet) return undefined;
 
     let proficiency = character_sheet.Stats.Proficiencies.Skills[skill];
     let score: keyof AbilityScoreType = skill_score_dictionary[skill] as keyof AbilityScoreType;
@@ -117,64 +118,97 @@ export const calcSkillBonus = (skill: keyof SkillProficiencyType) => {
 };
 
 export const calcSavingBonus = (saving_throw: keyof AbilityScoreType) => {
-    if (!character_sheet) return 0;
+    if (!character_sheet) return undefined;
 
     let proficiency = character_sheet.Stats.Proficiencies.Saving_Throws[saving_throw];
 
-    let bonuses = 0;
-    character_sheet.Equipment.Shields.forEach(shield => bonuses += Number(shield.Saving_Throw_Mods[saving_throw]));
+    let maths = calcBonus(saving_throw, proficiency);
+    character_sheet.Equipment.Shields.forEach(shield => maths?.addVariables({name:shield.Name, bonus:Number(shield.Saving_Throw_Mods[saving_throw])}));
 
-    return calcBonus(saving_throw, proficiency) + bonuses;
+    return maths;
+
 };
 
 export const calcBonus = (
     ability: keyof AbilityScoreType,
     proficiency: string,
 ) => {
-    if (!character_sheet) return 0;
+    if (!character_sheet) return undefined;
 
-    let proficiency_bonus = getPB();
-    let modifier = scoreToModifier(character_sheet.Stats.Ability_Scores[ability]) as number;
+    let maths = new Calculation();
 
-    if (proficiency === "P") modifier += proficiency_bonus;
-    else if (proficiency === "E") modifier += proficiency_bonus * 2;
+    maths.addVariables({name:ability, bonus:scoreToModifier(character_sheet.Stats.Ability_Scores[ability])});
 
-    return modifier;
+    if (proficiency === "P") maths.addVariables({name:"Proficiency", bonus:getPB()});
+    else if (proficiency === "E") maths.addVariables({name:"Expertise", bonus:getPB() * 2});
+
+    return maths;
 };
 
 export const calcPassiveBonuses = (skill: keyof SkillProficiencyType) => {
-    if (!character_sheet) return 0;
+    if (!character_sheet) return undefined;
 
-    let bonus = 10;
+    let maths = new Calculation();
+
+    maths.addVariables({name:"Base", bonus:10});
     let observant = character_sheet.Features.Feats.find(x => x.Title === "Observant");
 
-    bonus += calcSkillBonus(skill);
-    if(["Investigation", "Perception"].includes(skill) && observant) bonus += 5;
+    // @ts-ignore
+    maths.join(calcSkillBonus(skill));
 
-    return bonus;
+    if(["Investigation", "Perception"].includes(skill) && observant) maths.addVariables({name:"Observant", bonus:5});
+
+    return maths;
 }
 
 export const calcAC = () => {
-    if (!character_sheet) return 0;
+    if (!character_sheet) return undefined;
+
+    let maths = new Calculation();
 
     let armor = character_sheet.Equipment.Armor;
-    let ability_bonus = calcBonus(armor.Ability, "");
+    let ability_bonus = calcBonus(armor.Ability, "")?.total;
     let enhancements = character_sheet.Equipment.Shields;
+    if(ability_bonus === undefined) return;
 
-    let ac = Number(armor.Base) + armor.Bonus;
+    maths.addVariables({name:armor.Name, bonus:Number(armor.Base) + Number(armor.Bonus)})
 
-    if(armor.Limit === "" || (Number(armor.Limit) !== 0 && ability_bonus <= Number(armor.Limit))) {
-        ac += ability_bonus;
-    }
-    else {
-        ac += Number(armor.Limit);
-    }
+    // @ts-ignore
+    if(armor.Limit === "" || (Number(armor.Limit) !== 0 && ability_bonus <= Number(armor.Limit))) maths.addVariables({name:armor.Ability, bonus:ability_bonus});
+    else maths.addVariables({name:armor.Ability, bonus:armor.Limit});
 
     enhancements?.forEach(shield => {
-        ac += Number(shield.Base) + shield.Bonus;
+        maths.addVariables({name:shield.Name, bonus:Number(shield.Base) + Number(shield.Bonus)})
     })
 
-    return ac;
+    return maths;
+}
+
+export const calcAttackModifier = () => {
+    if(!character_sheet) return undefined;
+
+    let maths = new Calculation();
+
+    let ability = character_sheet.Spellcasting.Ability as keyof AbilityScoreType;
+    let ability_mod = scoreToModifier(character_sheet.Stats.Ability_Scores[ability]);
+
+    maths.addVariables({name:ability, bonus:ability_mod});
+    maths.addVariables({name:"Proficiency", bonus:getPB()});
+    maths.addVariables({name:"Magic Item", bonus:character_sheet.Spellcasting.Bonus});
+
+    return maths;
+}
+
+export const calcSaveDC = () => {
+    if(!character_sheet) return undefined;
+
+    let maths = new Calculation();
+
+    maths.addVariables({name:"Base", bonus:8});
+    // @ts-ignore
+    maths.join(calcAttackModifier());
+
+    return maths;
 }
 
 export const setCharacter = (ch: { data: CharacterSheet, name: string, id: string }) => {
@@ -194,13 +228,13 @@ const updateJsonFormatting = (character:CharacterSheet) => {
     updatedCharacter = merge(CharacterTemplate, character);
 
     updatedCharacter.Equipment.Shields = 
-        updatedCharacter.Equipment.Shields.map(x => merge(ShieldTemplate, x));
+        updatedCharacter.Equipment.Shields.map((x: any) => merge(ShieldTemplate, x));
 
     updatedCharacter.Equipment.Weapons = 
-        updatedCharacter.Equipment.Weapons.map(x => merge(WeaponTemplate, x));
+        updatedCharacter.Equipment.Weapons.map((x: any) => merge(WeaponTemplate, x));
 
     updatedCharacter.Equipment.Magic_Items = 
-        updatedCharacter.Equipment.Magic_Items.map(x => merge(MagicItemTemplate, x));
+        updatedCharacter.Equipment.Magic_Items.map((x: any) => merge(MagicItemTemplate, x));
 
     return updatedCharacter;
 }

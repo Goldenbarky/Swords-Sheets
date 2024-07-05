@@ -108,6 +108,7 @@
                                 number_edit_modes={["use"]}
                                 label_edit_modes={["edit"]}
                                 incremental={true}
+                                label_font_size="medium"
                             />
                         </div>
                     </div>

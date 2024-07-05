@@ -1,10 +1,14 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
+    import { updateDatabase, bonusToString } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
+    import type { Calculation } from "./Classes/DataClasses";
+    import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
 
     export let proficiency:string;
     export let name:string;
-    export let bonusCalculator:(arg0: string) => string;
+    export let bonusCalculator:(arg0: string) => Calculation;
+    
+    let maths:Calculation;
     let bonus:string;
 
     const proficiencyCycle = (proficiency:string) => {
@@ -21,7 +25,9 @@
     }
 
     $: {
-        bonus = bonusCalculator(name);
+        maths = bonusCalculator(name);
+        bonus = bonusToString(maths.total);
+
         proficiency = proficiency;
     }
 </script>
@@ -37,6 +43,11 @@
     </div>
     <div class="skill-name">{name}</div>
     <div class="skill-bonus">{bonus}</div>
+    {#if $mode === "edit"}
+        <CalculationVisualizer
+            maths = {maths}
+        />
+    {/if}
 </div>
 <style lang="scss">
     .skill-div {

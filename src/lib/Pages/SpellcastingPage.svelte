@@ -6,7 +6,7 @@
     import NumberLabel from "$lib/Components/Generic/NumberLabel.svelte";
     import Divider from "$lib/Components/Helpers/Divider.svelte";
     import Spell from "$lib/Components/Spell.svelte";
-    import { bonusToString, scoreToModifier, updateDatabase, getPB } from "$lib/GenericFunctions";
+    import { bonusToString, scoreToModifier, updateDatabase, getPB, calcAttackModifier, calcSaveDC } from "$lib/GenericFunctions";
     import { mode, theme } from "$lib/Theme";
 
     export let spells:Record<string, unknown>[];
@@ -40,24 +40,6 @@
         }
 
         return num;
-    }
-
-    const calcAttackModifier = () => {
-        let ability = character.Spellcasting.Ability;
-        let ability_mod = scoreToModifier(character.Stats.Ability_Scores[ability]);
-        let bonus = character.Spellcasting.Bonus;
-        let pb = getPB();
-
-        return bonusToString(ability_mod + pb + bonus);
-    }
-
-    const calcSaveDC = () => {
-        let ability = character.Spellcasting.Ability;
-        let ability_mod = scoreToModifier(character.Stats.Ability_Scores[ability]);
-        let bonus = character.Spellcasting.Bonus;
-        let pb = getPB();
-
-        return 8 + ability_mod + pb + bonus;
     }
 
     const calcPrepared = () => {
@@ -130,13 +112,17 @@
                         <div class="custom-title">Spellcasting</div>
                         <NumberLabel
                             label="Attack Modifier"
-                            number={attack_modifier}
+                            number={bonusToString(attack_modifier?.total)}
                             bold_label={false}
+                            label_font_size="medium"
+                            calculation={attack_modifier}
                         />
                         <NumberLabel
                             label="Save DC"
-                            number={save_dc}
+                            number={save_dc?.total}
                             bold_label={false}
+                            label_font_size="medium"
+                            calculation={save_dc}
                         />
                     </div>
                     {#if $mode === "edit"}

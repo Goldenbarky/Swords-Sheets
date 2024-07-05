@@ -15,6 +15,7 @@
                 label="Base"
                 bold_label={false}
                 number_edit_modes={["edit"]}
+                label_font_size="medium"
             />
             {#if armor.Limit !== 0}
                 <NumberLabel
@@ -22,6 +23,7 @@
                     label={`${armor.Ability} Max`}
                     bold_label={false}
                     number_edit_modes={["edit"]}
+                    label_font_size="medium"
                 />
             {/if}
         </div>

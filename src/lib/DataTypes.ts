@@ -170,3 +170,8 @@ type SpellSlotCount = {
     "8":number,
     "9":number,
 }
+
+type Variable = {
+    name:string,
+    bonus:number
+}

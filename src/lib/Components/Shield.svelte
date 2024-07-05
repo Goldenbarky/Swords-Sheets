@@ -26,6 +26,7 @@
                 bold_label={false}
                 number_edit_modes={["edit"]}
                 --width={"5rem;"}
+                label_font_size="medium"
             />
         </div>
     </div>

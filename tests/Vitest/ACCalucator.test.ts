@@ -40,7 +40,7 @@ test('Unarmored AC - High Dex', () => {
     
     updateCharacter(character);
 
-    expect(calcAC()).toBe(15);
+    expect(calcAC()?.total).toBe(15);
 })
 
 test('Unarmored AC - Low Dex', () => {
@@ -48,7 +48,7 @@ test('Unarmored AC - Low Dex', () => {
 
     updateCharacter(character);
 
-    expect(calcAC()).toBe(8);
+    expect(calcAC()?.total).toBe(8);
 })
 
 test('Light Armor AC - High Dex', () => {
@@ -58,7 +58,7 @@ test('Light Armor AC - High Dex', () => {
 
     updateCharacter(character);
 
-    expect(calcAC()).toBe(17);
+    expect(calcAC()?.total).toBe(17);
 })
 
 test('Light Armor AC - Low Dex', () => {
@@ -68,7 +68,7 @@ test('Light Armor AC - Low Dex', () => {
 
     updateCharacter(character);
 
-    expect(calcAC()).toBe(11);
+    expect(calcAC()?.total).toBe(11);
 })
 
 test('Medium Armor AC - High Dex', () => {
@@ -79,7 +79,7 @@ test('Medium Armor AC - High Dex', () => {
 
     updateCharacter(character);
 
-    expect(calcAC()).toBe(17);
+    expect(calcAC()?.total).toBe(17);
 })
 
 test('Medium Armor AC - Low Dex', () => {
@@ -90,7 +90,7 @@ test('Medium Armor AC - Low Dex', () => {
 
     updateCharacter(character);
 
-    expect(calcAC()).toBe(13);
+    expect(calcAC()?.total).toBe(13);
 })
 
 test('Heavy Armor AC - High Dex', () => {
@@ -101,7 +101,7 @@ test('Heavy Armor AC - High Dex', () => {
 
     updateCharacter(character);
 
-    expect(calcAC()).toBe(18);
+    expect(calcAC()?.total).toBe(18);
 })
 
 test('Heavy Armor AC - Low Dex', () => {
@@ -112,5 +112,5 @@ test('Heavy Armor AC - Low Dex', () => {
 
     updateCharacter(character);
 
-    expect(calcAC()).toBe(18);
+    expect(calcAC()?.total).toBe(18);
 })
