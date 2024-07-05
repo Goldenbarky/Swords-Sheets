@@ -9,8 +9,18 @@
     import { updateTheme, resetColors } from '$lib/GenericFunctions';
     import { theme } from '$lib/Theme';
     import ColorPicker from "svelte-awesome-color-picker";
+    import { Calculation } from '$lib/Components/Classes/DataClasses';
+
+    let skill1 = new Calculation();
+    let skill2 = new Calculation();
+    let skill3 = new Calculation();
+
+    skill1.addVariables({name:"Value", bonus: -2});
+    skill2.addVariables({name:"Value", bonus: 2});
+    skill3.addVariables({name:"Value", bonus: 4});
+
 </script>
-<div class="columns">
+<div class="columns has-text-centered">
     <div class="edge"/>
     <div class="column" style="align-items: flex-start;">
         <div class="custom-box color-picker">
@@ -59,17 +69,17 @@
             <Skill
                 name="Skill Name"
                 proficiency=""
-                bonusCalculator={() => {return "+4"}}
+                bonusCalculator={() => {return skill1}}
             />
             <Skill
                 name="Skill Name"
                 proficiency="P"
-                bonusCalculator={() => {return "+1"}}
+                bonusCalculator={() => {return skill2}}
             />
             <Skill
                 name="Skill Name"
                 proficiency="E"
-                bonusCalculator={() => {return "-2"}}
+                bonusCalculator={() => {return skill3}}
             />
         </div>
 

@@ -5,12 +5,14 @@
 
     export let label:string;
     export let list:string[];
+
+    export let editable:boolean = true;
 </script>
-    <div class="row" style="margin:0.5rem;">
+    <div class="row" style="margin:0.5rem; width: 100%;">
         <div class="custom-title">{label}</div>
         <Divider/>
         <div class="list">
-            {#if $mode === "edit"}
+            {#if editable && $mode === "edit"}
                 {#each list as item}
                     <div class="row">
                         <button class="custom-box custom-button custom-tiny-button" on:click={() => {

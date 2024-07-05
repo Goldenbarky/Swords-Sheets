@@ -10,6 +10,7 @@
     import { mode } from "$lib/Theme";
     import * as GenericFunctions from "$lib/GenericFunctions";
     import CheckedBox from "$lib/Components/Generic/CheckedBox.svelte";
+    import Divider from "$lib/Components/Helpers/Divider.svelte";
 
     export let character: CharacterSheet;
 
@@ -47,10 +48,10 @@
             <div class="custom-title">Proficiencies</div>
             {#each proficiencies as proficiency, i}
                 {#if $mode === "edit" || character.Stats.Proficiencies[proficiency].length >= 1}
-                    <ListLabel label={proficiency} bind:list={character.Stats.Proficiencies[proficiency]}/>
-                    {#if i != proficiencies.length - 1}
-                        <div style="margin: 0rem; border-top: 1px solid var(--border); height: 1px"/>
+                    {#if i != 0}
+                        <Divider orientation="horizontal"/>
                     {/if}
+                    <ListLabel label={proficiency} bind:list={character.Stats.Proficiencies[proficiency]}/>
                 {/if}
             {/each}
         </div>
@@ -58,10 +59,13 @@
             <div class="custom-title">Passive Skills</div>
             {#key character.Stats.Ability_Scores}
                 {#each GenericFunctions.passive_skills as passive_skill}
+                {@const bonusCalculation = GenericFunctions.calcPassiveBonuses(passive_skill)}
                     <NumberLabel
                         label={passive_skill}
-                        number={GenericFunctions.calcPassiveBonuses(passive_skill)}
+                        number={bonusCalculation?.total}
                         bold_label={false}
+                        label_font_size={"medium"}
+                        calculation={bonusCalculation}
                     />
                 {/each}
             {/key}
@@ -82,13 +86,13 @@
             <div class="custom-title">Saving Throws</div>
             {#key character.Stats.Ability_Scores}
                 {#each GenericFunctions.abilities as ability}
-                    <Skill
-                        bind:proficiency={character.Stats.Proficiencies.Saving_Throws[
-                            ability
-                        ]}
-                        name={ability}
-                        bonusCalculator={(a) => GenericFunctions.bonusToString(GenericFunctions.calcSavingBonus(a))}
-                    />
+                        <Skill
+                            bind:proficiency={character.Stats.Proficiencies.Saving_Throws[
+                                ability
+                            ]}
+                            name={ability}
+                            bonusCalculator={(a) => GenericFunctions.calcSavingBonus(a)}
+                        />
                 {/each}
             {/key}
         </div>
@@ -99,7 +103,7 @@
                     <Skill
                         name={skill}
                         bind:proficiency={character.Stats.Proficiencies.Skills[skill]}
-                        bonusCalculator={(s) => GenericFunctions.bonusToString(GenericFunctions.calcSkillBonus(s))}
+                        bonusCalculator={(s) => GenericFunctions.calcSkillBonus(s)}
                     />
                 {/each}
             {/key}
@@ -123,9 +127,9 @@
             <NumberLabel bind:number={character.Stats.Health.Temp} label="Temp HP" number_edit_modes={["use"]}/>
         </div>
         <div class="custom-box" style="width:17rem; padding:0px;">
-            <NumberLabel number={GenericFunctions.calcAC()} label={"Armor Class"}/>
+            <NumberLabel number={GenericFunctions.calcAC().total} label={"Armor Class"} calculation={GenericFunctions.calcAC()}/>
             <NumberLabel bind:number={character.Stats.Speed} label={"Speed"} number_edit_modes={["edit"]}/>
-            <NumberLabel number={GenericFunctions.bonusToString(GenericFunctions.calcBonus("Dexterity", ""))} label={"Initiative"}/>
+            <NumberLabel number={GenericFunctions.bonusToString(GenericFunctions.calcBonus("Dexterity", "")?.total)} label={"Initiative"}/>
         </div>
         <div class="custom-box" style="width: 100%;">
             <div class="custom-title">Death Saves</div>
