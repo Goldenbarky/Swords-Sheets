@@ -10,6 +10,7 @@
         "Paragraph":string
     }[];
     export let removeFunction:any = () => { };
+    export let orderable:boolean;
 
     $: newList = description.map(x => ({...x, id: crypto.randomUUID()}));
 
@@ -50,6 +51,7 @@
             <div style="width:100%;">
                 <div class="custom-title placeholder" on:focusout={updateDatabase} bind:innerText={title} contenteditable="true" placeholder="Title"/>
             </div>
+            {#if orderable}
             <div use:dndzone={{ items: newList, dragDisabled }} on:consider={handleConsider} on:finalize={handleFinalize}>
                 {#each newList as paragraph (paragraph.id)}
                     <div class="row">
@@ -72,6 +74,20 @@
                     </div>
                 {/each}
             </div>
+            {:else}
+                {#each description as paragraph}
+                    <div class="row">
+                        <button class="custom-box custom-button custom-tiny-button" on:click={() => {
+                            description = description.filter(x => x !== paragraph);
+                            updateDatabase();
+                        }}>-</button>
+                        <div style="margin-top: 0.2rem;">
+                            <p class="placeholder" style="color:var(--secondary);" on:focusout={updateDatabase} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Subtitle"/>
+                            <p class="placeholder" on:focusout={updateDatabase} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"/>
+                        </div>
+                    </div>
+                {/each}
+            {/if}
         </div>
     </div>
     <div style="display: flex; justify-content: center;">

@@ -19,6 +19,8 @@ export let supabaseObject = (supa?: SupabaseClient) => {
 
 export let user = writable<User | null>(null);
 
+export let savingPromise = writable<boolean>(false);
+
 let character_sheet: CharacterSheet | null;
 let character_id: string | null;
 let character: { name: any; data?: CharacterSheet; id?: string; };
@@ -214,12 +216,13 @@ export const calcSaveDC = () => {
 export const setCharacter = (ch: { data: CharacterSheet, name: string, id: string }) => {
     character_sheet = updateJsonFormatting(ch.data);
     
+    character_id = ch.id;
+    
     if(character_sheet !== ch.data) {
         ch.data = character_sheet!;
-        updateDatabase();
+        updateDatabase().then(() => {});
     }
 
-    character_id = ch.id;
     character = ch;
 }
 
@@ -252,9 +255,15 @@ export const createNewCharacter = (character_class: string, level: number) => {
 }
 
 export const updateDatabase = async () => {
-    if (!supabase) return;
+    savingPromise.set(true);
+}
 
-    await supabase.from("characters").update({ data: character_sheet }).eq("id", character_id).select('*');
+export const saveToDatabase = async () => {
+    if (!supabase || !character_sheet || !character_id) return 10000;
+
+    const { status } = await supabase.from("characters").update({ data: character_sheet }).eq("id", character_id).select('*');
+    
+    return status;
 }
 
 export const updateName = async () => {
