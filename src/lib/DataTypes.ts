@@ -47,6 +47,8 @@ type CharacterSheet = {
             "9":Spell[],
         },
         "Max_Prepared":number,
+        "Prepared_Caster":boolean,
+        "Learned_Caster":boolean,
         "Spell_Slots":SpellSlotCount,
         "Slots_Expended":SpellSlotCount
     }

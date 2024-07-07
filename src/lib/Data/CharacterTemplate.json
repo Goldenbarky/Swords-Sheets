@@ -92,6 +92,8 @@
         "Ability": "Wisdom",
         "Bonus": 0,
         "Max_Prepared": 0,
+        "Prepared_Caster": true,
+        "Learned_Caster": true,
         "Spell_Slots": {
             "1": 0,
             "2": 0,
