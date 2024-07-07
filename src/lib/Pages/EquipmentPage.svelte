@@ -49,10 +49,11 @@
             <div class="custom-title" style="width: 100%;">Armor</div>
             <Armor
                 bind:armor={character.Equipment.Armor}
+                z_index={character.Equipment.Shields.length + 1}
             />
         </div>
         <br>
-        {#each character.Equipment.Shields as shield}
+        {#each character.Equipment.Shields as shield, i}
             <div class="row" style="position: relative;">
                 {#if $mode === "edit"}
                     <button class="custom-box custom-button custom-tiny-button" style="position: absolute; left: -2.5rem;" on:click={() => {
@@ -63,6 +64,7 @@
                 <div>
                     <Shield
                         bind:shield={shield}
+                        z_index={character.Equipment.Shields.length - i}
                     />
                 </div>
             </div>
