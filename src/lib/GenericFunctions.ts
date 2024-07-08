@@ -10,6 +10,7 @@ import CharacterTemplate from "$lib/Data/CharacterTemplate.json";
 import ShieldTemplate from "$lib/Data/ShieldTemplate.json";
 import WeaponTemplate from "$lib/Data/WeaponTemplate.json";
 import MagicItemTemplate from "$lib/Data/MagicItemTemplate.json";
+import FeatureTemplate from "$lib/Data/FeatureTemplate.json";
 
 let supabase: SupabaseClient | undefined;
 export let supabaseObject = (supa?: SupabaseClient) => {
@@ -229,6 +230,15 @@ export const setCharacter = (ch: { data: CharacterSheet, name: string, id: strin
 const updateJsonFormatting = (character:CharacterSheet) => {
     let updatedCharacter;
     updatedCharacter = merge(CharacterTemplate, character);
+
+    updatedCharacter.Features.Class = 
+        updatedCharacter.Features.Class.map((x: any) => merge(FeatureTemplate, x));
+
+    updatedCharacter.Features.Feats = 
+        updatedCharacter.Features.Feats.map((x: any) => merge(FeatureTemplate, x));
+
+    updatedCharacter.Features.Racial = 
+        updatedCharacter.Features.Racial.map((x: any) => merge(FeatureTemplate, x));
 
     updatedCharacter.Equipment.Shields = 
         updatedCharacter.Equipment.Shields.map((x: any) => merge(ShieldTemplate, x));

@@ -56,11 +56,33 @@
         "Class": [
             {
                 "Title": "",
-                "Description": []
+                "Description": [],
+                "Uses": {
+					"Max": 0,
+					"Used": 0
+				}
             }
         ],
-        "Feats": [],
-        "Racial": []
+        "Feats": [
+			{
+                "Title": "",
+                "Description": [],
+                "Uses": {
+					"Max": 0,
+					"Used": 0
+				}
+            }
+		],
+        "Racial": [
+			{
+                "Title": "",
+                "Description": [],
+                "Uses": {
+					"Max": 0,
+					"Used": 0
+				}
+            }
+		]
     },
     "Equipment": {
         "Armor": {

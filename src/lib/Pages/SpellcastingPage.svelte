@@ -150,7 +150,7 @@
             </div>
         </div>
         {#if $mode === "edit"}
-            <div class="custom-box" style="width:100%; margin-top: 1rem;">
+            <div class="custom-box" style="width:100%; margin-top: 1rem; margin-bottom: 0px;">
                 <div class="custom-title">Add A New Spell</div>
                 <input bind:value={spell_query}/>
                 {#if spell_query.length > 0}
@@ -171,7 +171,7 @@
             </div>
         {/if}
         {#if $mode === "edit" || character.Spellcasting.Learned_Caster}
-            <div class="custom-box" style="padding-bottom: 0px; width: 20.5rem; margin-bottom: 0px;">
+            <div class="custom-box" style="padding-bottom: 0px; width: 20.5rem; margin-bottom: 0px; margin-top: 1rem;">
                 <NumberLabel
                     label="Spells Known"
                     number={spells_known}
