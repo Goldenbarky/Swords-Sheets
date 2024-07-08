@@ -28,14 +28,22 @@
             <button class="custom-box custom-button custom-tiny-button" style="font-size: {number_font_size}" on:click={() => {
                 number--;
                 updateDatabase();
-            }}>-</button>
+            }}>
+                <div style="position: relative; top: 2.5px">
+                    -
+                </div>
+            </button>
         {/if}
         <input class="value {number_edit_modes.includes($mode) ? 'editable' : ''}" style="font-size: {number_font_size}" disabled={!number_edit_modes.includes($mode)} on:change={updateDatabase} bind:value={number} placeholder={placeholder}/>
         {#if incremental && number_edit_modes.includes($mode)}
             <button class="custom-box custom-button custom-tiny-button" style="font-size: {number_font_size}" on:click={() => {
                 number++;
                 updateDatabase();
-            }}>+</button>
+            }}>
+                <div style="position: relative; top: 2.5px">
+                    +
+                </div>
+            </button>
         {/if}
     </div>
     <Divider/>

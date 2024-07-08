@@ -4,6 +4,7 @@
     import CheckedBox from "$lib/Components/Generic/CheckedBox.svelte";
     import DynamicNumberLabel from "$lib/Components/Generic/DynamicNumberLabel.svelte";
     import NumberLabel from "$lib/Components/Generic/NumberLabel.svelte";
+    import ToggleSwitch from "$lib/Components/Generic/ToggleSwitch.svelte";
     import Divider from "$lib/Components/Helpers/Divider.svelte";
     import Spell from "$lib/Components/Spell.svelte";
     import { bonusToString, scoreToModifier, updateDatabase, getPB, calcAttackModifier, calcSaveDC } from "$lib/GenericFunctions";
@@ -148,9 +149,8 @@
                 </div>
             </div>
         </div>
-        <div style="height: 1rem;"/>
         {#if $mode === "edit"}
-            <div class="custom-box" style="width:100%;">
+            <div class="custom-box" style="width:100%; margin-top: 1rem; margin-bottom: 0px;">
                 <div class="custom-title">Add A New Spell</div>
                 <input bind:value={spell_query}/>
                 {#if spell_query.length > 0}
@@ -170,14 +170,25 @@
                 {/if}
             </div>
         {/if}
-        <div class="custom-box" style="padding-bottom: 0px; width: 20.5rem;">
-            <NumberLabel
-                label="Spells Known"
-                number={spells_known}
-                --width="14.3rem;"
-            />
-        </div>
-        <div class="custom-box" style="padding-bottom: 0px">
+        {#if $mode === "edit" || character.Spellcasting.Learned_Caster}
+            <div class="custom-box" style="padding-bottom: 0px; width: 20.5rem; margin-bottom: 0px; margin-top: 1rem;">
+                <NumberLabel
+                    label="Spells Known"
+                    number={spells_known}
+                    --width="14.3rem;"
+                />
+            </div>
+        {/if}
+        {#if $mode == "edit"}
+            <div class="custom-box" style="border-top: 0px; border-radius: 0px 0px 6px 6px; padding-top: 0.5rem; margin-bottom: 0px">
+                <ToggleSwitch
+                    title="Show Known Count?"
+                    bind:toggle={character.Spellcasting.Learned_Caster}
+                />
+            </div>
+        {/if}
+        {#if $mode === "edit" || character.Spellcasting.Prepared_Caster}
+        <div class="custom-box" style="padding-bottom: 0px; margin-bottom: 0px; margin-top: 1rem;">
             <DynamicNumberLabel
                 label="Spells Prepared"
                 current={num_prepared}
@@ -186,7 +197,16 @@
                 current_edit_modes={[]}
             />
         </div>
-        <div class="custom-box" style="width: 100%;">
+        {/if}
+        {#if $mode == "edit"}
+            <div class="custom-box" style="border-top: 0px; border-radius: 0px 0px 6px 6px; padding-top: 0.5rem; margin-bottom: 0px">
+                <ToggleSwitch
+                    title="Show Prepared Count?"
+                    bind:toggle={character.Spellcasting.Prepared_Caster}
+                />
+            </div>
+        {/if}
+        <div class="custom-box" style="width: 100%; margin-top: 1rem;">
             <div class="custom-title">Spell Slots</div>
             {#each Object.values(character.Spellcasting.Spell_Slots) as slots, i}
                 {#if $mode === "edit" || slots !== 0}

@@ -5,6 +5,8 @@
     import NumberLabel from "./Generic/NumberLabel.svelte";
 
     export let shield:Shield;
+    export let z_index:number;
+
     let shown:boolean = false;
 
     let abilities = [
@@ -54,7 +56,7 @@
                 {/if}
             {/each}
         </div>
-        <div style="width: 100%; height: 1.2rem; position:absolute; z-index:2; bottom: -1px; display:flex; flex-direction:column; place-items:center;">
+        <div style="width: 100%; height: 1.2rem; position:absolute; z-index:{z_index}; bottom: -1px; display:flex; flex-direction:column; place-items:center;">
             <DropDownArrow
                 bind:shown = {shown}
             />

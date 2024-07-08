@@ -4,7 +4,7 @@
 </script>
 
 <div style="display: flex; flex-direction: row">
-    <div>{title}</div>
+    <div class="custom-title" style="padding-right: 0.5rem;">{title}</div>
     <label class="switch">
         <input type="checkbox" bind:checked={toggle}/>
         <span class="slider round"></span>
@@ -13,6 +13,9 @@
 
 
 <style lang="scss">
+    .custom-title {
+        color: var(--text);
+    }
     /* The switch - the box around the slider */
     .switch {
         position: relative;

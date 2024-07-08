@@ -5,6 +5,7 @@
     import NumberLabel from "./Generic/NumberLabel.svelte";
 
     export let armor:Armor;
+    export let z_index:number;
 </script>
 <div style="position: relative; width:100%;">
     <div class="custom-box">
@@ -17,7 +18,7 @@
                 number_edit_modes={["edit"]}
                 label_font_size="medium"
             />
-            {#if armor.Limit !== 0}
+            {#if $mode === "edit" || Number(armor.Limit) !== 0}
                 <NumberLabel
                     bind:number={armor.Limit}
                     label={`${armor.Ability} Max`}
@@ -32,6 +33,7 @@
         <AbilitySelector
             category_name = "Weapon"
             bind:selected_ability = {armor.Ability}
+            z_index = {z_index}
         />
     {/if}
     <div style="display: flex; flex-direction: column; position: absolute; right: -19px; top: 0;">

@@ -2,16 +2,14 @@
     import TitleDescription from "$lib/Components/Generic/TitleDescription.svelte";
     import { updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
-    import DraggableHandle from '$lib/Components/Icons/DraggableHandle.svelte';
-    import { SOURCES, dndzone } from "svelte-dnd-action";
     import ToggleSwitch from "./Generic/ToggleSwitch.svelte";
 
     export let title:string;
-    export let features:{Title:string, Description:{Subtitle:string, Paragraph:string}[]}[];
+    export let features:TitleDescriptionType[];
 
     let reorderable = false;
 
-    const removeFeature = (list:{Title:string, Description:{Subtitle:string, Paragraph:string}[]}[], title:string) => {
+    const removeFeature = (list:TitleDescriptionType[], title:string) => {
         return list.filter(x => x.Title !== title);
     }
 
@@ -21,8 +19,7 @@
     <div class="custom-title">{title}</div>
     {#each features as feature, i (feature)}
         <TitleDescription
-            bind:title={feature.Title}
-            bind:description={feature.Description}
+            bind:feature={feature}
             removeFunction={() => features = removeFeature(features, feature.Title)}
             orderable={reorderable}
         />
@@ -34,7 +31,7 @@
                 class="custom-box custom-button custom-tiny-button" 
                 style="margin-top:0.5rem;" 
                 on:click={async () => {
-                    features = [...features, {Title:"", Description:[{Subtitle:"", Paragraph:""}]}];
+                    features = [...features, {Title:"", Description:[{Subtitle:"", Paragraph:""}], Uses: {Max:0, Used:0}}];
                     await updateDatabase();
                 }}
             >

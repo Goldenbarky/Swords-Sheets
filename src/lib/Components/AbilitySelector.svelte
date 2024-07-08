@@ -5,6 +5,7 @@
     export let category_name:string;
     export let selected_ability:keyof AbilityScoreType;
     export let onChange:Function = () => {};
+    export let z_index:number = 1;
 
     let abilities = [
         "Strength",
@@ -18,7 +19,7 @@
     let shown = false;
 </script>
 
-<div style="width: 100%; height: 1.2rem; position:absolute; z-index:2; bottom: -1px; display:flex; flex-direction:column; place-items:center;">
+<div style="width: 100%; height: 1.2rem; position:absolute; z-index:{z_index}; bottom: -1px; display:flex; flex-direction:column; place-items:center;">
     <DropDownArrow
         bind:shown = {shown}
     />

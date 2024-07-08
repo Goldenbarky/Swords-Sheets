@@ -13,9 +13,9 @@ type CharacterSheet = {
         "Speed":number
     },
     "Features":{
-        "Racial":TitleDescription[],
-        "Class":TitleDescription[],
-        "Feats":TitleDescription[]
+        "Racial":TitleDescriptionType[],
+        "Class":TitleDescriptionType[],
+        "Feats":TitleDescriptionType[]
     },
     "Equipment":{
         "Weapons":Weapon[],
@@ -47,6 +47,8 @@ type CharacterSheet = {
             "9":Spell[],
         },
         "Max_Prepared":number,
+        "Prepared_Caster":boolean,
+        "Learned_Caster":boolean,
         "Spell_Slots":SpellSlotCount,
         "Slots_Expended":SpellSlotCount
     }
@@ -137,13 +139,13 @@ type Shield = {
         "Wisdom":number,
         "Charisma":number
       },
-    "Entries":TitleDescription
+    "Entries":TitleDescriptionType
 }
 
 type MagicItem = {
     "Name":string,
     "Attuned":boolean,
-    "Entries":TitleDescription
+    "Entries":TitleDescriptionType
 }
 
 type Spell = {
@@ -151,12 +153,16 @@ type Spell = {
     "Prepared":string
 }
 
-type TitleDescription = {
+type TitleDescriptionType = {
     "Title":string,
     "Description":{
         "Subtitle":string,
         "Paragraph":string
-    }[]
+    }[],
+    "Uses":{
+        "Max":number,
+        "Used":number
+    }
 }
 
 type SpellSlotCount = {
