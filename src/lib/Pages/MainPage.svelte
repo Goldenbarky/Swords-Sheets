@@ -51,10 +51,10 @@
         <div class="columns" style="margin: 0">
             <div class="column custom-column" style="padding: 0;">
                 {#if $mode !== "edit"}
-                    <p class="title custom-title" style="margin-bottom: 1.5rem;">{sheet.name}</p>
+                    <p class="title custom-title" style="margin-bottom: 1.5rem;">{sheet.data.Name}</p>
                     <p class="subtitle" style="color: var(--text);">{sheet.data.Class} {sheet.data.Level}</p>
                 {:else}
-                    <p class="title custom-title placeholder" style="margin-bottom: 0.25rem;" on:focusout={updateName} bind:innerText={sheet.name} contenteditable="true" placeholder="Name"/>
+                    <p class="title custom-title placeholder" style="margin-bottom: 0.25rem;" on:focusout={updateDatabase} bind:innerText={sheet.data.Name} contenteditable="true" placeholder="Name"/>
                     <div class="row">
                         <p class="subtitle placeholder" on:focusout={updateDatabase} bind:innerText={sheet.data.Class} contenteditable="true" placeholder="Class"/>
                         <div style="width: 0.35rem;"/>

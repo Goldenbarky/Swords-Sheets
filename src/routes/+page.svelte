@@ -126,11 +126,20 @@
             shown = false;
         }}
     />
-    <div class="modal-content" style="width: 24rem;">
-        <div class="custom-box column" style="width: 23rem;">
+    <div class="modal-content" style="display: grid; align-items: center; justify-items: center;">
+        <div class="custom-box column" style="width: fit-content; height: fit-content;">
             <div class="custom-title">Make a New Character</div>
-            <div class="custom-subtitle">Name</div>
-            <input bind:value={character_name} />
+            <div class="row">
+                <div class="custom-subtitle">Name</div>
+                <div class="spell-detail custom-button">?
+                    <div class="box tooltip-box">
+                        <div class="tooltip-text">
+                            This will be the URI to your character sheet, it must be unique but can be changed later. There is also an option to add a display name for the top of the sheet, so it's best to choose something short and representative here.
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <input bind:value={character_name} maxlength="25"/>
             <div class="row">
                 <div
                     class="column"
@@ -178,7 +187,7 @@
                 class="custom-box custom-button {!userAuthorized
                     ? 'disabled'
                     : ''}"
-                style="border-width: 1px; border: solid 1px;"
+                style="border: solid 1px var(--border);"
                 on:click={async () => {
                     if (userAuthorized) {
                         await upsertNewCharacter(character_class, character_level, character_name);
@@ -199,6 +208,7 @@
         --background: #1b1919;
         --background_hover: #2f2f2f;
         --primary: #8f0002;
+        --secondary: #C62F31;
         --border: #adadad;
         --text: #adadad;
     }
@@ -293,7 +303,6 @@
         margin-bottom: 0.2rem;
         border: 0px;
         user-select: none;
-        color: var(--text);
         font-size: small;
         cursor: pointer;
     }
@@ -336,5 +345,49 @@
     }
     .disabled {
         cursor: not-allowed;
+    }
+
+    .spell-detail{
+        outline: 1.5px solid var(--border);
+        border-radius: 35%;
+        width: 1.2rem;
+        height: 1.2rem;
+        font-size: small;
+        font-weight: 500;
+        display: inline-block;
+        justify-items: center;
+        justify-content: center;
+        align-items: center;
+        text-align: center;
+        padding-bottom: 1px;
+        margin-left: 0.5rem;
+        color: var(--secondary);
+        user-select: none;
+    }
+    .tooltip-box {
+        border: 2px solid var(--border);
+        padding: 0.75rem;
+        padding-bottom: 0.25rem;
+        padding-top: 0.25rem;
+        background-color: var(--background);
+        height: fit-content;
+        width: fit-content;
+        margin-bottom: 0px;
+        visibility: hidden;
+        position: absolute;
+        margin-top: 5px;
+        z-index: 1;
+    }
+    .tooltip-text {
+        visibility: hidden;
+        text-align: center;
+        width: 15rem;
+        color: var(--text);
+    }
+    .spell-detail:hover .tooltip-box {
+        visibility: visible;
+    }
+    .spell-detail:hover .tooltip-text {
+        visibility: visible;
     }
 </style>

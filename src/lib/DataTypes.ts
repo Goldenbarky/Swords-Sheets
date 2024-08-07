@@ -1,4 +1,5 @@
 type CharacterSheet = {
+    "Name":string,
     "Class":string,
     "Level":number,
     "Stats":{
