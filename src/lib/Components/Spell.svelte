@@ -140,7 +140,6 @@
                         if(prepared === "always") {
                             prepared = "false";
                         } else {
-                            console.log(prepared);
                             onChange(prepared, true);
                             prepared = "always";
                         }
