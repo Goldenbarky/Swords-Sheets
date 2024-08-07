@@ -137,8 +137,13 @@
                 {#if $mode === "edit"}
                     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                     <div class="spell-detail custom-button {prepared === "always" ? "" : "not-selected"}" on:click={() => {
-                        onChange(prepared, true);
-                        prepared = "always";
+                        if(prepared === "always") {
+                            prepared = "false";
+                        } else {
+                            onChange(prepared, true);
+                            prepared = "always";
+                        }
+                        
                         updateDatabase();
                     }}>A
                         <div class="box tooltip-box">

@@ -256,10 +256,11 @@ const updateJsonFormatting = (character:CharacterSheet) => {
 //     Object.keys(object).map(x => )
 // }
 
-export const createNewCharacter = (character_class: string, level: number) => {
+export const createNewCharacter = (character_class: string, level: number, name: string) => {
     let character = CharacterTemplate;
     character.Level = level;
     character.Class = character_class;
+    character.Name = name;
 
     return character;
 }
@@ -320,6 +321,7 @@ export const upsertNewCharacter = async (character_class: string, character_leve
         data: createNewCharacter(
             character_class,
             character_level,
+            character_name,
         ),
         name: character_name,
     });
