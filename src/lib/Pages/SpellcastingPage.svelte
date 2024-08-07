@@ -85,8 +85,12 @@
     let spells_known = calcKnown();
 
     const changePrepared = (prepared:string, changeToAlways:boolean = false) => {
-        if(changeToAlways && prepared === "true") num_prepared--;
-        else if(prepared === "true") num_prepared++;
+        if(changeToAlways) {
+            if(prepared === "true") num_prepared--;
+            return;
+        }
+        
+        if(prepared === "true") num_prepared++;
         else num_prepared--;
     }
 
