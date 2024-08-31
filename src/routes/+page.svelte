@@ -216,6 +216,8 @@
         width: 100vw;
         height: 100vh;
         background-color: var(--background);
+        margin: 0;
+        padding: 0;
     }
     .hero {
         padding-bottom: 0px !important;

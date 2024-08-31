@@ -1,13 +1,237 @@
-/* Write your global styles here, in SCSS syntax. Variables and mixins from the src/variables.scss file are available here without importing */ /* Import only what you need from Bulma */
-@import "bulma/sass/utilities/_all";
-@import "bulma/sass/base/_all";
-@import "bulma/sass/elements/_all";
-@import "bulma/sass/form/_all";
-@import "bulma/sass/components/_all";
-@import "bulma/sass/grid/_all";
-@import "bulma/sass/helpers/_all";
-@import "bulma/sass/layout/_all";
-
 body {
     overflow-x: clip;
+    overflow-y: auto;
+    color: #4a4a4a;
+    font-size: 1em;
+    font-weight: 400;
+    line-height: 1.5;
+}
+
+* {
+    font-family: Inter, SF Pro, Segoe UI, Roboto, Oxygen, Ubuntu, Helvetica Neue, Helvetica, Arial, sans-serif;
+    box-sizing: border-box;
+}
+
+.hero {
+    padding-bottom: 0px !important;
+    padding-top: 0.5rem !important;
+    background-color: var(--primary);
+    border-bottom: 1px solid var(--border);
+    align-items: stretch;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.hero-body {
+    flex-grow: 1;
+    flex-shrink: 0;
+    padding: 1.5rem;
+}
+
+@media screen and (min-width: 769px),
+print {
+    .columns:not(.is-desktop) {
+        display: flex;
+    }
+}
+
+.title {
+    font-size: 2rem;
+    font-weight: 600;
+    line-height: 1.125;
+}
+
+.column {
+    flex-basis: 0;
+    flex-grow: 1;
+    flex-shrink: 1;
+    padding: .75rem;
+    padding-top: 0.75rem;
+    padding-bottom: 0.75rem;
+}
+
+.title,
+.subtitle {
+    word-break: break-word;
+    margin: 0;
+}
+
+.subtitle {
+    color: #4a4a4a;
+    font-size: 1.25rem;
+    font-weight: 400;
+    line-height: 1.25;
+}
+
+.columns {
+    margin-left: -.75rem;
+    margin-right: -.75rem;
+    margin-top: -.75rem;
+}
+
+.title:not(.is-spaced)+.subtitle {
+    margin-top: -1.25rem;
+}
+
+.tabs:not(:last-child),
+.pagination:not(:last-child),
+.message:not(:last-child),
+.level:not(:last-child),
+.breadcrumb:not(:last-child),
+.block:not(:last-child),
+.title:not(:last-child),
+.subtitle:not(:last-child),
+.table-container:not(:last-child),
+.table:not(:last-child),
+.progress:not(:last-child),
+.notification:not(:last-child),
+.content:not(:last-child),
+.box:not(:last-child) {
+    margin-bottom: 1.5rem;
+}
+
+ul {
+    list-style: none;
+}
+
+html,
+body,
+p,
+ol,
+ul,
+li,
+dl,
+dt,
+dd,
+blockquote,
+figure,
+fieldset,
+legend,
+textarea,
+pre,
+iframe,
+hr,
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+    margin: 0;
+    padding: 0;
+}
+
+a {
+    color: #485fc7;
+    cursor: pointer;
+    text-decoration: none;
+}
+
+.has-text-centered {
+    text-align: center !important;
+}
+
+fieldset {
+    border: none;
+}
+
+.modal {
+    align-items: center;
+    display: none;
+    flex-direction: column;
+    justify-content: center;
+    overflow: hidden;
+    position: fixed;
+    z-index: 40;
+}
+
+.columns:last-child {
+    margin-bottom: -.75rem;
+}
+
+.modal.is-active {
+    display: flex;
+}
+
+.hero-video,
+.is-overlay,
+.modal-background,
+.modal,
+.image.is-square img,
+.image.is-square .has-ratio,
+.image.is-1by1 img,
+.image.is-1by1 .has-ratio,
+.image.is-5by4 img,
+.image.is-5by4 .has-ratio,
+.image.is-4by3 img,
+.image.is-4by3 .has-ratio,
+.image.is-3by2 img,
+.image.is-3by2 .has-ratio,
+.image.is-5by3 img,
+.image.is-5by3 .has-ratio,
+.image.is-16by9 img,
+.image.is-16by9 .has-ratio,
+.image.is-2by1 img,
+.image.is-2by1 .has-ratio,
+.image.is-3by1 img,
+.image.is-3by1 .has-ratio,
+.image.is-4by5 img,
+.image.is-4by5 .has-ratio,
+.image.is-3by4 img,
+.image.is-3by4 .has-ratio,
+.image.is-2by3 img,
+.image.is-2by3 .has-ratio,
+.image.is-3by5 img,
+.image.is-3by5 .has-ratio,
+.image.is-9by16 img,
+.image.is-9by16 .has-ratio,
+.image.is-1by2 img,
+.image.is-1by2 .has-ratio,
+.image.is-1by3 img,
+.image.is-1by3 .has-ratio {
+    bottom: 0;
+    left: 0;
+    position: absolute;
+    right: 0;
+    top: 0;
+}
+
+.modal-background {
+    background-color: #0a0a0adb;
+}
+
+.modal-content,
+.modal-card {
+    margin: 0 20px;
+    max-height: calc(100vh - 160px);
+    overflow: auto;
+    position: relative;
+    width: 100%;
+}
+
+@media screen and (min-width: 769px) {
+
+    .modal-content,
+    .modal-card {
+        margin: 0 auto;
+        max-height: calc(100vh - 40px);
+        width: 640px;
+    }
+}
+
+.box {
+    background-color: #fff;
+    border-radius: 6px;
+    box-shadow: 0 .5em 1em -.125em #0a0a0a1a, 0 0 0 1px #0a0a0a05;
+    color: #4a4a4a;
+    display: block;
+    padding: 1.25rem;
+}
+
+.container {
+    flex-grow: 1;
+    margin: 0 auto;
+    position: relative;
+    width: auto;
 }
