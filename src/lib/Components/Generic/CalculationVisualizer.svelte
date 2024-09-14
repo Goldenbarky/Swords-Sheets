@@ -47,11 +47,6 @@
     </div>
 </div>
 <style lang="scss">
-    .row {
-        display: flex;
-        flex-direction: row;
-        place-content: space-between;
-    }
     .custom-title {
         @extend .title !optional;
         font-size: medium;

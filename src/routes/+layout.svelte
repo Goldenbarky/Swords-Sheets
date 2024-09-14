@@ -8,7 +8,6 @@
 
     onMount(() => {
         const { data } = supabase.auth.onAuthStateChange(async (event, _session) => {
-            // console.log(event);
             if (event === 'SIGNED_IN' || event === 'USER_UPDATED' || event === 'INITIAL_SESSION' || _session?.expires_at !== session?.expires_at) {
                 if (_session) {
                     $user = _session.user;
@@ -21,8 +20,6 @@
 
         return () => data.subscription.unsubscribe();
     });
-
-    // $: console.log(session);
 
     setContext('user', { user: data.user });
 </script>

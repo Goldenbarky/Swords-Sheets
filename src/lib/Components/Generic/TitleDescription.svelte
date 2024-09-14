@@ -53,19 +53,19 @@
                 </div>
             </div>
             {#if orderable}
-            <div use:dndzone={{ items: newList, dragDisabled }} on:consider={handleConsider} on:finalize={handleFinalize}>
-                {#each newList as paragraph (paragraph.id)}
-                    <div class="row">
-                        <div style="margin-top: 0.2rem;">
-                            <p class="placeholder" style="color:var(--secondary);" on:focusout={updateDatabase} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"/>
-                            <p class="placeholder" on:focusout={updateDatabase} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"/>
+                <div use:dndzone={{ items: newList, dragDisabled }} on:consider={handleConsider} on:finalize={handleFinalize}>
+                    {#each newList as paragraph (paragraph.id)}
+                        <div class="row">
+                            <div style="margin-top: 0.2rem;">
+                                <p class="placeholder" style="color:var(--secondary);" on:focusout={updateDatabase} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"/>
+                                <p class="placeholder" on:focusout={updateDatabase} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"/>
+                            </div>
+                            <div style="display: flex; place-content: end; flex-grow: 1">
+                                <DraggableHandle bind:dragDisabled/>
+                            </div>
                         </div>
-                        <div style="display: flex; place-content: end; flex-grow: 1">
-                            <DraggableHandle bind:dragDisabled/>
-                        </div>
-                    </div>
-                {/each}
-            </div>
+                    {/each}
+                </div>
             {:else}
                 {#each feature.Description as paragraph}
                     <div class="row">

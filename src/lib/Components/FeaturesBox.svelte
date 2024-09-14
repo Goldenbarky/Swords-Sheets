@@ -77,6 +77,7 @@
         border: 2px solid var(--border);
         padding: 0.75rem;
         padding-top: 0rem;
+        width: 100%;
         background-color: var(--background);
     }
     .row {

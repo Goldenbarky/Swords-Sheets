@@ -1,7 +1,7 @@
 <script lang="ts">
     import { updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
-    import TitleDescription from "./Generic/TitleDescription.svelte";
+    import FeaturesBox from "./FeaturesBox.svelte";
 
     export let item:MagicItem;
     export let removeFunction:Function;
@@ -33,14 +33,14 @@
         </div>
     </div>
     {#if shown}
-        <div class="custom-box dropdown">
-            <TitleDescription
-                bind:title={item.Entries.Title}
-                bind:description={item.Entries.Description}
+        <div class="dropdown">
+            <FeaturesBox
+                title="Features"
+                features={item.Entries}
             />
         </div>
     {/if}
-    {#if $mode === "edit" || item.Entries.Description.length > 0}
+    {#if $mode === "edit" || item.Entries.length > 0}
         <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions-->
         <div class="custom-box bubble" on:click = {() => {
             shown = !shown
@@ -130,6 +130,11 @@
     }
     .dropdown {
         width: 90%;
+        border-top-left-radius: 0px;
+        border-top-right-radius: 0px;
+        border-top: 0px;
+    }
+    .dropdown .custom-box {
         border-top-left-radius: 0px;
         border-top-right-radius: 0px;
         border-top: 0px;

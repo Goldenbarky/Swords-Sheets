@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { updateDatabase, bonusToString } from "$lib/GenericFunctions";
+    import { bonusToString, updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
     import type { Calculation } from "./Classes/DataClasses";
     import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
