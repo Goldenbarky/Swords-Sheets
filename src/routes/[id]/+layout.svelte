@@ -1,9 +1,25 @@
 <script lang="ts">
     import "../../app.scss";
     import { theme } from "$lib/Theme";
-    import MainPage from '$lib/Pages/MainPage.svelte';
+    import MainPage from '$lib/Pages/CharacterSheet/MainPage.svelte';
+    import { getCampaign, getInvitesForCharacter, supabaseObject } from "$lib/GenericFunctions";
+    import { onMount } from "svelte";
     
     export let data;
+
+    let campaign_invites:CampaignDataRow[] = [];
+    let campaign:CampaignDataRow|undefined;
+
+    onMount(() => {
+        supabaseObject(data.supabase);
+
+        if(data.sheets.data.Campaign === null) {
+            getInvitesForCharacter(data.sheets.id).then((s) => campaign_invites = (s!));
+        } else {
+            getCampaign(data.sheets.data.Campaign).then(s => campaign = s);
+        }
+    });
+    
 </script>
 <div class="outer"
     style:--primary={$theme.primary}
@@ -14,8 +30,10 @@
     style:--border={$theme.border}>
     <slot/>
     <MainPage
-        sheet={data.sheets}
+        bind:sheet={data.sheets}
         spells={data.spells}
+        invites={campaign_invites}
+        campaign={campaign}
     />
 </div>
 <style lang="scss">

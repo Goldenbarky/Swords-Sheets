@@ -1,14 +1,16 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
 
-    export let character;
+    export let campaign:CampaignDataRow;
+
+    let theme = campaign.theme;
 </script>
 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-<div class="custom-box" on:click={() => {goto(`/${character.name}`)}}>
-    <div class="color-tab" style="background-color: {character.theme.primary}"/>
+<div class="custom-box" on:click={() => {goto(`/campaign/${campaign.id}`)}}>
+    <div class="color-tab" style="background-color: {theme.primary};"/>
     <div class="border">
-        <div class="custom-title">{character.name}</div>
-        <div class="custom-subtitle">Level {character.data.Level} {character.data.Class}</div>
+        <div class="custom-title">{campaign.name}</div>
+        <div class="custom-subtitle">Level {campaign.data.Level} campaign</div>
     </div>
 </div>
 <style lang="scss">

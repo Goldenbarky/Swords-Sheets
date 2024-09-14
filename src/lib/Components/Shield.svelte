@@ -35,11 +35,12 @@
     {#if $mode === "edit"}
         <div style="display: flex; flex-direction: column; position: absolute; left: -19px; top: 6px;">
             {#each [0, 1] as item_bonus}
-                {#if $mode === "edit" || (shield.Bonus === item_bonus && item_bonus !== 0)}
+                {#if shield.Bonus === item_bonus && item_bonus !== 0}
+                    <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" style="cursor: default;">+{item_bonus}</div>
+                {:else if $mode === "edit"}
                     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                     <div class="custom-box custom-side-tab left {item_bonus === shield.Bonus ? "selected" : ""}" on:click={() => {
                         shield.Bonus = item_bonus;
-                        createNewCharacter("", 0);
                         updateDatabase();
                     }}>+{item_bonus}</div>
                 {/if}
@@ -47,7 +48,9 @@
         </div>
         <div style="display: flex; flex-direction: column; position: absolute; right: -19px; top: 6px;">
             {#each [2, 3] as item_bonus}
-                {#if $mode === "edit" || (shield.Bonus === item_bonus && item_bonus !== 0)}
+                {#if shield.Bonus === item_bonus && item_bonus !== 0}
+                    <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" style="cursor: default;">+{item_bonus}</div>
+                {:else if $mode === "edit"}
                     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                     <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" on:click={() => {
                         shield.Bonus = item_bonus;

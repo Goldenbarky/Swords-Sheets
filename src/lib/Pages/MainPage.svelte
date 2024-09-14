@@ -1,182 +1,173 @@
 <script lang="ts">
-    import { goto } from '$app/navigation';
-    import { page } from '$app/stores';
-    import { saveToDatabase, savingPromise, setCharacter, signInWithGoogle, updateDatabase, updateName, user as writeUser } from '$lib/GenericFunctions';
-    import EquipmentPage from '$lib/Pages/EquipmentPage.svelte';
-    import FeaturesPage from "$lib/Pages/FeaturesPage.svelte";
-    import SpellcastingPage from "$lib/Pages/SpellcastingPage.svelte";
-    import StatsPage from "$lib/Pages/StatsPage.svelte";
-    import { mode } from '$lib/Theme';
-    import type { User } from '@supabase/supabase-js';
-    import { getContext, onMount } from 'svelte';
-    import ThemePage from './ThemePage.svelte';
-    import { fade } from 'svelte/transition';
+    import {
+        getUserNames,
+        getUsersCampaigns,
+        getUsersCharacters,
+        supabaseObject,
+        user as writeUser,
+    } from "$lib/GenericFunctions";
+    import "$lib/../app.scss";
+    import CharacterPreview from "$lib/Components/Generic/CharacterPreview.svelte";
+    import { onMount } from "svelte";
+    import Login from "$lib/Components/Server/Login.svelte";
+    import CreateCharacter from "$lib/Components/CreateCharacter.svelte";
+    import CreateCampaign from "$lib/Components/CreateCampaign.svelte";
+    import CampaignPreview from "$lib/Components/Generic/CampaignPreview.svelte";
 
-    export let sheet:any;
-    export let spells:any;
+    export let data;
 
-    let origUser = getContext<{ user: User } | null>('user')?.user;
-    $: user = origUser ?? $writeUser;
+    let activeTab: string = "";
 
-    onMount(async () => {
-        setCharacter(sheet);
+    let users: any[];
+    let characters: CharacterDataRow[];
+    let campaigns:CampaignDataRow[];
+
+    let characterModal = false;
+    let campaignModal = false;
+
+    onMount(() => {
+        supabaseObject(data.supabase);
+        getUserNames().then((s) => {
+            if (!s) return;
+            users = s;
+        });
+
+        getUsersCharacters().then((s) => (characters = s!));
+        getUsersCampaigns().then((s) => (campaigns = s!));
     });
 
-    let savePromise: null | (() => Promise<number>) = null;
-
-    const finuto = async (num: number) => {
-        // oops
-
-        if (num !== 200) {
-            console.error('Saving to database: ', num);
-        } else {
-            savePromise = null;
-            $savingPromise = false;
-        }
-    }
-    
-    $: if ($savingPromise === true) {
-        savePromise = saveToDatabase;
-    }
-
-    let tabs = ["Stats", "Features", "Equipment", "Spellcasting", "Notes", "Theme"];
-    let tabParam = $page.url.searchParams.get('activetab');
-    let activeTab = tabParam ?? "Stats";
+    $: user = $writeUser ?? data.user;
+    $: userAuthorized = user ? users?.find((x) => x.id === user.id) : false;
+    $: filteredCharacters = characters?.filter((x) => x.owner_id === activeTab);
+    $: filteredCampaigns = campaigns?.filter((x) => x.owner_id === activeTab);
 </script>
-<section class="hero is-small">
-    <div
-        class="hero-body"
-        style="padding-bottom: 0px; padding-top: 0.5rem; background-color: var(--primary); border-bottom: 1px solid var(--border);"
-    >
-        <div class="columns" style="margin: 0">
-            <div class="column custom-column" style="padding: 0;">
-                {#if $mode !== "edit"}
-                    <p class="title custom-title" style="margin-bottom: 1.5rem;">{sheet.data.Name}</p>
-                    <p class="subtitle" style="color: var(--text);">{sheet.data.Class} {sheet.data.Level}</p>
-                {:else}
-                    <p class="title custom-title placeholder" style="margin-bottom: 0.25rem;" on:focusout={updateDatabase} bind:innerText={sheet.data.Name} contenteditable="true" placeholder="Name"/>
-                    <div class="row">
-                        <p class="subtitle placeholder" on:focusout={updateDatabase} bind:innerText={sheet.data.Class} contenteditable="true" placeholder="Class"/>
-                        <div style="width: 0.35rem;"/>
-                        <p class="subtitle placeholder" on:focusout={updateDatabase} bind:innerText={sheet.data.Level} contenteditable="true" placeholder="Level"/>
-                    </div>
-                {/if}
-            </div>
-            <div class="column custom-column" style="flex: none;">
-                <div style="display: flex; flex-direction: column;">
-                    <button class="custom-box custom-button {$mode === "view" ? "selected" : ""}" on:click={() => goto(`/${sheet.name}/?activetab=${activeTab}`)}>View</button>
-                    {#if user && sheet.owner_id === user.id}
-                        <button class="custom-box custom-button {$mode === "use" ? "selected" : ""}" on:click={() => goto(`/${sheet.name}/use?activetab=${activeTab}`)}>Use</button>
-                        <button class="custom-box custom-button {$mode === "edit" ? "selected" : ""}" on:click={() => goto(`/${sheet.name}/edit?activetab=${activeTab}`)}>Edit</button>
+
+<div>
+    <section class="hero is-small">
+        <div class="hero-body hero">
+            <div class="columns" style="margin: 0">
+                <div class="column custom-column" style="padding: 0;">
+                    <p class="title" style="color: white">Swords & Sheets</p>
+                    <p class="subtitle" style="color: var(--text);">
+                        Isabelle's Favorite Character Sheet Creator
+                    </p>
+                </div>
+                <div class="column custom-column" style="flex: none;">
+                    {#if user}
+                        <button
+                            class="custom-box custom-button"
+                            on:click={async () => {
+                                characterModal = true;
+                            }}
+                        >
+                            Create New Character
+                        </button>
+                        <button
+                            class="custom-box custom-button"
+                            on:click={async () => {
+                                campaignModal = true;
+                            }}
+                        >
+                            Create New Campaign
+                        </button>
                     {/if}
                 </div>
+                <Login
+                    user={user}
+                />
             </div>
-            <div class="column custom-column" style="flex: none;">
-                {#if !user}
-                    <button class="custom-box custom-button" 
-                        on:click={async () => await signInWithGoogle()}>
-                        Log in
-                    </button>
-                {:else}
-                    <!-- svelte-ignore a11y-missing-attribute -->
-                    <img src={user.user_metadata.avatar_url} class="profile-pic"/>
-                {/if}
-            </div>
-        </div>
-        <div class="custom-tabs is-boxed">
-            <ul style="display: flex; flex-direction: row;">
-                {#each tabs as tab}
-                    {#if tab !== "Theme" || $mode === "edit"}
-                        <li class:is-active={activeTab===tab}>
-                            <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
-                            <a on:click={() => {
-                                activeTab = tab;
-                                goto(`/${sheet.name}/${$mode === "view" ? "" : $mode }?activetab=${tab}`);
-                            }}>{tab}</a>
-                        </li>
+            <div class="custom-tabs is-boxed">
+                <ul style="display: flex; flex-direction: row; height: 41px">
+                    {#if users}
+                        {#each users.sort((a, b) => a.display_name.localeCompare(b.display_name)) as tab}
+                            <li class:is-active={activeTab === tab.id}>
+                                <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
+                                <a
+                                    on:click={() => {
+                                        activeTab = tab.id;
+                                    }}
+                                >
+                                    {tab.display_name}
+                                </a>
+                            </li>
+                        {/each}
                     {/if}
-                {/each}
-            </ul>
+                </ul>
+            </div>
         </div>
-    </div>
-</section>
-{#if activeTab==="Stats"}
-    <StatsPage
-        bind:character={sheet.data}
-    />
-{:else if activeTab==="Features"}
-    <FeaturesPage
-        bind:character={sheet.data}
-    />
-{:else if activeTab==="Equipment"}
-    <EquipmentPage
-        bind:character={sheet.data}
-    />
-{:else if activeTab==="Spellcasting"}
-    <SpellcastingPage
-        spells={spells}
-        bind:character={sheet.data}
-    />
-{:else if activeTab==="Notes"}
-    <div>words</div>
-{:else if activeTab==="Theme"}
-    {#if $mode === "edit"}
-        <ThemePage/>
+    </section>
+</div>
+{#if activeTab}
+    <div style="height: 0.5rem;"/>
+    {#if filteredCampaigns.length > 0}
+        <div class="row">
+            <div class="custom-title">Campaigns</div>
+        </div>
+        <div class="grid">
+                {#each filteredCampaigns as campaign}
+                    <CampaignPreview
+                        campaign={campaign}
+                    />
+                {/each}
+        </div>
+    {/if}
+    {#if filteredCharacters}
+        <div class="row">
+            <div class="custom-title">Characters</div>
+        </div>
+        <div class="grid">
+            
+                {#each filteredCharacters as character}
+                    <CharacterPreview
+                        character={character}
+                    />
+                {/each}
+        </div>
     {/if}
 {/if}
-
-{#if savePromise !== null}
-    <div class="save-indicator" out:fade={{ delay: 1000 }}>
-        {#await savePromise()}
-            <div class="save-saving">
-                
-            </div>
-        {:then num}
-            {#if num === 200}
-                <div class="save-saved">
-                    
-                </div>
-            {:else}
-                <div class="save-errored">
-                    
-                </div>
-            {/if}
-            {#await finuto(num)}
-                {""}
-            {/await}
-        {/await}
-    </div>
+<CreateCharacter
+    userAuthorized={userAuthorized}
+    bind:shown={characterModal}
+/>
+{#if characters}
+    <CreateCampaign
+        userAuthorized={userAuthorized}
+        bind:shown={campaignModal}
+        all_characters={characters}
+    />
 {/if}
 <style lang="scss">
-    .save-indicator {
-        position: absolute;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 25px;
-        overflow: clip;
-        border: solid black 2px;
-        top: 20px;
-        left: 50%;
-        color: black;
-        transition: background-color 0.5s ease-in;
+    :root {
+        --background: #1b1919;
+        --background_hover: #2f2f2f;
+        --primary: #8f0002;
+        --secondary: #C62F31;
+        --border: #adadad;
+        --text: #adadad;
     }
-    .save-indicator:has(.save-saving) {
-        background-color: yellow;
+    :global(body) {
+        width: 100vw;
+        height: 100vh;
+        background-color: var(--background);
     }
-    .save-indicator:has(.save-saved) {
-        background-color: green;
+    .hero {
+        padding-bottom: 0px !important;
+        padding-top: 0.5rem !important;
+        background-color: var(--primary);
+        border-bottom: 1px solid var(--border);
     }
-    .save-indicator:has(.save-errored) {
-        background-color: red;
-    }
-
-    .custom-title {
-        color: white;
-        margin:0;
-    }
-    .subtitle {
-        color: var(--text);
-        margin-bottom: 1.7rem;   
+    .custom-box {
+        border: 2px solid var(--border);
+        padding: 0.75rem;
+        padding-top: 0rem;
+        background-color: var(--background);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: 6px;
+        box-shadow:
+            0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
+            0 0px 0 1px rgba(10, 10, 10, 0.02);
     }
     .custom-tabs {
         -webkit-overflow-scrolling: touch;
@@ -190,6 +181,8 @@
         background-color: var(--background);
         border-color: var(--border);
         border-bottom-color: transparent !important;
+        position: relative;
+        top: 1px;
     }
     .custom-tabs li.is-active a {
         border-bottom-color: hsl(229, 53%, 53%);
@@ -217,7 +210,6 @@
         margin-bottom: 0.2rem;
         border: 0px;
         user-select: none;
-        color: var(--text);
         font-size: small;
         cursor: pointer;
     }
@@ -228,18 +220,33 @@
         padding-top: 0;
         padding-bottom: 0;
     }
-    .selected {
-        border-color: var(--secondary);
-        color: var(--secondary);
-    }
-    .profile-pic {
-        width: 5rem;
-        border-radius: 999px;
-        border: 2px solid var(--text);
-        user-select: none;
-    }
     .row {
         display: flex;
         flex-direction: row;
+        padding-left: 1rem;
+    }
+    .column {
+        display: flex;
+        flex-direction: column;
+    }
+    .grid {
+        display: flex;
+        flex-wrap: wrap;
+        width: 100%;
+        gap: 0.5rem;
+        padding: 1rem;
+    }
+    .custom-title {
+        @extend .title !optional;
+        width: fit-content;
+        font-size: x-large;
+        justify-content: center;
+        text-align: center;
+        font-weight: bold;
+        margin-bottom: 0.5rem;
+        border-bottom: 1px solid var(--border);
+        color: var(--secondary);
+        user-select: none;
+        cursor: default;
     }
 </style>

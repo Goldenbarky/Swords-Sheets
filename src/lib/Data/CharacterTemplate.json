@@ -1,4 +1,5 @@
 {
+    "Version":1.1,
     "Name": "New Character",
     "Class": "Undefined",
     "Level": 0,
@@ -139,5 +140,6 @@
             "8": 0,
             "9": 0
         }
-    }
+    },
+    "Campaign": null
 }

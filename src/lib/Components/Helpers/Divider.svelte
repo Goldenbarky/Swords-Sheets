@@ -3,7 +3,7 @@
 </script>
 
 {#if orientation === "vertical"}
-    <div class="buffer" style="border-right: 1px solid var(--border)"/>
+    <div class="buffer" style="border-right: 1px solid var(--border);"/>
     <div class="buffer"/>
 {:else if orientation === "horizontal"}
     <div class="line"/>

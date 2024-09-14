@@ -31,14 +31,17 @@
     </div>
     {#if $mode === "edit"}
         <AbilitySelector
-            category_name = "Weapon"
+            category_name = "AC"
             bind:selected_ability = {armor.Ability}
             z_index = {z_index}
         />
     {/if}
     <div style="display: flex; flex-direction: column; position: absolute; right: -19px; top: 0;">
         {#each [0, 1, 2, 3] as item_bonus}
-            {#if $mode === "edit" || (armor.Bonus === item_bonus && item_bonus !== 0)}
+            {#if armor.Bonus === item_bonus && item_bonus !== 0}
+                <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+                <div class="custom-box custom-side-tab {item_bonus === armor.Bonus ? "selected" : ""}" style="cursor: default;">+{item_bonus}</div>
+            {:else if $mode === "edit"}
                 <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                 <div class="custom-box custom-side-tab {item_bonus === armor.Bonus ? "selected" : ""}" on:click={() => {
                     armor.Bonus = item_bonus;

@@ -7,7 +7,7 @@
     import ToggleSwitch from "$lib/Components/Generic/ToggleSwitch.svelte";
     import Divider from "$lib/Components/Helpers/Divider.svelte";
     import Spell from "$lib/Components/Spell.svelte";
-    import { bonusToString, scoreToModifier, updateDatabase, getPB, calcAttackModifier, calcSaveDC } from "$lib/GenericFunctions";
+    import { updateDatabase, levenshteinDistance, calcSpellToHit, calcSaveDC, bonusToString } from "$lib/GenericFunctions";
     import { mode, theme } from "$lib/Theme";
 
     export let spells:Record<string, unknown>[];
@@ -57,30 +57,8 @@
         return prepared;
     }
 
-    const levenshteinDistance = (str1 = '', str2 = '') => {
-        const track = Array(str2.length + 1).fill(null).map(() =>
-        Array(str1.length + 1).fill(null));
-        for (let i = 0; i <= str1.length; i += 1) {
-            track[0][i] = i;
-        }
-        for (let j = 0; j <= str2.length; j += 1) {
-            track[j][0] = j;
-        }
-        for (let j = 1; j <= str2.length; j += 1) {
-            for (let i = 1; i <= str1.length; i += 1) {
-                const indicator = str1[i - 1] === str2[j - 1] ? 0 : 1;
-                track[j][i] = Math.min(
-                    track[j][i - 1] + 1, // deletion
-                    track[j - 1][i] + 1, // insertion
-                    track[j - 1][i - 1] + indicator, // substitution
-                );
-            }
-        }
-        return track[str2.length][str1.length];
-    };
-
     let num_prepared = calcPrepared();
-    let attack_modifier = calcAttackModifier();
+    let attack_modifier = calcSpellToHit();
     let save_dc = calcSaveDC();
     let spells_known = calcKnown();
 
@@ -95,7 +73,7 @@
     }
 
     const changeAbility = () => {
-        attack_modifier = calcAttackModifier();
+        attack_modifier = calcSpellToHit();
         save_dc = calcSaveDC();
     }
 
@@ -144,7 +122,7 @@
                             <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                             <div class="custom-box custom-side-tab {$mode !== "edit" ? "disable" : ""} {character.Spellcasting.Bonus === bonus ? "selected" : ""}" on:click={() => {
                                 character.Spellcasting.Bonus = bonus;
-                                attack_modifier = calcAttackModifier();
+                                attack_modifier = calcSpellToHit();
                                 save_dc = calcSaveDC();
                                 updateDatabase();
                             }}>+{bonus}</div>
