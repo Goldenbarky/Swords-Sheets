@@ -87,7 +87,7 @@
                                 {#if actualCharacter?.data.Campaign}
                                     &#x2714;
                                     <div class="box tooltip-box">
-                                        <div class="tooltip-text">Invite Pending</div>
+                                        <div class="tooltip-text">Invite Accepted</div>
                                     </div>
                                 {:else}
                                     &#x27F3;
