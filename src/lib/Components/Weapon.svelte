@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { bonusToString, calcWeaponToHit, getAbilityModifier, updateDatabase } from "$lib/GenericFunctions";
+    import { bonusToString, calcBonus, calcWeaponToHit, getAbilityModifier, updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
     import AbilitySelector from "./AbilitySelector.svelte";
     import FeaturesBox from "./FeaturesBox.svelte";
+    import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
     import CheckedBox from "./Generic/CheckedBox.svelte";
     import Divider from "./Helpers/Divider.svelte";
 
@@ -40,7 +41,12 @@
                         {:else}
                             <div class="custom-title">{weapon.Name}</div>
                         {/if}
-                        <div class="custom-subtitle">{to_hit} To Hit</div>
+                        <div class="row" style="align-items:center">
+                            <div class="custom-subtitle">{bonusToString(to_hit.total)} To Hit</div>
+                            <CalculationVisualizer
+                                maths={to_hit}
+                            />
+                        </div>
                     </div>
                     <Divider/>
                     <div class="column" style="padding:0px;">
