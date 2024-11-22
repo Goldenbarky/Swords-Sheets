@@ -26,9 +26,9 @@
         "Ninth Level"
     ];
 
-    const removeSpell = (spell_name:string, spell_level:number) => {
-        character.Spellcasting.Spells[spell_level] = character.Spellcasting.Spells[spell_level].filter(x => x.Spell_Name !== spell_name);
-        if(spell_level !== 0) spells_known--;
+    const removeSpell = (spell: any) => {
+        character.Spellcasting.Spells[spell.level] = character.Spellcasting.Spells[spell.level].filter(x => !(x.Spell_Name === spell.name && x.Source === (spell.source ?? x.Source)));
+        if(spell.level !== 0) spells_known--;
 
         updateDatabase();
     }
@@ -142,12 +142,12 @@
                     {#each filter_array as spell}
                         <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
                         <div class="custom-button" style="font-size:medium;" on:click={() => {
-                            if(!character.Spellcasting.Spells[spell.level].find(x => spell.name === x.Spell_Name)) {
-                                character.Spellcasting.Spells[spell.level] = [...character.Spellcasting.Spells[spell.level], ({"Spell_Name":spell.name, "Prepared":"false"})].sort((a, b) => a.Spell_Name.localeCompare(b.Spell_Name));
+                            if(!character.Spellcasting.Spells[spell.level].find(x => spell.name === x.Spell_Name && spell.source === x.Source)) {
+                                character.Spellcasting.Spells[spell.level] = [...character.Spellcasting.Spells[spell.level], ({"Spell_Name":spell.name, "Prepared":"false", "Source": spell.source})].sort((a, b) => a.Spell_Name.localeCompare(b.Spell_Name));
                                 if(spell.level !== 0) spells_known++;
                                 updateDatabase();
                             }
-                        }}>{spell.name}</div>
+                        }}>{spell.name} <b>{spell.source}</b></div>
                     {/each}
                 {/if}
             </div>
@@ -239,7 +239,7 @@
                         <div class="custom-subtitle" style="font-size: x-large;">{spell_levels[i] + " Spells"}</div>
                         <div class="grid">
                             {#each level as item (item)}
-                                {@const spell = spells.find(x => x["name"] === item.Spell_Name)}
+                                {@const spell = spells.find(x => x["name"] === item.Spell_Name && x["source"] === (item.Source ?? x["source"]))}
                                 <Spell
                                     spell={spell}
                                     bind:prepared={item.Prepared}
