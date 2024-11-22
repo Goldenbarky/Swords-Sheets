@@ -151,7 +151,7 @@
                         </div>
                     </div>
                     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                    <div class="spell-detail custom-button" on:click={removeFunction(spell.name, spell.level)}>X
+                    <div class="spell-detail custom-button" on:click={() => removeFunction(spell)}>X
                         <div class="box tooltip-box">
                             <div class="tooltip-text">Remove Spell</div>
                         </div>
