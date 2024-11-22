@@ -49,7 +49,7 @@
     <Divider/>
     <input class="custom-title {bold_label ? 'bold' : 'not-bold'} {label_edit_modes.includes($mode) ? 'editable' : ''}" style="font-size: {label_font_size}" disabled={!label_edit_modes.includes($mode)} on:change={updateDatabase} bind:value={label} placeholder={label_placeholder}/>
     <div class="row" style="align-items: center">
-        {#if calculation !== undefined && $mode === "edit"}
+        {#if calculation !== undefined }
             <CalculationVisualizer
                 maths={calculation}
             />

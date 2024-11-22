@@ -1,4 +1,37 @@
+type CharacterDataRow = {
+    "id":string,
+    "owner_id":string,
+    "name":string,
+    "data":CharacterSheet
+    "theme":Theme
+}
+
+type CampaignDataRow = {
+    "id":string,
+    "owner_id":string,
+    "name":string,
+    "data":Campaign,
+    "theme":Theme
+}
+
+type Campaign = {
+    "Version":number,
+    "Characters":string[],
+    "Level":number
+}
+
+type Theme = {
+    "Version":number,
+    "primary":string,
+    "secondary":string,
+    "background":string,
+    "background_hover":string,
+    "text":string,
+    "border":string
+}
+
 type CharacterSheet = {
+    "Version":number,
     "Name":string,
     "Class":string,
     "Level":number,
@@ -52,7 +85,8 @@ type CharacterSheet = {
         "Learned_Caster":boolean,
         "Spell_Slots":SpellSlotCount,
         "Slots_Expended":SpellSlotCount
-    }
+    },
+    "Campaign":string
 }
 
 type AbilityScoreType = {
@@ -86,14 +120,7 @@ type SkillProficiencyType = {
 }
 
 type Proficiencies = {
-    "Saving_Throws":{
-        "Strength":string,
-        "Dexterity":string,
-        "Constitution":string,
-        "Intelligence":string,
-        "Wisdom":string,
-        "Charisma":string
-    }
+    "Saving_Throws":SavingThrowProfs,
     "Skills":SkillProficiencyType,
     "Weapons":string[],
     "Armor":string[],
@@ -101,7 +128,17 @@ type Proficiencies = {
     "Languages":string[]
 }
 
+type SavingThrowProfs = {
+    "Strength":string,
+    "Dexterity":string,
+    "Constitution":string,
+    "Intelligence":string,
+    "Wisdom":string,
+    "Charisma":string
+}
+
 type Weapon = {
+    "Version":number,
     "Name":string,
     "Ability":keyof AbilityScoreType,
     "Bonus":number,
@@ -114,13 +151,11 @@ type Weapon = {
         "Damage":string,
         "Type":string
     }[],
-    "Entries":{
-        "Subtitle":string,
-        "Paragraph":string
-    }[]
+    "Entries":TitleDescriptionType[]
 }
 
 type Armor = {
+    "Version":number,
     "Name":string,
     "Ability":keyof AbilityScoreType,
     "Bonus":number,
@@ -129,6 +164,7 @@ type Armor = {
 }
 
 type Shield = {
+    "Version":number,
     "Name":string,
     "Base":number,
     "Bonus":number,
@@ -144,9 +180,10 @@ type Shield = {
 }
 
 type MagicItem = {
+    "Version":number,
     "Name":string,
     "Attuned":boolean,
-    "Entries":TitleDescriptionType
+    "Entries":TitleDescriptionType[]
 }
 
 type Spell = {
@@ -155,6 +192,7 @@ type Spell = {
 }
 
 type TitleDescriptionType = {
+    "Version":number,
     "Title":string,
     "Description":{
         "Subtitle":string,

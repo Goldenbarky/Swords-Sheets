@@ -1,12 +1,13 @@
 {
-  "Name":"Sword",
-  "Ability":"Strength",
-  "Bonus":0,
-  "Proficient":false,
-  "Base_Damage":{
-      "Dice":"1dX",
-      "Type":"Slashing"
-  },
-  "Extra_Damage":[],
-  "Entries":[]
+	"Version": 1.0,
+	"Name": "Sword",
+	"Ability": "Strength",
+	"Bonus": 0,
+	"Proficient": false,
+	"Base_Damage": {
+		"Dice": "1dX",
+		"Type": "Slashing"
+	},
+	"Extra_Damage": [],
+	"Entries": []
 }

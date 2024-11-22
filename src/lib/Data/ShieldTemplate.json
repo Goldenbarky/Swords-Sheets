@@ -1,4 +1,5 @@
 {
+    "Version":1.0,
     "Base": 2,
     "Name": "Shield",
     "Bonus": 0,
@@ -12,6 +13,10 @@
     },
     "Entries": {
         "Title": "",
-        "Description": []
+        "Description": [],
+        "Uses": {
+            "Max": 0,
+            "Used": 0
+        }
     }
 }

@@ -7,6 +7,9 @@
     import { updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
 
+    import ShieldTemplate from "$lib/Data/ShieldTemplate.json";
+    import MagicItemTemplate from "$lib/Data/MagicItemTemplate.json";
+
     export let character: CharacterSheet;
 
     const removeWeapon = (weapon:any) => {
@@ -72,7 +75,7 @@
         {/each}
         {#if $mode === "edit"}
             <button class="custom-box custom-button" on:click={() => {
-                character.Equipment.Shields = [...character.Equipment.Shields, {Name: "Shield", Base: 2, Bonus: 0, Saving_Throw_Mods:{Strength: 0, Dexterity: 0, Constitution: 0, Intelligence: 0, Wisdom: 0, Charisma: 0}, Entries: {Title: "", Description: []}}];
+                character.Equipment.Shields = [...character.Equipment.Shields, ShieldTemplate];
                 updateDatabase();
             }}>Add New Armor Enhancement</button>
         {/if}
@@ -85,7 +88,7 @@
         {/each}
         {#if $mode === "edit"}
             <div style="display: flex; justify-content: center;">
-                <button class="custom-box custom-button" on:click={() => character.Equipment.Magic_Items = [...character.Equipment.Magic_Items, {Name: "", Attuned:false, Entries:{Title:"", Description:[]}}]}>+</button>
+                <button class="custom-box custom-button" on:click={() => character.Equipment.Magic_Items = [...character.Equipment.Magic_Items, MagicItemTemplate]}>+</button>
             </div>
         {/if}
     </div>

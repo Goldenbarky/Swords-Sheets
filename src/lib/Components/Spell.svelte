@@ -196,7 +196,6 @@
     <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions-->
     <div class="custom-box bubble" on:click = {() => {
         shown = !shown
-        console.log(spell);
         }}>
         <div style="margin-top: -0.6rem; user-select: none">
             {shown ? "-" : "+"}
@@ -290,7 +289,7 @@
     .tooltip-text {
         visibility: hidden;
         text-align: right;
-        color: var(--secondary)
+        color: var(--secondary);
     }
     .not-selected {
         color: var(--text) !important;

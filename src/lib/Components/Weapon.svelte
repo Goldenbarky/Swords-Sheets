@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { bonusToString, getAbilityModifier, getPB, updateDatabase } from "$lib/GenericFunctions";
+    import { bonusToString, calcBonus, calcWeaponToHit, getAbilityModifier, updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
     import AbilitySelector from "./AbilitySelector.svelte";
+    import FeaturesBox from "./FeaturesBox.svelte";
+    import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
     import CheckedBox from "./Generic/CheckedBox.svelte";
-    import TitleDescription from "./Generic/TitleDescription.svelte";
     import Divider from "./Helpers/Divider.svelte";
 
     export let weapon:Weapon;
@@ -11,24 +12,13 @@
 
     let bonus = weapon.Bonus;
 
-    const calcToHit = () => {
-        let proficiency_bonus = getPB();
-        let modifier = getAbilityModifier(weapon.Ability) as number;
-
-        let hit_bonus = modifier;
-
-        if(weapon.Proficient) hit_bonus += proficiency_bonus;
-        
-        return bonusToString(hit_bonus + bonus);
-    }
-
     const calcDamageMod = () => {
         let modifier = getAbilityModifier(weapon.Ability) as number;
 
         return bonusToString(modifier + bonus);
     }
 
-    let to_hit = calcToHit();
+    let to_hit = calcWeaponToHit(weapon);
     let damage_mod = calcDamageMod();
     let shown:boolean = false;
 </script>
@@ -51,7 +41,12 @@
                         {:else}
                             <div class="custom-title">{weapon.Name}</div>
                         {/if}
-                        <div class="custom-subtitle">{to_hit} To Hit</div>
+                        <div class="row" style="align-items:center">
+                            <div class="custom-subtitle">{bonusToString(to_hit.total)} To Hit</div>
+                            <CalculationVisualizer
+                                maths={to_hit}
+                            />
+                        </div>
                     </div>
                     <Divider/>
                     <div class="column" style="padding:0px;">
@@ -61,7 +56,7 @@
                                     checked={weapon.Proficient}
                                     onChange={() => {
                                         weapon.Proficient = !weapon.Proficient;
-                                        to_hit = calcToHit();
+                                        to_hit = calcWeaponToHit(weapon);
                                         damage_mod = calcDamageMod();
                                         updateDatabase();
                                     }}
@@ -114,7 +109,7 @@
                 <AbilitySelector
                     category_name = "Weapon"
                     bind:selected_ability = {weapon.Ability}
-                    onChange = {() => { to_hit = calcToHit(); damage_mod = calcDamageMod(); }}
+                    onChange = {() => { to_hit = calcWeaponToHit(weapon); damage_mod = calcDamageMod(); }}
                 />
             {/if}
         </div>
@@ -125,7 +120,7 @@
                     <div class="custom-box custom-side-tab {item_bonus === bonus ? "selected" : ""}" on:click={() => {
                         weapon.Bonus = item_bonus;
                         bonus = item_bonus;
-                        to_hit = calcToHit();
+                        to_hit = calcWeaponToHit(weapon);
                         damage_mod = calcDamageMod();
                         updateDatabase();
                     }}>+{item_bonus}</div>
@@ -135,9 +130,9 @@
     </div>
     {#if shown}
         <div class="custom-box dropdown">
-            <TitleDescription
+            <FeaturesBox
                 title={""}
-                description={weapon.Entries}
+                features={weapon.Entries}
             />
         </div>
     {/if}

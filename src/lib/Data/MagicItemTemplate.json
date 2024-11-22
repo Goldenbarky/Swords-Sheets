@@ -1,8 +1,13 @@
 {
+    "Version":1.0,
     "Name": "",
     "Attuned": false,
-    "Entries": {
+    "Entries": [{
         "Title": "",
-        "Description": []
-    }
+        "Description": [],
+        "Uses": {
+            "Max": 0,
+            "Used": 0
+        }
+    }]
 }
