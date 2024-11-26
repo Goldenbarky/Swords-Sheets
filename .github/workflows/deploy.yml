@@ -1,0 +1,17 @@
+name: deploy changes on webserver
+on:
+  push: 
+    branches:
+      - main
+jobs:
+  build:
+    name: Build
+    runs-on: ubuntu-latest
+    steps:
+    - name: executing remote ssh commands using password
+      uses: appleboy/ssh-action@v1.2.0
+      with:
+        host: justin.pakj.games
+        username: kennedjustin7
+        key: ${{ secrets.SSH_KEY }}
+        script_path: DnDSheets/scripts/rebuild.sh
