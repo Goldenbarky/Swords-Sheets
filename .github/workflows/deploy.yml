@@ -14,4 +14,11 @@ jobs:
         host: justin.pakj.games
         username: kennedjustin7
         key: ${{ secrets.SSH_KEY }}
-        script_path: ./DnDSheets/scripts/rebuild.sh
+        #script_path: ./DnDSheets/scripts/rebuild.sh
+        script: |
+          cd /home/kennedjustin7/DnDSheets
+          git pull
+          bun i
+          bun pm trust --all
+          bun run build
+          sudo systemctl restart dnd-site
