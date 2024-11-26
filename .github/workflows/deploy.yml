@@ -14,4 +14,4 @@ jobs:
         host: justin.pakj.games
         username: kennedjustin7
         key: ${{ secrets.SSH_KEY }}
-        script_path: DnDSheets/scripts/rebuild.sh
+        script_path: /home/kennedjustin7/DnDSheets/scripts/rebuild.sh
