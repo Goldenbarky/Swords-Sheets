@@ -19,6 +19,19 @@
         padding-top: 0;
         padding-bottom: 0;
     }
+    .custom-box {
+        border: 2px solid var(--border);
+        padding: 0.75rem;
+        padding-top: 0rem;
+        background-color: var(--background);
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border-radius: 6px;
+        box-shadow:
+            0 0.5em 1em -0.125em rgba(10, 10, 10, 0.1),
+            0 0px 0 1px rgba(10, 10, 10, 0.02);
+    }
     .custom-button {
         padding-bottom: 2px;
         background-color: var(--background);
