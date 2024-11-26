@@ -18,7 +18,7 @@ jobs:
         script: |
           cd /home/kennedjustin7/DnDSheets
           git pull
-          bun i
-          bun pm trust --all
-          bun run build
+          /home/kennedjustin7/.bun/bin/bun i
+          /home/kennedjustin7/.bun/bin/bun pm trust --all
+          /home/kennedjustin7/.bun/bin/bun run build
           sudo systemctl restart dnd-site
