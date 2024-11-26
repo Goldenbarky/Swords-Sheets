@@ -20,5 +20,5 @@ jobs:
           git pull
           /home/kennedjustin7/.bun/bin/bun i
           /home/kennedjustin7/.bun/bin/bun pm trust --all
-          /home/kennedjustin7/.bun/bin/bun run build
+          /home/kennedjustin7/.bun/bin/bun vite build
           sudo systemctl restart dnd-site
