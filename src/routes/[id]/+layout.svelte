@@ -3,23 +3,29 @@
     import { theme } from "$lib/Theme";
     import MainPage from '$lib/Pages/CharacterSheet/MainPage.svelte';
     import { getCampaign, getInvitesForCharacter, supabaseObject } from "$lib/GenericFunctions";
-    import { onMount } from "svelte";
+    import { getContext, onMount } from "svelte";
+    import type { DatabaseConnection } from "$lib/Database.svelte";
     
-    export let data;
+    let { data, children } = $props();
 
-    let campaign_invites:CampaignDataRow[] = [];
-    let campaign:CampaignDataRow|undefined;
+    let campaign_invites:CampaignDataRow[] = $state([]);
+    let campaign:CampaignDataRow|undefined = $state();
 
     onMount(() => {
         supabaseObject(data.supabase);
 
-        if(data.sheets.data.Campaign === null) {
-            getInvitesForCharacter(data.sheets.id).then((s) => campaign_invites = (s!));
+        if (!dbContext.activeCharacterRow) {
+            return;
+        }
+
+        if(!dbContext.activeCharacterRow.data.Campaign) {
+            getInvitesForCharacter(dbContext.activeCharacterRow.id).then((s) => campaign_invites = (s!));
         } else {
-            getCampaign(data.sheets.data.Campaign).then(s => campaign = s);
+            getCampaign(dbContext.activeCharacterRow.data.Campaign).then(s => campaign = s);
         }
     });
     
+    const dbContext = getContext<DatabaseConnection>('database');
 </script>
 <div class="outer"
     style:--primary={$theme.primary}
@@ -28,13 +34,15 @@
     style:--background_hover={$theme.background_hover}
     style:--text={$theme.text}
     style:--border={$theme.border}>
-    <slot/>
-    <MainPage
-        bind:sheet={data.sheets}
-        spells={data.spells}
-        invites={campaign_invites}
-        campaign={campaign}
-    />
+    {@render children()}
+    {#if dbContext.activeCharacterRow}
+        <MainPage
+            bind:sheet={dbContext.activeCharacterRow}
+            spells={data.spells}
+            invites={campaign_invites}
+            campaign={campaign}
+        />
+    {/if}
 </div>
 <style lang="scss">
     :global(.center) {

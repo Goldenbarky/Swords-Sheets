@@ -3,6 +3,7 @@ import type { LayoutLoad } from "./$types";
 import { browser } from '$app/environment';
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public'
 import { createBrowserClient, isBrowser, parse } from '@supabase/ssr'
+import { DatabaseConnection } from "$lib/Database.svelte";
 
 export const load: LayoutLoad = async ({ fetch, data, depends }) => {
     depends('supabase:auth');
@@ -46,6 +47,7 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
         supabase,
         session: session,
         user: data.user,
-        spells: spellsCombined
+        spells: spellsCombined,
+        database: new DatabaseConnection(supabase),
     };
 }
