@@ -60,44 +60,46 @@
                 />
                 -->
                 <table>
-                    <tr>
-                        <th>Character</th>
-                        <th>Class</th>
-                        <th>Level</th>
-                        <th>Status</th>
-                    </tr>
-                    {#each campaign.data.Characters as character_id}
-                    {@const actualCharacter = all_characters.find(x => x.id === character_id)}
+                    <tbody>
                         <tr>
-                            <td>
-                                <button 
-                                    class="custom-box custom-button custom-tiny-button" 
-                                    style="position: absolute; left: -1.5rem; top: 0.5rem;"
-                                    on:click={() => {
-                                        campaign.data.Characters = campaign.data.Characters.filter(x => x != character_id);
-                                        updateDatabase();
-                                    }}>
-                                    -
-                                </button>
-                                {actualCharacter?.name}
-                            </td>
-                            <td>{actualCharacter?.data.Class}</td>
-                            <td style="text-align: center;">{actualCharacter?.data.Level}</td>
-                            <td class="status-icon">
-                                {#if actualCharacter?.data.Campaign}
-                                    &#x2714;
-                                    <div class="box tooltip-box">
-                                        <div class="tooltip-text">Invite Accepted</div>
-                                    </div>
-                                {:else}
-                                    &#x27F3;
-                                    <div class="box tooltip-box">
-                                        <div class="tooltip-text">Invite Pending</div>
-                                    </div>
-                                {/if}
-                            </td>
+                            <th>Character</th>
+                            <th>Class</th>
+                            <th>Level</th>
+                            <th>Status</th>
                         </tr>
-                    {/each}
+                        {#each campaign.data.Characters as character_id}
+                        {@const actualCharacter = all_characters.find(x => x.id === character_id)}
+                            <tr>
+                                <td>
+                                    <button 
+                                        class="custom-box custom-button custom-tiny-button" 
+                                        style="position: absolute; left: -1.5rem; top: 0.5rem;"
+                                        on:click={() => {
+                                            campaign.data.Characters = campaign.data.Characters.filter(x => x != character_id);
+                                            updateDatabase();
+                                        }}>
+                                        -
+                                    </button>
+                                    {actualCharacter?.name}
+                                </td>
+                                <td>{actualCharacter?.data.Class}</td>
+                                <td style="text-align: center;">{actualCharacter?.data.Level}</td>
+                                <td class="status-icon">
+                                    {#if actualCharacter?.data.Campaign}
+                                        &#x2714;
+                                        <div class="box tooltip-box">
+                                            <div class="tooltip-text">Invite Accepted</div>
+                                        </div>
+                                    {:else}
+                                        &#x27F3;
+                                        <div class="box tooltip-box">
+                                            <div class="tooltip-text">Invite Pending</div>
+                                        </div>
+                                    {/if}
+                                </td>
+                            </tr>
+                        {/each}
+                    </tbody>
                 </table>
             <div style="height: 1rem;"/>
             <div class="custom-subtitle">Level</div>

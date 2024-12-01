@@ -65,29 +65,31 @@
                     orientation="horizontal"
                 />
                 <table>
-                    <tr>
-                        <th >Character</th>
-                        <th>Class</th>
-                        <th>Level</th>
-                    </tr>
-                    {#each characters as character_id}
-                    {@const actualCharacter = all_characters.find(x => x.id === character_id)}
+                    <tbody>
                         <tr>
-                            <td>
-                                <button 
-                                    class="custom-box custom-button custom-tiny-button" 
-                                    style="position: absolute; left: -1.5rem; top: 0.5rem;"
-                                    on:click={() => {
-                                        characters = characters.filter(x => x != character_id)
-                                    }}>
-                                    -
-                                </button>
-                                {actualCharacter?.name}
-                            </td>
-                            <td>{actualCharacter?.data.Class}</td>
-                            <td style="text-align: center;">{actualCharacter?.data.Level}</td>
+                            <th >Character</th>
+                            <th>Class</th>
+                            <th>Level</th>
                         </tr>
-                    {/each}
+                        {#each characters as character_id}
+                        {@const actualCharacter = all_characters.find(x => x.id === character_id)}
+                            <tr>
+                                <td>
+                                    <button 
+                                        class="custom-box custom-button custom-tiny-button" 
+                                        style="position: absolute; left: -1.5rem; top: 0.5rem;"
+                                        on:click={() => {
+                                            characters = characters.filter(x => x != character_id)
+                                        }}>
+                                        -
+                                    </button>
+                                    {actualCharacter?.name}
+                                </td>
+                                <td>{actualCharacter?.data.Class}</td>
+                                <td style="text-align: center;">{actualCharacter?.data.Level}</td>
+                            </tr>
+                        {/each}
+                    </tbody>
                 </table>
             <div style="height: 1rem;"/>
             <div class="custom-subtitle">Level</div>
