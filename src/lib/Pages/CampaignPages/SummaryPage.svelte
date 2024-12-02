@@ -1,13 +1,17 @@
 <script lang="ts">
     import CharacterSummary from "$lib/Components/DMScreen/CharacterSummary.svelte";
 
-    export let characters:CharacterDataRow[];
+    interface Props {
+        characters: CharacterDataRow[];
+    }
+
+    let { characters }: Props = $props();
 </script>
 
 <div class="grid">
-    {#each characters as character}
+    {#each characters as character, i (character)}
         <CharacterSummary
-            bind:character={character}
+            bind:character={characters[i]}
         />
     {/each}
 </div>

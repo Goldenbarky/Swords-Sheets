@@ -1,45 +1,70 @@
 <script lang="ts">
-    export let invites:CampaignDataRow[];
-    export let campaign:CampaignDataRow|undefined;
-    export let shown:boolean;
-    export let acceptInvite;
-    //To-do fix supabase issues so we can delete campaign invite from here
+    import { DatabaseConnection } from "$lib/Database.svelte";
+
+    interface Props {
+        shown: boolean;
+    }
+
+    let {
+        shown = $bindable(),
+    }: Props = $props();
+
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
-    <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
+    <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
     <div
         class="modal-background"
-        on:click={() => {
+        onclick={() => {
             shown = false;
         }}
-    />
+    ></div>
     <div class="modal-content" style="display: grid; align-items: center; justify-items: center;">
-        {#if campaign === undefined}
-            {#each invites as invite}
-                <div class="custom-box column" style="width: fit-content; height: fit-content;">
-                    <div class="custom-title">Campaign Invites</div>
-                    <div class="custom-box" style="padding-bottom: 0rem;">
-                        <div class="row">
-                            <div class="custom-subtitle" style="margin-right: 0.5rem;">{invite.name}</div>
-                            <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions-->
-                            <div class="custom-box custom-button" style="margin-right: 0.5rem; color: green" on:click={async () => {
-                                campaign = invites.find(x => x.id === invite.id);
-                                await acceptInvite(invite.id);
-                            }}>&#x2714;</div>
-                            <div class="custom-box custom-button" style="color: red">&#x2716;</div>
-                        </div>
-                    </div>
-                </div>  
-            {/each}
+        {#if !dbContext.activeCharacterRow}
+            <div>loading character...</div>
         {:else}
-            <div class="custom-box column" style="width: fit-content; height: fit-content;">
-                <div class="custom-title">Campaign Info</div>
-                <div class="row">
-                    <div class="custom-subtitle">{campaign.name}</div>
-                </div>
-            </div>
+            {#if dbContext.activeCharacterRow.data.Campaign}
+                {#await dbContext.getCampaign(dbContext.activeCharacterRow.data.Campaign)}
+                    <div>loading campaign...</div>
+                {:then campaign}
+                    {#if campaign}
+                        <div class="custom-box column" style="width: fit-content; height: fit-content;">
+                            <div class="custom-title">Campaign Info</div>
+                            <div class="row">
+                                <div class="custom-subtitle">{campaign.name}</div>
+                            </div>
+                        </div>
+                    {:else}
+                        <div>Error finding campaign</div>
+                    {/if}
+                {/await}
+            {:else}
+                {#await dbContext.getInvitesForCharacter(dbContext.activeCharacterRow.id)}
+                    <div>loading invites...</div>
+                {:then invites}
+                    {#if invites}
+                        {#each invites as invite}
+                            <div class="custom-box column" style="width: fit-content; height: fit-content;">
+                                <div class="custom-title">Campaign Invites</div>
+                                <div class="custom-box" style="padding-bottom: 0rem;">
+                                    <div class="row">
+                                        <div class="custom-subtitle" style="margin-right: 0.5rem;">{invite.name}</div>
+                                        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
+                                        <div class="custom-box custom-button" style="margin-right: 0.5rem; color: green" onclick={async () => {
+                                            dbContext.activeCharacterRow!.data.Campaign = invite.id;
+                                            await dbContext.save();
+                                        }}>&#x2714;</div>
+                                        <div class="custom-box custom-button" style="color: red">&#x2716;</div>
+                                    </div>
+                                </div>
+                            </div>  
+                        {/each}
+                    {:else}
+                        <div>no invites</div>
+                    {/if}
+                {/await}
+            {/if}
         {/if}
-        
     </div>
 </div>
 

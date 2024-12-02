@@ -3,17 +3,15 @@
     import { theme } from "$lib/Theme";
     import MainPage from '$lib/Pages/CharacterSheet/MainPage.svelte';
     import { getCampaign, getInvitesForCharacter, supabaseObject } from "$lib/GenericFunctions";
-    import { getContext, onMount } from "svelte";
-    import type { DatabaseConnection } from "$lib/Database.svelte";
+    import { onMount } from "svelte";
+    import { DatabaseConnection } from "$lib/Database.svelte";
     
     let { data, children } = $props();
 
-    let campaign_invites:CampaignDataRow[] = $state([]);
-    let campaign:CampaignDataRow|undefined = $state();
+    let campaign_invites: CampaignDataRow[] = $state([]);
+    let campaign: CampaignDataRow | undefined = $state();
 
-    onMount(() => {
-        supabaseObject(data.supabase);
-
+    $effect(() => {
         if (!dbContext.activeCharacterRow) {
             return;
         }
@@ -25,7 +23,7 @@
         }
     });
     
-    const dbContext = getContext<DatabaseConnection>('database');
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 <div class="outer"
     style:--primary={$theme.primary}
@@ -39,8 +37,6 @@
         <MainPage
             bind:sheet={dbContext.activeCharacterRow}
             spells={data.spells}
-            invites={campaign_invites}
-            campaign={campaign}
         />
     {/if}
 </div>

@@ -1,6 +1,10 @@
 <script lang="ts">
-    export let title:string;
-    export let toggle:boolean = false;
+    interface Props {
+        title: string;
+        toggle?: boolean;
+    }
+
+    let { title, toggle = $bindable(false) }: Props = $props();
 </script>
 
 <div style="display: flex; flex-direction: row">
@@ -10,7 +14,6 @@
         <span class="slider round"></span>
     </label>
 </div>
-
 
 <style lang="scss">
     .custom-title {

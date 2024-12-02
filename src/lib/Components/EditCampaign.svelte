@@ -1,37 +1,35 @@
 <script lang="ts">
-    import { getInvitesForCampaign, getUsersCharacters, levenshteinDistance, saveCampaign, updateDatabase } from "$lib/GenericFunctions";
-    import { onMount } from "svelte";
-    import Divider from "./Helpers/Divider.svelte";
+    import { DatabaseConnection } from "$lib/Database.svelte";
 
-    export let shown:boolean;
-    export let campaign:CampaignDataRow;
+    interface Props {
+        shown: boolean;
+        campaign: CampaignDataRow;
+    }
 
-    let all_characters:CharacterDataRow[] = [];
+    let { shown = $bindable(), campaign = $bindable() }: Props = $props();
 
     let character_query = "";
 
-    onMount(() => {
-        getUsersCharacters().then((s) => (all_characters = s!));
-    })
+    // let filter_array = $derived(all_characters.filter(x => x.name.toLowerCase().includes(character_query.toLowerCase())).sort((a, b) => {
+    //     return levenshteinDistance(a.name.toLowerCase(), character_query.toLowerCase()) - levenshteinDistance(b.name.toLowerCase(), character_query.toLowerCase());
+    // }).slice(0, 5));
 
-    $: filter_array = all_characters.filter(x => x.name.toLowerCase().includes(character_query.toLowerCase())).sort((a, b) => {
-        return levenshteinDistance(a.name.toLowerCase(), character_query.toLowerCase()) - levenshteinDistance(b.name.toLowerCase(), character_query.toLowerCase());
-    }).slice(0, 5);
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
-    <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
+    <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
     <div
         class="modal-background"
-        on:click={() => {
+        onclick={() => {
             shown = false;
         }}
-    />
+    ></div>
     <div class="modal-content" style="display: grid; align-items: center; justify-items: center; overflow: visible;">
         <div class="custom-box column" style="width: fit-content; height: fit-content; min-width: 30rem; padding-right: 2rem; padding-left: 2rem;">
             <div class="custom-title">Campaign Name</div>
                 <div class="custom-subtitle">Name</div>
             <input bind:value={campaign.name} maxlength="32"/>
-            <div style="height: 1rem;"/>
+            <div style="height: 1rem;"></div>
             <div class="custom-subtitle">Characters</div>
             <!--
             <input bind:value={character_query}/>
@@ -67,41 +65,53 @@
                             <th>Level</th>
                             <th>Status</th>
                         </tr>
-                        {#each campaign.data.Characters as character_id}
-                        {@const actualCharacter = all_characters.find(x => x.id === character_id)}
+                        {#await dbContext.getUsersCharacters()}
                             <tr>
-                                <td>
-                                    <button 
-                                        class="custom-box custom-button custom-tiny-button" 
-                                        style="position: absolute; left: -1.5rem; top: 0.5rem;"
-                                        on:click={() => {
-                                            campaign.data.Characters = campaign.data.Characters.filter(x => x != character_id);
-                                            updateDatabase();
-                                        }}>
-                                        -
-                                    </button>
-                                    {actualCharacter?.name}
-                                </td>
-                                <td>{actualCharacter?.data.Class}</td>
-                                <td style="text-align: center;">{actualCharacter?.data.Level}</td>
-                                <td class="status-icon">
-                                    {#if actualCharacter?.data.Campaign}
-                                        &#x2714;
-                                        <div class="box tooltip-box">
-                                            <div class="tooltip-text">Invite Accepted</div>
-                                        </div>
-                                    {:else}
-                                        &#x27F3;
-                                        <div class="box tooltip-box">
-                                            <div class="tooltip-text">Invite Pending</div>
-                                        </div>
-                                    {/if}
-                                </td>
+                                <td colspan="4">loading...</td>
                             </tr>
-                        {/each}
+                        {:then all_characters}
+                            {#if !all_characters}
+                                <tr>
+                                    <td colspan="4">no characters</td>
+                                </tr>
+                            {:else}
+                                {#each campaign.data.Characters as character_id (character_id)}
+                                {@const actualCharacter = all_characters.find(x => x.id === character_id)}
+                                    <tr>
+                                        <td>
+                                            <button 
+                                                class="custom-box custom-button custom-tiny-button" 
+                                                style="position: absolute; left: -1.5rem; top: 0.5rem;"
+                                                onclick={async () => {
+                                                    campaign.data.Characters = campaign.data.Characters.filter(x => x != character_id);
+                                                    await dbContext.save();
+                                                }}>
+                                                -
+                                            </button>
+                                            {actualCharacter?.name}
+                                        </td>
+                                        <td>{actualCharacter?.data.Class}</td>
+                                        <td style="text-align: center;">{actualCharacter?.data.Level}</td>
+                                        <td class="status-icon">
+                                            {#if actualCharacter?.data.Campaign}
+                                                &#x2714;
+                                                <div class="box tooltip-box">
+                                                    <div class="tooltip-text">Invite Accepted</div>
+                                                </div>
+                                            {:else}
+                                                &#x27F3;
+                                                <div class="box tooltip-box">
+                                                    <div class="tooltip-text">Invite Pending</div>
+                                                </div>
+                                            {/if}
+                                        </td>
+                                    </tr>
+                                {/each}
+                            {/if}
+                        {/await}
                     </tbody>
                 </table>
-            <div style="height: 1rem;"/>
+            <div style="height: 1rem;"></div>
             <div class="custom-subtitle">Level</div>
             <input
                 type="number"
@@ -110,11 +120,11 @@
                 max="20"
                 bind:value={campaign.data.Level}
             />
-            <div style="height: 1rem;"/>
+            <div style="height: 1rem;"></div>
             <button
                 class="custom-box custom-button"
                 style="border: solid 1px var(--border);"
-                on:click={async () => await saveCampaign()}
+                onclick={dbContext.save}
             >
                 Create Campaign
             </button>

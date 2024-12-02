@@ -1,20 +1,31 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
+    import { DatabaseConnection } from "$lib/Database.svelte";
     import { mode } from "$lib/Theme";
     import FeaturesBox from "./FeaturesBox.svelte";
 
-    export let item:MagicItem;
-    export let removeFunction:Function;
+    interface Props {
+        item: MagicItem;
+        removeFunction: Function;
+    }
 
-    let shown:boolean = false;
+    let { item = $bindable(), removeFunction }: Props = $props();
+
+    let shown:boolean = $state(false);
+
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 <div class="container" style="margin-bottom:0.5rem; flex:none;">
     <div class="custom-box">
         <div class="row" style="width: 100%;">
-            <input class="custom-subtitle {$mode === "edit" ? 'editable' : ''}" disabled={$mode !== "edit"} on:change={updateDatabase} bind:value={item.Name} placeholder={"New Magic Item"}/>
+            <input class="custom-subtitle {$mode === "edit" ? 'editable' : ''}" disabled={$mode !== "edit"} onchange={dbContext.save} bind:value={item.Name} placeholder={"New Magic Item"}/>
             {#if $mode === "edit" || item.Attuned}
-                <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                <div class="attuned {item.Attuned ? "selected" : ""} {$mode === "edit" ? "attuned-hover" : ""}" on:click={() => { if($mode === "edit") {item.Attuned = !item.Attuned; updateDatabase();}}}>A
+                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                <div class="attuned {item.Attuned ? "selected" : ""} {$mode === "edit" ? "attuned-hover" : ""}" onclick={async () => { 
+                    if($mode === "edit") {
+                        item.Attuned = !item.Attuned; 
+                        await dbContext.save();
+                    }
+                }}>A
                     <div class="box tooltip-box">
                         <div class="tooltip-text">
                             Attuned
@@ -23,8 +34,8 @@
                 </div>
             {/if}
             {#if $mode === "edit"}
-                <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                <div class="attuned selected attuned-hover" on:click={removeFunction()}>X
+                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                <div class="attuned selected attuned-hover" onclick={removeFunction()}>X
                     <div class="box tooltip-box">
                         <div class="tooltip-text">Delete Item</div>
                     </div>
@@ -41,8 +52,8 @@
         </div>
     {/if}
     {#if $mode === "edit" || item.Entries.length > 0}
-        <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions-->
-        <div class="custom-box bubble" on:click = {() => {
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
+        <div class="custom-box bubble" onclick={() => {
             shown = !shown
             }}>
             <div style="margin-top: -0.6rem; user-select: none">
@@ -51,7 +62,6 @@
         </div>
     {/if}
 </div>
-
 
 <style lang="scss">
     .custom-subtitle {

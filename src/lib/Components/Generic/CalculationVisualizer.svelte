@@ -4,10 +4,11 @@
     import NumberLabel from "./NumberLabel.svelte";
     import { Calculation } from "../Classes/DataClasses";
 
-    export let maths:Calculation = new Calculation();
+    let { maths = new Calculation() }: { maths: Calculation } = $props();
+    //TODO: check if derived is needed here
     let variables = maths.getVariables();
 </script>
-<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div class="spell-detail custom-button">?
     <div class="box tooltip-box">
         <div class="tooltip-text">
@@ -28,7 +29,7 @@
                     />
                 {/if}
                 {#if i == variables.length - 1 && variables.length <= 1}
-                        <div style="height:0.5rem"/>
+                    <div style="height:0.5rem"></div>
                 {/if}
             {/each}
             {#if variables.length > 1}

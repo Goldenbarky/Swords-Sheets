@@ -1,17 +1,17 @@
 <script lang="ts">
-    import { signInWithGoogle } from "$lib/GenericFunctions";
+    import { DatabaseConnection } from "$lib/Database.svelte";
 
-    export let user;
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 <div class="column custom-column" style="flex: none;">
-    {#if !user}
+    {#if !dbContext.user}
         <button class="custom-box custom-button" 
-            on:click={async () => await signInWithGoogle()}>
+            onclick={dbContext.signInWithGoogle}>
             Log in
         </button>
     {:else}
         <!-- svelte-ignore a11y-missing-attribute -->
-        <img src={user.user_metadata.avatar_url} class="profile-pic"/>
+        <img src={dbContext.user.user_metadata.avatar_url} class="profile-pic"/>
     {/if}
 </div>
 <style lang="scss">

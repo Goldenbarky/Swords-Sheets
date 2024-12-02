@@ -1,13 +1,17 @@
 <script lang="ts">
-    import { createNewCharacter, updateDatabase } from "$lib/GenericFunctions";
+    import { DatabaseConnection } from "$lib/Database.svelte";
     import { mode } from "$lib/Theme";
     import DropDownArrow from "./Generic/DropDownArrow.svelte";
     import NumberLabel from "./Generic/NumberLabel.svelte";
 
-    export let shield:Shield;
-    export let z_index:number;
+    interface Props {
+        shield: Shield;
+        z_index: number;
+    }
 
-    let shown:boolean = false;
+    let { shield = $bindable(), z_index }: Props = $props();
+
+    let shown:boolean = $state(false);
 
     let abilities = [
         "Strength",
@@ -17,10 +21,11 @@
         "Wisdom",
         "Charisma",
     ] as (keyof AbilityScoreType)[];
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 <div style="position: relative; width:100%;">
     <div class="custom-box" style="background-color: #00000000;">
-        <input class="custom-title {$mode === "edit" ? 'editable' : ''}" disabled={$mode !== "edit"} on:change={updateDatabase} bind:value={shield.Name} placeholder={"Armor Enhancement"}/>
+        <input class="custom-title {$mode === "edit" ? 'editable' : ''}" disabled={$mode !== "edit"} onchange={dbContext.save} bind:value={shield.Name} placeholder={"Armor Enhancement"}/>
         <div>
             <NumberLabel
                 bind:number={shield.Base}
@@ -38,10 +43,10 @@
                 {#if shield.Bonus === item_bonus && item_bonus !== 0}
                     <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" style="cursor: default;">+{item_bonus}</div>
                 {:else if $mode === "edit"}
-                    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                    <div class="custom-box custom-side-tab left {item_bonus === shield.Bonus ? "selected" : ""}" on:click={() => {
+                    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                    <div class="custom-box custom-side-tab left {item_bonus === shield.Bonus ? "selected" : ""}" onclick={async () => {
                         shield.Bonus = item_bonus;
-                        updateDatabase();
+                        await dbContext.save();
                     }}>+{item_bonus}</div>
                 {/if}
             {/each}
@@ -51,10 +56,10 @@
                 {#if shield.Bonus === item_bonus && item_bonus !== 0}
                     <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" style="cursor: default;">+{item_bonus}</div>
                 {:else if $mode === "edit"}
-                    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                    <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" on:click={() => {
+                    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                    <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" onclick={async () => {
                         shield.Bonus = item_bonus;
-                        updateDatabase();
+                        await dbContext.save();
                     }}>+{item_bonus}</div>
                 {/if}
             {/each}
@@ -71,11 +76,11 @@
                             <div class="custom-subtitle">{ability}</div>
                         {/each}
                     </div>
-                    <div style="width: 1rem;"/>
+                    <div style="width: 1rem;"></div>
                     <div class="column" style="display: flex; flex-direction: column; justify-content: space-evenly; padding: 0;">
                         {#each abilities as ability}
                             <span class="bonus" style="width: 1.75rem;">
-                                +<input style="width: 1rem;" on:change={updateDatabase} bind:value={shield.Saving_Throw_Mods[ability]} placeholder={"0"}/>
+                                +<input style="width: 1rem;" onchange={dbContext.save} bind:value={shield.Saving_Throw_Mods[ability]} placeholder={"0"}/>
                             </span>
                         {/each}
                     </div>

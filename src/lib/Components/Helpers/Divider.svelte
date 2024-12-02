@@ -1,13 +1,17 @@
 <script lang="ts">
-    export let orientation:"vertical" | "horizontal" = "vertical";
+    interface Props {
+        orientation?: "vertical" | "horizontal";
+    }
+
+    let { orientation = "vertical" }: Props = $props();
 </script>
 
 {#if orientation === "vertical"}
-    <div class="buffer" style="border-right: 1px solid var(--border);"/>
-    <div class="buffer"/>
+    <div class="buffer" style="border-right: 1px solid var(--border);"></div>
+    <div class="buffer"></div>
 {:else if orientation === "horizontal"}
-    <div class="line"/>
-    <div style="width: 100%; height: 0.5rem;"/>
+    <div class="line"></div>
+    <div style="width: 100%; height: 0.5rem;"></div>
 {/if}
 
 <style lang="scss">

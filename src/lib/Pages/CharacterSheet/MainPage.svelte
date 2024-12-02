@@ -15,8 +15,6 @@
 
     export let sheet:CharacterDataRow;
     export let spells:any;
-    export let invites:CampaignDataRow[];
-    export let campaign:CampaignDataRow|undefined;
 
     let origUser = getContext<{ user: User } | null>('user')?.user;
     $: user = origUser ?? $writeUser;
@@ -65,11 +63,11 @@
                     <p class="title custom-title" style="margin-bottom: 1.5rem;">{sheet.data.Name}</p>
                     <p class="subtitle" style="color: var(--text);">{sheet.data.Class} {sheet.data.Level}</p>
                 {:else}
-                    <p class="title custom-title placeholder" style="margin-bottom: 0.25rem;" on:focusout={updateDatabase} bind:innerText={sheet.data.Name} contenteditable="true" placeholder="Name"/>
+                    <p class="title custom-title placeholder" style="margin-bottom: 0.25rem;" on:focusout={updateDatabase} bind:innerText={sheet.data.Name} contenteditable="true" placeholder="Name"></p>
                     <div class="row">
-                        <p class="subtitle placeholder" on:focusout={updateDatabase} bind:innerText={sheet.data.Class} contenteditable="true" placeholder="Class"/>
-                        <div style="width: 0.35rem;"/>
-                        <p class="subtitle placeholder" on:focusout={updateDatabase} bind:innerText={sheet.data.Level} contenteditable="true" placeholder="Level"/>
+                        <p class="subtitle placeholder" on:focusout={updateDatabase} bind:innerText={sheet.data.Class} contenteditable="true" placeholder="Class"></p>
+                        <div style="width: 0.35rem;"></div>
+                        <p class="subtitle placeholder" on:focusout={updateDatabase} bind:innerText={sheet.data.Level} contenteditable="true" placeholder="Level"></p>
                     </div>
                 {/if}
             </div>
@@ -145,8 +143,6 @@
 {/if}
 
 <CampaignInfo
-    bind:campaign={campaign}
-    invites={invites}
     bind:shown={campaignInfoShown}
     acceptInvite={acceptInvite}
 />

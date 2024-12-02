@@ -1,7 +1,7 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { batchGetCharactersFromID, saveCampaign, savingPromise, setCampaign, user as writeUser } from '$lib/GenericFunctions';
+    import { batchGetCharactersFromID, savingPromise, setCampaign, user as writeUser } from '$lib/GenericFunctions';
     import Login from '$lib/Components/Server/Login.svelte';
     import SummaryPage from './SummaryPage.svelte';
     import CombatPage from './CombatPage.svelte';
@@ -14,15 +14,19 @@
     import "$lib/../app.scss";
     import EditCampaign from '$lib/Components/EditCampaign.svelte';
 
-    export let campaign:CampaignDataRow;
+    interface Props {
+        campaign: CampaignDataRow;
+    }
 
-    let characters:CharacterDataRow[] = [];
-    let edit_campaign = false;
+    let { campaign = $bindable() }: Props = $props();
+
+    let characters:CharacterDataRow[] = $state([]);
+    let edit_campaign = $state(false);
 
     let origUser = getContext<{ user: User } | null>('user')?.user;
-    $: user = origUser ?? $writeUser;
+    let user = $derived(origUser ?? $writeUser);
 
-    let savePromise: null | (() => Promise<number>) = null;
+    let savePromise: null | (() => Promise<number>) = $state(null);
 
     const finuto = async (num: number) => {
         // oops
@@ -35,15 +39,17 @@
         }
     }
     
-    $: if ($savingPromise === true) {
-        savePromise = saveCampaign;
-        batchGetCharactersFromID(campaign.data.Characters).then((s) => {
-            if (!s) return;
-            characters = s.filter(x => !!x.data.Campaign);
-        });
-    }
+    $effect(() => {
+        if ($savingPromise === true) {
+            savePromise = saveCampaign;
+            batchGetCharactersFromID(campaign.data.Characters).then((s) => {
+                if (!s) return;
+                characters = s.filter(x => !!x.data.Campaign);
+            });
+        }
+    });
 
-    onMount(async () => {
+    $effect(() => {
         setCampaign(campaign);
         batchGetCharactersFromID(campaign.data.Characters).then((s) => {
             if (!s) return;
@@ -53,7 +59,7 @@
 
     let tabs = ["Summary", "Combat", "Theme"];
     let tabParam = $page.url.searchParams.get('activetab');
-    let activeTab = tabParam ?? "Summary";
+    let activeTab = $state(tabParam ?? "Summary");
 </script>
 <section class="hero is-small">
     <div
@@ -66,21 +72,19 @@
             </div>
             <div class="column custom-column" style="flex: none;">
                 <div style="display: flex; flex-direction: column;">
-                    <button class="custom-box custom-button" on:click={() => goto(`/`)}>Go Home</button>
-                    <button class="custom-box custom-button" on:click={() => edit_campaign = true}>Edit Characters</button>
+                    <button class="custom-box custom-button" onclick={() => goto(`/`)}>Go Home</button>
+                    <button class="custom-box custom-button" onclick={() => edit_campaign = true}>Edit Characters</button>
                 </div>
             </div>
-            <Login
-                user={user}
-            />
+            <Login />
         </div>
         <div class="custom-tabs is-boxed">
             <ul style="display: flex; flex-direction: row;">
                 {#each tabs as tab}
                     {#if tab !== "Theme" || $mode === "edit"}
                         <li class:is-active={activeTab===tab}>
-                            <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
-                            <a on:click={() => {
+                            <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
+                            <a onclick={() => {
                                 activeTab = tab;
                                 goto(`/campaign/${campaign.id}/${$mode === "view" ? "" : $mode }?activetab=${tab}`);
                             }}>{tab}</a>

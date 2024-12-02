@@ -1,15 +1,20 @@
 <script lang="ts">
-    import { bonusToString, updateDatabase } from "$lib/GenericFunctions";
+    import { DatabaseConnection } from "$lib/Database.svelte";
+    import { bonusToString } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
     import type { Calculation } from "./Classes/DataClasses";
     import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
 
-    export let proficiency:string;
-    export let name:string;
-    export let bonusCalculator:(arg0: string) => Calculation;
+    interface Props {
+        proficiency: string;
+        name: string;
+        bonusCalculator: (arg0: string) => Calculation;
+    }
+
+    let { proficiency = $bindable(), name, bonusCalculator }: Props = $props();
     
-    let maths:Calculation;
-    let bonus:string;
+    let maths: Calculation | null = $state(null);
+    let bonus: string = $state('');
 
     const proficiencyCycle = (proficiency:string) => {
         switch(proficiency) {
@@ -24,26 +29,28 @@
         }
     }
 
-    $: {
+    $effect(() => {
         maths = bonusCalculator(name);
         bonus = bonusToString(maths.total);
 
-        proficiency = proficiency;
-    }
+        proficiency;
+    });
+
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 
 <div class="skill-div">
     <div class="proficiency-buffer {$mode !== "edit" ? "disable" : ""}">
-        <button class="skill-proficiency" disabled={$mode !== "edit"} on:click={() => {
+        <button class="skill-proficiency" disabled={$mode !== "edit"} onclick={async () => {
             proficiency = proficiencyCycle(proficiency); 
-            updateDatabase();
+            await dbContext.save();
         }}>
             {proficiency}
         </button>
     </div>
     <div class="skill-name">{name}</div>
     <div class="skill-bonus">{bonus}</div>
-    {#if $mode === "edit"}
+    {#if $mode === "edit" && maths}
         <CalculationVisualizer
             maths = {maths}
         />

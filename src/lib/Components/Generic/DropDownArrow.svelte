@@ -4,10 +4,14 @@
 -->
 
 <script lang="ts">
-    export let shown:boolean = false;
+    interface Props {
+        shown?: boolean;
+    }
+
+    let { shown = $bindable(false) }: Props = $props();
 </script>
-<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions-->
-<div class="custom-box bubble {shown ? "shown" : ""}" on:click = {() => {
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
+<div class="custom-box bubble {shown ? "shown" : ""}" onclick={() => {
     shown = !shown
     }}>
     <div style="margin-top: -0.2rem; user-select: none" class="{shown ? "up-arrow" : "down-arrow"}">

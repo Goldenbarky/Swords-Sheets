@@ -1,7 +1,11 @@
 <script lang="ts">
-    export let entries:any[];
-    export let upcast:string;
-    export let level:number;
+    interface Props {
+        entries: any[];
+        upcast: string;
+        level: number;
+    }
+
+    let { entries, upcast, level }: Props = $props();
 
     let damageDetails:{
         base:number,
@@ -9,7 +13,7 @@
         scale:number,
         damage:number,
         index:string[]
-    }[] = [];
+    }[] = $state([]);
 
     let paragraphs:string[] = [];
     entries.forEach(x => (x.type !== "quote") ? paragraphs.push(x) : "");
@@ -113,7 +117,7 @@
 
     let formattedUpcast = formatParagraph(upcast, 0);
 
-    let active:number = level;
+    let active:number = $state(level);
 </script>
 {#each formattedDescription as paragraph, i}
     <p>
@@ -128,12 +132,12 @@
             {/if}
         {/each}
     </p>
-    {#if (i != paragraphs.length - 1)}<div style="height:0.5rem;"/> {/if}
+    {#if (i != paragraphs.length - 1)}<div style="height:0.5rem;"></div> {/if}
 {/each}
 {#if upcast != ""}
 {@const formatted = formattedUpcast}
     {#if formatted[0] !== ""}
-        <div style="height:0.5rem;"/>
+        <div style="height:0.5rem;"></div>
         <p>
             <span class="upcast">At Higher Levels.</span>
             {#each formatted as entry, i}
@@ -148,8 +152,8 @@
     {#if damageDetails.find(x => x.scale !== 0) !== undefined}
         <div class="row">
             {#each Array(9 - level + 1) as _, i}
-                <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events -->
-                <div class="spell-detail" class:is-active={active===(level + i)} on:click={() => {
+                <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events -->
+                <div class="spell-detail" class:is-active={active===(level + i)} onclick={() => {
                     active = (level + i);
                     damageDetails.forEach(x => {
                         x.damage = x.base + (x.scale * i);

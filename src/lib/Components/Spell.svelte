@@ -1,11 +1,12 @@
 <script lang="ts">
     import SpellDescription from "./SpellDescription.svelte";
     import StringLabel from "./Generic/StringLabel.svelte";
-    import { updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
+    import { DatabaseConnection } from "$lib/Database.svelte";
 
-    //@ts-nocheck
-    export let spell:{
+    interface Props {
+        //@ts-nocheck
+        spell: {
         name:string,
         school:keyof typeof schools,
         level:number,
@@ -39,10 +40,17 @@
             type:string
         }[]
     };
+        prepared?: string;
+        onChange: Function;
+        removeFunction: Function;
+    }
 
-    export let prepared:string = "false";
-    export let onChange:Function;
-    export let removeFunction:Function;
+    let {
+        spell,
+        prepared = $bindable("false"),
+        onChange,
+        removeFunction
+    }: Props = $props();
 
     const getComponents = () => {
         return Object.keys(spell.components).filter(x => spell.components[x]).join(", ").toUpperCase()
@@ -100,7 +108,9 @@
         } else return "";
     }
 
-    let shown = false;
+    let shown = $state(false);
+
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 
 <div class="container">
@@ -111,10 +121,10 @@
             {:else if prepared === "always"}
                 <div class="custom-subtitle cantrip always-prepared">{spell["name"]}</div>
             {:else}
-                <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                <div class="custom-subtitle {$mode !== "use" ? "disable" : ""}" on:click={() => {
+                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                <div class="custom-subtitle {$mode !== "use" ? "disable" : ""}" onclick={async () => {
                     prepared = prepared === "true" ? "false" : "true";
-                    updateDatabase();
+                    await dbContext.save();
                     onChange(prepared);
                 }}>
                 {#if String(prepared) !== "false"}<span class="highlighted">{spell["name"]}</span>
@@ -135,8 +145,8 @@
                     </div>
                 {/each}
                 {#if $mode === "edit"}
-                    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                    <div class="spell-detail custom-button {prepared === "always" ? "" : "not-selected"}" on:click={() => {
+                    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                    <div class="spell-detail custom-button {prepared === "always" ? "" : "not-selected"}" onclick={async () => {
                         if(prepared === "always") {
                             prepared = "false";
                         } else {
@@ -144,14 +154,14 @@
                             prepared = "always";
                         }
                         
-                        updateDatabase();
+                        await dbContext.save();
                     }}>A
                         <div class="box tooltip-box">
                             <div class="tooltip-text">Always Prepared</div>
                         </div>
                     </div>
-                    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                    <div class="spell-detail custom-button" on:click={() => removeFunction(spell)}>X
+                    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                    <div class="spell-detail custom-button" onclick={() => removeFunction(spell)}>X
                         <div class="box tooltip-box">
                             <div class="tooltip-text">Remove Spell</div>
                         </div>
@@ -193,8 +203,8 @@
             </div>
         </div>
     {/if}
-    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions-->
-    <div class="custom-box bubble" on:click = {() => {
+    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
+    <div class="custom-box bubble" onclick={() => {
         shown = !shown
         }}>
         <div style="margin-top: -0.6rem; user-select: none">

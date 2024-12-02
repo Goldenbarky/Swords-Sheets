@@ -1,9 +1,10 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
     import { mode } from "$lib/Theme";
+    import { getContext } from "svelte";
     import { Calculation } from "../Classes/DataClasses";
     import Divider from "../Helpers/Divider.svelte";
     import CalculationVisualizer from "./CalculationVisualizer.svelte";
+    import type { DatabaseConnection } from "$lib/Database.svelte";
 
     let {
         number = $bindable(),
@@ -20,18 +21,20 @@
     }: {
         number: number;
         label: string;
-        label_placeholder: string;
-        bold_label: boolean;
-        number_edit_modes: string[];
-        label_edit_modes: string[];
-        incremental: boolean;
-        number_font_size: string;
-        label_font_size: string;
-        vertical_margins: boolean;
+        label_placeholder?: string;
+        bold_label?: boolean;
+        number_edit_modes?: string[];
+        label_edit_modes?: string[];
+        incremental?: boolean;
+        number_font_size?: string;
+        label_font_size?: string;
+        vertical_margins?: boolean;
         calculation?: Calculation;
     } = $props();
 
     let placeholder = "\u{221E}";
+
+    const dbContext = getContext<DatabaseConnection>('database');
 </script>
 
 <div
@@ -41,13 +44,13 @@
         : "margin-left:0.5rem; margin-right:0.5rem;"}
 >
     <div class="row" style="align-items:center;">
-        {#if incremental && number_edit_modes.includes($mode) && typeof number === "number"}
+        {#if incremental && number_edit_modes.includes($mode)}
             <button
                 class="custom-box custom-button custom-tiny-button"
                 style="font-size: {number_font_size}"
-                onclick={() => {
+                onclick={async () => {
                     number--;
-                    updateDatabase();
+                    await dbContext.save();
                 }}
             >
                 <div style="position: relative; top: 2.5px">-</div>
@@ -57,7 +60,7 @@
             class="value {number_edit_modes.includes($mode) ? 'editable' : ''}"
             style="font-size: {number_font_size}"
             disabled={!number_edit_modes.includes($mode)}
-            onchange={updateDatabase}
+            onchange={dbContext.save}
             bind:value={number}
             {placeholder}
         />
@@ -65,9 +68,9 @@
             <button
                 class="custom-box custom-button custom-tiny-button"
                 style="font-size: {number_font_size}"
-                onclick={() => {
+                onclick={async () => {
                     number++;
-                    updateDatabase();
+                    await dbContext.save();
                 }}
             >
                 <div style="position: relative; top: 2.5px">+</div>
@@ -81,7 +84,7 @@
             : 'not-bold'} {label_edit_modes.includes($mode) ? 'editable' : ''}"
         style="font-size: {label_font_size}"
         disabled={!label_edit_modes.includes($mode)}
-        onchange={updateDatabase}
+        onchange={dbContext.save}
         bind:value={label}
         placeholder={label_placeholder}
     />

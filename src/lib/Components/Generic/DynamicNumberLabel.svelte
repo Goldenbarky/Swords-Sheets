@@ -1,24 +1,36 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
+    import { DatabaseConnection } from "$lib/Database.svelte";
     import { mode } from "$lib/Theme";
 
-    export let current:number;
-    export let label:string;
-    export let max:number;
-    export let bold_label:boolean=true;
-    export let current_edit_modes:string[] = ["use"];
-    export let max_edit_modes:string[] = ["edit"];
+    interface Props {
+        current: number;
+        label: string;
+        max: number;
+        bold_label?: boolean;
+        current_edit_modes?: string[];
+        max_edit_modes?: string[];
+    }
 
+    let {
+        current = $bindable(),
+        label,
+        max = $bindable(),
+        bold_label = true,
+        current_edit_modes = ["use"],
+        max_edit_modes = ["edit"]
+    }: Props = $props();
+
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
-    <div class="row" style="margin:0.5rem;">
-        <input class="value" disabled={!current_edit_modes.includes($mode)} on:change={updateDatabase} bind:value={current}/>
-        <div class="buffer" style="border-right: 1px solid var(--border)"></div>
-        <div class="buffer"></div>
-        <div class="custom-title {bold_label ? 'bold' : 'not-bold'}">{label}</div>
-        <div class="buffer" style="border-right: 1px solid var(--border)"></div>
-        <div class="buffer"></div>
-        <input class="value max" disabled={!max_edit_modes.includes($mode)} on:change={updateDatabase} bind:value={max}/>
-    </div>
+<div class="row" style="margin:0.5rem;">
+    <input class="value" disabled={!current_edit_modes.includes($mode)} onchange={dbContext.save} bind:value={current}/>
+    <div class="buffer" style="border-right: 1px solid var(--border)"></div>
+    <div class="buffer"></div>
+    <div class="custom-title {bold_label ? 'bold' : 'not-bold'}">{label}</div>
+    <div class="buffer" style="border-right: 1px solid var(--border)"></div>
+    <div class="buffer"></div>
+    <input class="value max" disabled={!max_edit_modes.includes($mode)} onchange={dbContext.save} bind:value={max}/>
+</div>
 <style lang="scss">
     .custom-title {
         @extend .title !optional;

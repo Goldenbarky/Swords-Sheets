@@ -1,16 +1,22 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
+    import { DatabaseConnection } from "$lib/Database.svelte";
     import { mode } from "$lib/Theme";
 
-    export let name:string;
-    export let score:number;
-    export let mod:string;
+    interface Props {
+        name: string;
+        score: number;
+        mod: string;
+    }
+
+    let { name, score = $bindable(), mod }: Props = $props();
+
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 
 <div class="ability-box">
     <div class="box custom-box ability-score-box">
         <div class="ability-name">{name}</div>
-        <input class="ability-score" disabled={$mode !== "edit"} on:change={updateDatabase} bind:value={score}/>
+        <input class="ability-score" disabled={$mode !== "edit"} onchange={dbContext.save} bind:value={score}/>
     </div>
     <div class="box custom-box ability-mod">{mod}</div>
 </div>

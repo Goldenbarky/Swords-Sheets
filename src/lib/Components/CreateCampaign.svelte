@@ -1,51 +1,56 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { levenshteinDistance, upsertNewCampaign } from "$lib/GenericFunctions";
-    import { onMount } from "svelte";
     import Divider from "./Helpers/Divider.svelte";
 
-    export let userAuthorized;
-    export let shown:boolean;
-    export let all_characters:CharacterDataRow[];
+    interface Props {
+        userAuthorized: any;
+        shown: boolean;
+        all_characters: CharacterDataRow[];
+    }
 
-    let campaign_name: string;
-    let characters: string[] = [];
-    let campaign_level: number;
+    let { userAuthorized, shown = $bindable(), all_characters = $bindable() }: Props = $props();
 
-    let character_query = "";
+    let campaign_name: string = $state('');
+    let characters: string[] = $state([]);
+    let campaign_level: number = $state(0);
 
-    onMount(() => {
+    let character_query = $state("");
+
+    $effect(() => {
         all_characters = all_characters.filter(x => !x.data.Campaign);
     });
 
-    $: filter_array = all_characters.filter(x => x.name.toLowerCase().includes(character_query.toLowerCase())).sort((a, b) => {
-        return levenshteinDistance(a.name.toLowerCase(), character_query.toLowerCase()) - levenshteinDistance(b.name.toLowerCase(), character_query.toLowerCase());
-    }).slice(0, 5);
+    let filter_array = $derived(
+        all_characters.filter(x => x.name.toLowerCase().includes(character_query.toLowerCase()))
+            .sort((a, b) => levenshteinDistance(a.name.toLowerCase(), character_query.toLowerCase()) - levenshteinDistance(b.name.toLowerCase(), character_query.toLowerCase()))
+            .slice(0, 5)
+    );
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
-    <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
+    <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
     <div
         class="modal-background"
-        on:click={() => {
+        onclick={() => {
             shown = false;
         }}
-    />
+></div>
     <div class="modal-content" style="display: grid; align-items: center; justify-items: center; overflow: visible;">
         <div class="custom-box column" style="width: fit-content; height: fit-content; min-width: 30rem; padding-right: 2rem; padding-left: 2rem;">
             <div class="custom-title">Make a New Campaign</div>
                 <div class="custom-subtitle">Name</div>
             <input bind:value={campaign_name} maxlength="32"/>
-            <div style="height: 1rem;"/>
+            <div style="height: 1rem;"></div>
             <div class="custom-subtitle">Characters</div>
             <input bind:value={character_query}/>
                 {#if character_query.length > 0}
                     <div style="position:relative; display: flex; justify-content: center;">
                         <div class="custom-box tooltip-box" style="min-width:10rem;">
-                            {#each filter_array as character, i}
-                                <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                                <div class="custom-button" style="font-size:medium; width:100%; text-align:center;" on:click={() => {
+                            {#each filter_array as character, i (character.id)}
+                                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                                <div class="custom-button" style="font-size:medium; width:100%; text-align:center;" onclick={() => {
                                     if(!characters.find(x => character.id === x)) {
-                                        characters = [...characters, character.id];
+                                        characters.push(character.id);
                                         character_query = "";
                                     }
                                 }}>{character.name}</div>
@@ -67,7 +72,7 @@
                 <table>
                     <tbody>
                         <tr>
-                            <th >Character</th>
+                            <th>Character</th>
                             <th>Class</th>
                             <th>Level</th>
                         </tr>
@@ -78,7 +83,7 @@
                                     <button 
                                         class="custom-box custom-button custom-tiny-button" 
                                         style="position: absolute; left: -1.5rem; top: 0.5rem;"
-                                        on:click={() => {
+                                        onclick={() => {
                                             characters = characters.filter(x => x != character_id)
                                         }}>
                                         -
@@ -91,7 +96,7 @@
                         {/each}
                     </tbody>
                 </table>
-            <div style="height: 1rem;"/>
+            <div style="height: 1rem;"></div>
             <div class="custom-subtitle">Level</div>
             <input
                 type="number"
@@ -100,13 +105,13 @@
                 max="20"
                 bind:value={campaign_level}
             />
-            <div style="height: 1rem;"/>
+            <div style="height: 1rem;"></div>
             <button
                 class="custom-box custom-button {!userAuthorized
                     ? 'disabled'
                     : ''}"
                 style="border: solid 1px var(--border);"
-                on:click={async () => {
+                onclick={async () => {
                     if (userAuthorized) {
                         let campaign = await upsertNewCampaign(campaign_name, campaign_level, characters);
                         let campaign_id = campaign?.data?.id;

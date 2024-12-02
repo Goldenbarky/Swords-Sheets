@@ -1,17 +1,21 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
     import { mode, theme } from "$lib/Theme";
     import { SOURCES, dndzone } from "svelte-dnd-action";
     import DraggableHandle from "$lib/Components/Icons/DraggableHandle.svelte";
     import CheckedBox from "./CheckedBox.svelte";
+    import { DatabaseConnection } from "$lib/Database.svelte";
 
-    export let feature:TitleDescriptionType;
-    export let removeFunction:any = () => { };
-    export let orderable:boolean;
+    interface Props {
+        feature: TitleDescriptionType;
+        removeFunction?: any;
+        orderable: boolean;
+    }
 
-    $: newList = feature.Description.map(x => ({...x, id: crypto.randomUUID()}));
+    let { feature = $bindable(), removeFunction = () => { }, orderable }: Props = $props();
 
-    let dragDisabled = true;
+    let newList = $state(feature.Description.map(x => ({...x, id: crypto.randomUUID()})));
+
+    let dragDisabled = $state(true);
 
     const handleConsider = (e: { detail: { items: any; info: { source: any; trigger: any; }; }; }) => {
 		const {items: newItems, info: {source, trigger}} = e.detail;
@@ -28,37 +32,38 @@
 			dragDisabled = true;
 		}
 
-        await updateDatabase();
+        await dbContext.save();
 	}
 
+    const dbContext = DatabaseConnection.getDatabaseContext();
 </script>
 {#if $mode === "edit"}
     <div class="row" style="align-items: flex-start;">
         <button 
             class="custom-box custom-button custom-tiny-button"
             style="margin-top:0.5rem;" 
-            on:click={async () => {
+            onclick={async () => {
                 removeFunction();
-                await updateDatabase();
+                await dbContext.save();
             }}
         >
             -
         </button>
         <div style="width:100%;">
             <div class="row" style="width:100%;">
-                <div class="custom-title placeholder" on:focusout={updateDatabase} bind:innerText={feature.Title} contenteditable="true" placeholder="Title"/>
+                <div class="custom-title placeholder" onfocusout={dbContext.save} bind:innerText={feature.Title} contenteditable="true" placeholder="Title"></div>
                 <div class="row" style="padding-left: 0.5rem; width: fit-content;">
                     <i class="custom-subtitle"># of uses: </i>
-                    <input on:change={updateDatabase} bind:value={feature.Uses.Max}>
+                    <input onchange={dbContext.save} bind:value={feature.Uses.Max}>
                 </div>
             </div>
             {#if orderable}
-                <div use:dndzone={{ items: newList, dragDisabled }} on:consider={handleConsider} on:finalize={handleFinalize}>
+                <div use:dndzone={{ items: newList, dragDisabled }} onconsider={handleConsider} onfinalize={handleFinalize}>
                     {#each newList as paragraph (paragraph.id)}
                         <div class="row">
                             <div style="margin-top: 0.2rem;">
-                                <p class="placeholder" style="color:var(--secondary);" on:focusout={updateDatabase} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"/>
-                                <p class="placeholder" on:focusout={updateDatabase} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"/>
+                                <p class="placeholder" style="color:var(--secondary);" onfocusout={dbContext.save} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"></p>
+                                <p class="placeholder" onfocusout={dbContext.save} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"></p>
                             </div>
                             <div style="display: flex; place-content: end; flex-grow: 1">
                                 <DraggableHandle bind:dragDisabled/>
@@ -69,13 +74,13 @@
             {:else}
                 {#each feature.Description as paragraph}
                     <div class="row">
-                        <button class="custom-box custom-button custom-tiny-button" on:click={() => {
+                        <button class="custom-box custom-button custom-tiny-button" onclick={async () => {
                             feature.Description = feature.Description.filter(x => x !== paragraph);
-                            updateDatabase();
+                            await dbContext.save();
                         }}>-</button>
                         <div style="margin-top: 0.2rem;">
-                            <p class="placeholder" style="color:var(--secondary);" on:focusout={updateDatabase} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"/>
-                            <p class="placeholder" on:focusout={updateDatabase} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"/>
+                            <p class="placeholder" style="color:var(--secondary);" onfocusout={dbContext.save} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"></p>
+                            <p class="placeholder" onfocusout={dbContext.save} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"></p>
                         </div>
                     </div>
                 {/each}
@@ -83,7 +88,7 @@
         </div>
     </div>
     <div style="display: flex; justify-content: center;">
-        <button class="custom-box custom-button" on:click={() => feature.Description = [...feature.Description, {Subtitle:"",Paragraph:""}]}>+</button>
+        <button class="custom-box custom-button" onclick={() => feature.Description.push({Subtitle:"",Paragraph:""})}>+</button>
     </div>
 {:else}
     <div class="row" style="width:100%;">
@@ -96,7 +101,7 @@
                     checked = {i < feature.Uses.Used}
                     bind:checked_counter = {feature.Uses.Used}
                 />
-                <div style="width: 0.5rem;"/>
+                <div style="width: 0.5rem;"></div>
             {/each}
         </div>
     </div>
@@ -105,7 +110,7 @@
             <p style="color:var(--secondary)">{paragraph.Subtitle}</p>
         {/if}
         <p>{paragraph.Paragraph}</p>
-        {#if i != feature.Description.length - 1}<div style="height:0.5rem;"/>{/if}
+        {#if i != feature.Description.length - 1}<div style="height:0.5rem;"></div>{/if}
     {/each}
 {/if}
 
