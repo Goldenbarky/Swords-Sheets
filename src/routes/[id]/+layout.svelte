@@ -2,26 +2,9 @@
     import "../../app.scss";
     import { theme } from "$lib/Theme";
     import MainPage from '$lib/Pages/CharacterSheet/MainPage.svelte';
-    import { getCampaign, getInvitesForCharacter, supabaseObject } from "$lib/GenericFunctions";
-    import { onMount } from "svelte";
     import { DatabaseConnection } from "$lib/Database.svelte";
     
     let { data, children } = $props();
-
-    let campaign_invites: CampaignDataRow[] = $state([]);
-    let campaign: CampaignDataRow | undefined = $state();
-
-    $effect(() => {
-        if (!dbContext.activeCharacterRow) {
-            return;
-        }
-
-        if(!dbContext.activeCharacterRow.data.Campaign) {
-            getInvitesForCharacter(dbContext.activeCharacterRow.id).then((s) => campaign_invites = (s!));
-        } else {
-            getCampaign(dbContext.activeCharacterRow.data.Campaign).then(s => campaign = s);
-        }
-    });
     
     const dbContext = DatabaseConnection.getDatabaseContext();
 </script>

@@ -10,7 +10,11 @@
     import ShieldTemplate from "$lib/Data/ShieldTemplate.json";
     import MagicItemTemplate from "$lib/Data/MagicItemTemplate.json";
 
-    export let character: CharacterSheet;
+    interface Props {
+        character: CharacterSheet;
+    }
+
+    let { character = $bindable() }: Props = $props();
 
     const removeWeapon = (weapon:any) => {
         character.Equipment.Weapons = character.Equipment.Weapons.filter(x => x !== weapon);
@@ -24,15 +28,15 @@
     <div class="column custom-column padded-column center">
         <div style="width: 100%; display: flex; flex-direction: column; align-items:center;">
             <div class="custom-title" style="width:100%;">Weapons</div>
-            {#each character.Equipment.Weapons as weapon (weapon)}
+            {#each character.Equipment.Weapons as weapon, i (weapon)}
                 <Weapon
-                    bind:weapon={weapon}
+                    bind:weapon={character.Equipment.Weapons[i]}
                     removeFunction={() => {removeWeapon(weapon)}}
                 />
-                <div style="height: 0.5rem;"/>
+                <div style="height: 0.5rem;"></div>
             {/each}
             {#if $mode === "edit"}
-                <button class="custom-box custom-button" on:click={() => character.Equipment.Weapons = [...character.Equipment.Weapons, {
+                <button class="custom-box custom-button" onclick={() => character.Equipment.Weapons.push({
                     "Name":"",
                     "Ability":"Strength",
                     "Bonus":0,
@@ -43,7 +47,7 @@
                     },
                     "Extra_Damage":[],
                     "Entries":[]
-                }]}>+</button>
+                })}>+</button>
             {/if}
         </div>
     </div>
@@ -59,7 +63,7 @@
         {#each character.Equipment.Shields as shield, i}
             <div class="row" style="position: relative;">
                 {#if $mode === "edit"}
-                    <button class="custom-box custom-button custom-tiny-button" style="position: absolute; left: -2.5rem;" on:click={() => {
+                    <button class="custom-box custom-button custom-tiny-button" style="position: absolute; left: -2.5rem;" onclick={() => {
                         character.Equipment.Shields = character.Equipment.Shields.filter(x => x !== shield);
                         updateDatabase();
                     }}>-</button>
@@ -71,11 +75,11 @@
                     />
                 </div>
             </div>
-            <div style="height:1rem;"/>
+            <div style="height:1rem;"></div>
         {/each}
         {#if $mode === "edit"}
-            <button class="custom-box custom-button" on:click={() => {
-                character.Equipment.Shields = [...character.Equipment.Shields, ShieldTemplate];
+            <button class="custom-box custom-button" onclick={() => {
+                character.Equipment.Shields.push(ShieldTemplate);
                 updateDatabase();
             }}>Add New Armor Enhancement</button>
         {/if}
@@ -88,7 +92,7 @@
         {/each}
         {#if $mode === "edit"}
             <div style="display: flex; justify-content: center;">
-                <button class="custom-box custom-button" on:click={() => character.Equipment.Magic_Items = [...character.Equipment.Magic_Items, MagicItemTemplate]}>+</button>
+                <button class="custom-box custom-button" onclick={() => character.Equipment.Magic_Items.push(MagicItemTemplate)}>+</button>
             </div>
         {/if}
     </div>
@@ -99,7 +103,7 @@
                 {#each character.Equipment.Valuables as valuable}
                     <div class="row">
                         {#if $mode === "edit"}
-                            <button class="custom-box custom-button custom-tiny-button" on:click={() => {
+                            <button class="custom-box custom-button custom-tiny-button" onclick={() => {
                                 character.Equipment.Valuables = character.Equipment.Valuables.filter(x => x !== valuable);
                                 updateDatabase();
                             }}>-</button>
@@ -120,7 +124,7 @@
                 {/each}
                 {#if $mode === "edit"}
                     <div style="display: flex; justify-content: center;">
-                        <button class="custom-box custom-button" on:click={() => character.Equipment.Valuables = [...character.Equipment.Valuables, {Name: "", Amount: 0}]}>+</button>
+                        <button class="custom-box custom-button" onclick={() => character.Equipment.Valuables.push({Name: "", Amount: 0})}>+</button>
                     </div>
                 {/if}    
             </div>
@@ -133,7 +137,7 @@
                 {#each character.Equipment.Inventory as item}
                     <div class="row">
                         {#if $mode === "edit"}
-                            <button class="custom-box custom-button custom-tiny-button" on:click={() => {
+                            <button class="custom-box custom-button custom-tiny-button" onclick={() => {
                                 character.Equipment.Inventory = character.Equipment.Inventory.filter(x => x !== item);
                                 updateDatabase();
                             }}>-</button>
@@ -152,7 +156,7 @@
                 {/each}
                 {#if $mode === "edit"}
                     <div style="display: flex; justify-content: center;">
-                        <button class="custom-box custom-button" on:click={() => character.Equipment.Inventory = [...character.Equipment.Inventory, {Name: "", Amount: 0}]}>+</button>
+                        <button class="custom-box custom-button" onclick={() => character.Equipment.Inventory.push({Name: "", Amount: 0})}>+</button>
                     </div>
                 {/if}
             </div>
