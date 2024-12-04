@@ -1,56 +1,31 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { saveCharacter, savingPromise, setCharacter, signInWithGoogle, updateDatabase, user as writeUser } from '$lib/GenericFunctions';
     import EquipmentPage from '$lib/Pages/CharacterSheet/EquipmentPage.svelte';
     import FeaturesPage from "$lib/Pages/CharacterSheet/FeaturesPage.svelte";
     import SpellcastingPage from "$lib/Pages/CharacterSheet/SpellcastingPage.svelte";
     import StatsPage from "$lib/Pages/CharacterSheet/StatsPage.svelte";
-    import { mode } from '$lib/Theme';
-    import type { User } from '@supabase/supabase-js';
-    import { getContext, onMount } from 'svelte';
     import ThemePage from '../ThemePage.svelte';
     import { fade } from 'svelte/transition';
     import CampaignInfo from '$lib/Components/CampaignInfo.svelte';
+    import { DatabaseClient, SiteState } from '$lib/Database.svelte';
 
-    export let sheet:CharacterDataRow;
-    export let spells:any;
+    let { spells } = $props();
 
-    let origUser = getContext<{ user: User } | null>('user')?.user;
-    $: user = origUser ?? $writeUser;
-
-    onMount(async () => {
-        setCharacter(sheet);
-    });
-
-    let savePromise: null | (() => Promise<number>) = null;
-
-    const finuto = async (num: number) => {
-        // oops
-
-        if (num !== 200) {
-            console.error('Saving to database: ', num);
-        } else {
-            savePromise = null;
-            $savingPromise = false;
-        }
+    function save() {
+        siteState.save();
     }
 
-    const acceptInvite = async (campaign_id:string) => {
-        sheet.data.Campaign = campaign_id;
-        console.log(sheet.data.Campaign);
-        await updateDatabase();
-    }
-    
-    $: if ($savingPromise === true) {
-        savePromise = saveCharacter;
-    }
-
-    let campaignInfoShown = false;
+    let campaignInfoShown = $state(false);
 
     let tabs = ["Stats", "Features", "Equipment", "Spellcasting", "Theme"];
     let tabParam = $page.url.searchParams.get('activetab');
-    let activeTab = tabParam ?? "Stats";
+    let activeTab = $state(tabParam ?? "Stats");
+
+    const dbClient = DatabaseClient.getDatabaseClient();
+    const siteState = SiteState.getSiteState();
+    const characterController = $derived(siteState.characterController!);
+    const sheet = $derived(characterController.character);
 </script>
 <section class="hero is-small">
     <div
@@ -59,56 +34,56 @@
     >
         <div class="columns" style="margin: 0">
             <div class="column custom-column" style="padding: 0;">
-                {#if $mode !== "edit"}
+                {#if characterController.mode !== "edit"}
                     <p class="title custom-title" style="margin-bottom: 1.5rem;">{sheet.data.Name}</p>
                     <p class="subtitle" style="color: var(--text);">{sheet.data.Class} {sheet.data.Level}</p>
                 {:else}
-                    <p class="title custom-title placeholder" style="margin-bottom: 0.25rem;" on:focusout={updateDatabase} bind:innerText={sheet.data.Name} contenteditable="true" placeholder="Name"></p>
+                    <p class="title custom-title placeholder" style="margin-bottom: 0.25rem;" onfocusout={save} bind:innerText={sheet.data.Name} contenteditable="true" placeholder="Name"></p>
                     <div class="row">
-                        <p class="subtitle placeholder" on:focusout={updateDatabase} bind:innerText={sheet.data.Class} contenteditable="true" placeholder="Class"></p>
+                        <p class="subtitle placeholder" onfocusout={save} bind:innerText={sheet.data.Class} contenteditable="true" placeholder="Class"></p>
                         <div style="width: 0.35rem;"></div>
-                        <p class="subtitle placeholder" on:focusout={updateDatabase} bind:innerText={sheet.data.Level} contenteditable="true" placeholder="Level"></p>
+                        <p class="subtitle placeholder" onfocusout={save} bind:innerText={sheet.data.Level} contenteditable="true" placeholder="Level"></p>
                     </div>
                 {/if}
             </div>
             <div class="column custom-column" style="flex: none;">
                 <div style="display: flex; flex-direction: column;">
-                    <button class="custom-box custom-button" on:click={() => goto(`/`)}>Go Home</button>
+                    <button class="custom-box custom-button" onclick={() => goto(`/`)}>Go Home</button>
                 </div>
                 <div style="display: flex; flex-direction: column;">
-                    <button class="custom-box custom-button" on:click={() => campaignInfoShown = true}>Campaign Info</button>
+                    <button class="custom-box custom-button" onclick={() => campaignInfoShown = true}>Campaign Info</button>
                 </div>
             </div>
             <div class="column custom-column" style="flex: none;">
                 <div style="display: flex; flex-direction: column;">
-                    <button class="custom-box custom-button {$mode === "view" ? "selected" : ""}" on:click={() => goto(`/${sheet.name}/?activetab=${activeTab}`)}>View</button>
-                    {#if user && sheet.owner_id === user.id}
-                        <button class="custom-box custom-button {$mode === "use" ? "selected" : ""}" on:click={() => goto(`/${sheet.name}/use?activetab=${activeTab}`)}>Use</button>
-                        <button class="custom-box custom-button {$mode === "edit" ? "selected" : ""}" on:click={() => goto(`/${sheet.name}/edit?activetab=${activeTab}`)}>Edit</button>
+                    <button class="custom-box custom-button {characterController.mode === "view" ? "selected" : ""}" onclick={() => goto(`/${sheet.name}/?activetab=${activeTab}`)}>View</button>
+                    {#if dbClient.user && sheet.owner_id === dbClient.user.id}
+                        <button class="custom-box custom-button {characterController.mode === "use" ? "selected" : ""}" onclick={() => goto(`/${sheet.name}/use?activetab=${activeTab}`)}>Use</button>
+                        <button class="custom-box custom-button {characterController.mode === "edit" ? "selected" : ""}" onclick={() => goto(`/${sheet.name}/edit?activetab=${activeTab}`)}>Edit</button>
                     {/if}
                 </div>
             </div>
             <div class="column custom-column" style="flex: none;">
-                {#if !user}
+                {#if !dbClient.user}
                     <button class="custom-box custom-button" 
-                        on:click={async () => await signInWithGoogle()}>
+                        onclick={() => dbClient.signInWithGoogle()}>
                         Log in
                     </button>
                 {:else}
-                    <!-- svelte-ignore a11y-missing-attribute -->
-                    <img src={user.user_metadata.avatar_url} class="profile-pic"/>
+                    <!-- svelte-ignore a11y_missing_attribute -->
+                    <img src={dbClient.user.user_metadata.avatar_url} referrerpolicy="no-referrer" class="profile-pic"/>
                 {/if}
             </div>
         </div>
         <div class="custom-tabs is-boxed">
             <ul style="display: flex; flex-direction: row;">
                 {#each tabs as tab}
-                    {#if tab !== "Theme" || $mode === "edit"}
+                    {#if tab !== "Theme" || characterController.mode === "edit"}
                         <li class:is-active={activeTab===tab}>
-                            <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
-                            <a on:click={() => {
+                            <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
+                            <a onclick={() => {
                                 activeTab = tab;
-                                goto(`/${sheet.name}/${$mode === "view" ? "" : $mode }?activetab=${tab}`);
+                                goto(`/${sheet.name}/${characterController.mode === "view" ? "" : characterController.mode }?activetab=${tab}`);
                             }}>{tab}</a>
                         </li>
                     {/if}
@@ -131,44 +106,37 @@
     />
 {:else if activeTab==="Spellcasting"}
     <SpellcastingPage
-        spells={spells}
         bind:character={sheet.data}
+        spells={spells}
     />
 {:else if activeTab==="Notes"}
     <div>words</div>
 {:else if activeTab==="Theme"}
-    {#if $mode === "edit"}
+    {#if characterController.mode === "edit"}
         <ThemePage/>
     {/if}
 {/if}
 
-<CampaignInfo
-    bind:shown={campaignInfoShown}
-    acceptInvite={acceptInvite}
-/>
+<CampaignInfo bind:shown={campaignInfoShown} />
 
-{#if savePromise !== null}
+<!-- tODO fix  -->
+{#key siteState.saveStatus !== 'NOT'}
     <div class="save-indicator" out:fade={{ delay: 1000 }}>
-        {#await savePromise()}
+        {#if siteState.saveStatus === 'SAVING'}
             <div class="save-saving">
                 
             </div>
-        {:then num}
-            {#if num === 200}
-                <div class="save-saved">
-                    
-                </div>
-            {:else}
-                <div class="save-errored">
-                    
-                </div>
-            {/if}
-            {#await finuto(num)}
-                {""}
-            {/await}
-        {/await}
+        {:else if siteState.saveStatus === 'SUCCEEDED'}
+            <div class="save-saved">
+                
+            </div>
+        {:else}
+            <div class="save-errored">
+                
+            </div>
+        {/if}
     </div>
-{/if}
+{/key}
 <style lang="scss">
     .save-indicator {
         position: absolute;
@@ -180,15 +148,19 @@
         top: 20px;
         left: 50%;
         color: black;
-        transition: background-color 0.5s ease-in;
+        opacity: 1;
+        transition: background-color 0.5s ease-in, opacity 1s ease-in;
     }
     .save-indicator:has(.save-saving) {
+        opacity: 1;
         background-color: yellow;
     }
     .save-indicator:has(.save-saved) {
+        opacity: 0;
         background-color: green;
     }
     .save-indicator:has(.save-errored) {
+        opacity: 0;
         background-color: red;
     }
     .custom-title {
@@ -255,6 +227,7 @@
     }
     .profile-pic {
         width: 5rem;
+        height: 5rem;
         border-radius: 999px;
         border: 2px solid var(--text);
         user-select: none;

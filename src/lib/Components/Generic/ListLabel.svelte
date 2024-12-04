@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
-    import { mode } from "$lib/Theme";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
     import Divider from "../Helpers/Divider.svelte";
 
 
@@ -12,20 +11,21 @@
 
     let { label, list = $bindable(), editable = true }: Props = $props();
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 <div class="row" style="margin:0.5rem; width: 100%;">
     <div class="custom-title">{label}</div>
     <Divider/>
     <div class="list">
-        {#if editable && $mode === "edit"}
+        {#if editable && characterController.mode === "edit"}
             {#each list as item, i (item)}
                 <div class="row">
-                    <button class="custom-box custom-button custom-tiny-button" onclick={async () => {
+                    <button class="custom-box custom-button custom-tiny-button" onclick={() => {
                         list = list.filter(x => x !== item);
-                        await dbContext.save();
+                        siteState.save();
                     }}>-</button>
-                    <input class="item" onchange={dbContext.save} bind:value={list[i]} placeholder="New {label}"/>
+                    <input class="item" onchange={() => siteState.save()} bind:value={list[i]} placeholder="New {label}"/>
                 </div>
             {/each}
             <button class="custom-box custom-button" onclick={() => list.push("")}>+</button>

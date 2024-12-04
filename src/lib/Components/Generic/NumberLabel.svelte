@@ -1,10 +1,8 @@
 <script lang="ts">
-    import { mode } from "$lib/Theme";
-    import { getContext } from "svelte";
     import { Calculation } from "../Classes/DataClasses";
     import Divider from "../Helpers/Divider.svelte";
     import CalculationVisualizer from "./CalculationVisualizer.svelte";
-    import type { DatabaseConnection } from "$lib/Database.svelte";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
 
     let {
         number = $bindable(),
@@ -34,7 +32,8 @@
 
     let placeholder = "\u{221E}";
 
-    const dbContext = getContext<DatabaseConnection>('database');
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 
 <div
@@ -44,33 +43,33 @@
         : "margin-left:0.5rem; margin-right:0.5rem;"}
 >
     <div class="row" style="align-items:center;">
-        {#if incremental && number_edit_modes.includes($mode)}
+        {#if incremental && number_edit_modes.includes(characterController.mode)}
             <button
                 class="custom-box custom-button custom-tiny-button"
                 style="font-size: {number_font_size}"
-                onclick={async () => {
+                onclick={() => {
                     number--;
-                    await dbContext.save();
+                    siteState.save();
                 }}
             >
                 <div style="position: relative; top: 2.5px">-</div>
             </button>
         {/if}
         <input
-            class="value {number_edit_modes.includes($mode) ? 'editable' : ''}"
+            class="value {number_edit_modes.includes(characterController.mode) ? 'editable' : ''}"
             style="font-size: {number_font_size}"
-            disabled={!number_edit_modes.includes($mode)}
-            onchange={dbContext.save}
+            disabled={!number_edit_modes.includes(characterController.mode)}
+            onchange={() => siteState.save()}
             bind:value={number}
             {placeholder}
         />
-        {#if incremental && number_edit_modes.includes($mode)}
+        {#if incremental && number_edit_modes.includes(characterController.mode)}
             <button
                 class="custom-box custom-button custom-tiny-button"
                 style="font-size: {number_font_size}"
-                onclick={async () => {
+                onclick={() => {
                     number++;
-                    await dbContext.save();
+                    siteState.save();
                 }}
             >
                 <div style="position: relative; top: 2.5px">+</div>
@@ -81,10 +80,10 @@
     <input
         class="custom-title {bold_label
             ? 'bold'
-            : 'not-bold'} {label_edit_modes.includes($mode) ? 'editable' : ''}"
+            : 'not-bold'} {label_edit_modes.includes(characterController.mode) ? 'editable' : ''}"
         style="font-size: {label_font_size}"
-        disabled={!label_edit_modes.includes($mode)}
-        onchange={dbContext.save}
+        disabled={!label_edit_modes.includes(characterController.mode)}
+        onchange={() => siteState.save()}
         bind:value={label}
         placeholder={label_placeholder}
     />

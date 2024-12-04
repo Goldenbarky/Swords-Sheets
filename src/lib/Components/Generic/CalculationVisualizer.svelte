@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { bonusToString } from "$lib/GenericFunctions";
     import Divider from "../Helpers/Divider.svelte";
     import NumberLabel from "./NumberLabel.svelte";
     import { Calculation } from "../Classes/DataClasses";
+    import { CharacterSheetController } from "$lib/Database.svelte";
 
     let { maths = new Calculation() }: { maths: Calculation } = $props();
     //TODO: check if derived is needed here
@@ -19,7 +19,7 @@
                         <Divider orientation="horizontal"/>
                     {/if}
                     <NumberLabel
-                        number={bonusToString(math.bonus)}
+                        number={CharacterSheetController.bonusToString(math.bonus)}
                         label={math.name}
                         bold_label={false}
                         label_font_size="small"
@@ -35,7 +35,7 @@
             {#if variables.length > 1}
                 <Divider orientation="horizontal"/>
                 <NumberLabel
-                    number={bonusToString(maths.total)}
+                    number={CharacterSheetController.bonusToString(maths.total)}
                     label="Total"
                     bold_label={true}
                     label_font_size="medium"

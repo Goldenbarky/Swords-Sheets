@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
+    import { SiteState, DatabaseClient } from "$lib/Database.svelte";
 
     interface Props {
         shown: boolean;
@@ -14,7 +14,8 @@
     //     return levenshteinDistance(a.name.toLowerCase(), character_query.toLowerCase()) - levenshteinDistance(b.name.toLowerCase(), character_query.toLowerCase());
     // }).slice(0, 5));
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const siteState = SiteState.getSiteState();
+    const dbClient = DatabaseClient.getDatabaseClient();
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
     <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
@@ -65,7 +66,7 @@
                             <th>Level</th>
                             <th>Status</th>
                         </tr>
-                        {#await dbContext.getUsersCharacters()}
+                        {#await dbClient.getAllCharacters()}
                             <tr>
                                 <td colspan="4">loading...</td>
                             </tr>
@@ -82,9 +83,9 @@
                                             <button 
                                                 class="custom-box custom-button custom-tiny-button" 
                                                 style="position: absolute; left: -1.5rem; top: 0.5rem;"
-                                                onclick={async () => {
+                                                onclick={() => {
                                                     campaign.data.Characters = campaign.data.Characters.filter(x => x != character_id);
-                                                    await dbContext.save();
+                                                    siteState.save();
                                                 }}>
                                                 -
                                             </button>
@@ -124,7 +125,7 @@
             <button
                 class="custom-box custom-button"
                 style="border: solid 1px var(--border);"
-                onclick={dbContext.save}
+                onclick={() => siteState.save()}
             >
                 Create Campaign
             </button>

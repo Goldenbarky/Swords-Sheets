@@ -4,17 +4,19 @@
     import MagicItem from "$lib/Components/MagicItem.svelte";
     import Weapon from "$lib/Components/Weapon.svelte";
     import Shield from "$lib/Components/Shield.svelte";
-    import { updateDatabase } from "$lib/GenericFunctions";
-    import { mode } from "$lib/Theme";
 
     import ShieldTemplate from "$lib/Data/ShieldTemplate.json";
     import MagicItemTemplate from "$lib/Data/MagicItemTemplate.json";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         character: CharacterSheet;
     }
 
     let { character = $bindable() }: Props = $props();
+
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 
     const removeWeapon = (weapon:any) => {
         character.Equipment.Weapons = character.Equipment.Weapons.filter(x => x !== weapon);
@@ -35,7 +37,7 @@
                 />
                 <div style="height: 0.5rem;"></div>
             {/each}
-            {#if $mode === "edit"}
+            {#if characterController.mode === "edit"}
                 <button class="custom-box custom-button" onclick={() => character.Equipment.Weapons.push({
                     "Name":"",
                     "Ability":"Strength",
@@ -62,35 +64,35 @@
         <br>
         {#each character.Equipment.Shields as shield, i}
             <div class="row" style="position: relative;">
-                {#if $mode === "edit"}
+                {#if characterController.mode === "edit"}
                     <button class="custom-box custom-button custom-tiny-button" style="position: absolute; left: -2.5rem;" onclick={() => {
                         character.Equipment.Shields = character.Equipment.Shields.filter(x => x !== shield);
-                        updateDatabase();
+                        siteState.save();
                     }}>-</button>
                 {/if}
                 <div>
                     <Shield
-                        bind:shield={shield}
+                        bind:shield={character.Equipment.Shields[i]}
                         z_index={character.Equipment.Shields.length - i}
                     />
                 </div>
             </div>
             <div style="height:1rem;"></div>
         {/each}
-        {#if $mode === "edit"}
+        {#if characterController.mode === "edit"}
             <button class="custom-box custom-button" onclick={() => {
                 character.Equipment.Shields.push(ShieldTemplate);
-                updateDatabase();
+                siteState.save();
             }}>Add New Armor Enhancement</button>
         {/if}
         <div class="custom-title" style="width: 100%;">Magic Items</div>
-        {#each character.Equipment.Magic_Items as magic_item}
+        {#each character.Equipment.Magic_Items as magic_item, i (magic_item)}
             <MagicItem
-                bind:item={magic_item}
-                removeFunction={() => {character.Equipment.Magic_Items=character.Equipment.Magic_Items.filter(x => x !== magic_item); updateDatabase();}}
+                bind:item={character.Equipment.Magic_Items[i]}
+                removeFunction={() => {character.Equipment.Magic_Items=character.Equipment.Magic_Items.filter(x => x !== magic_item); siteState.save();}}
             />
         {/each}
-        {#if $mode === "edit"}
+        {#if characterController.mode === "edit"}
             <div style="display: flex; justify-content: center;">
                 <button class="custom-box custom-button" onclick={() => character.Equipment.Magic_Items.push(MagicItemTemplate)}>+</button>
             </div>
@@ -100,12 +102,12 @@
         <div class="custom-box">
             <div class="custom-title">Gold & Valuables</div>
             <div>
-                {#each character.Equipment.Valuables as valuable}
+                {#each character.Equipment.Valuables as valuable (valuable)}
                     <div class="row">
-                        {#if $mode === "edit"}
+                        {#if characterController.mode === "edit"}
                             <button class="custom-box custom-button custom-tiny-button" onclick={() => {
                                 character.Equipment.Valuables = character.Equipment.Valuables.filter(x => x !== valuable);
-                                updateDatabase();
+                                siteState.save();
                             }}>-</button>
                         {/if}
                         <div>
@@ -122,7 +124,7 @@
                         </div>
                     </div>
                 {/each}
-                {#if $mode === "edit"}
+                {#if characterController.mode === "edit"}
                     <div style="display: flex; justify-content: center;">
                         <button class="custom-box custom-button" onclick={() => character.Equipment.Valuables.push({Name: "", Amount: 0})}>+</button>
                     </div>
@@ -134,12 +136,12 @@
         <div class="custom-box" style="width: 100%;">
             <div class="custom-title" style="width: 100%;">Inventory</div>
             <div>
-                {#each character.Equipment.Inventory as item}
+                {#each character.Equipment.Inventory as item (item)}
                     <div class="row">
-                        {#if $mode === "edit"}
+                        {#if characterController.mode === "edit"}
                             <button class="custom-box custom-button custom-tiny-button" onclick={() => {
                                 character.Equipment.Inventory = character.Equipment.Inventory.filter(x => x !== item);
-                                updateDatabase();
+                                siteState.save();
                             }}>-</button>
                         {/if}
                         <div>
@@ -154,7 +156,7 @@
                         </div>
                     </div>
                 {/each}
-                {#if $mode === "edit"}
+                {#if characterController.mode === "edit"}
                     <div style="display: flex; justify-content: center;">
                         <button class="custom-box custom-button" onclick={() => character.Equipment.Inventory.push({Name: "", Amount: 0})}>+</button>
                     </div>

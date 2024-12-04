@@ -1,17 +1,21 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
+    import { DatabaseClient } from "$lib/Database.svelte";
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const dbClient = DatabaseClient.getDatabaseClient();
 </script>
 <div class="column custom-column" style="flex: none;">
-    {#if !dbContext.user}
-        <button class="custom-box custom-button" 
-            onclick={dbContext.signInWithGoogle}>
-            Log in
-        </button>
+    {#if !dbClient.user}
+        <div style="height:5rem;">
+            <button class="custom-box custom-button" 
+                onclick={() => {
+                    dbClient.signInWithGoogle();
+                }}>
+                Log in
+            </button>
+        </div>
     {:else}
         <!-- svelte-ignore a11y-missing-attribute -->
-        <img src={dbContext.user.user_metadata.avatar_url} class="profile-pic"/>
+        <img src={dbClient.user.user_metadata.avatar_url} referrerpolicy="no-referrer" class="profile-pic"/>
     {/if}
 </div>
 <style lang="scss">
@@ -45,6 +49,8 @@
     }
     .profile-pic {
         width: 5rem;
+        height: 5rem;
+        background-color: gray;
         border-radius: 999px;
         border: 2px solid var(--text);
         user-select: none;

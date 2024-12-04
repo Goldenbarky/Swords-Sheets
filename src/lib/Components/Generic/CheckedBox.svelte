@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
-    import { getContext } from "svelte";
+    import {  SiteState } from "$lib/Database.svelte";
 
     interface Props {
         checked?: boolean;
@@ -15,21 +14,22 @@
         checkmark = undefined,
         color = undefined,
         checked_counter = $bindable(-1),
-        onChange = () => {}
+        onChange,
     }: Props = $props();
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const siteState = SiteState.getSiteState();
 </script>
 
 <div class="checkbox-container" style="{checked ? `outline-color: ${color}` : ""}">
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
     <div class="checkmark" onclick={async () => {
         checked = !checked
-        onChange();
+        onChange?.();
         if(checked_counter !== -1) {
             if(checked) checked_counter++;
             else checked_counter--;
-            await dbContext.save();
+            // we should move this dependency for saving upwards as this is a generic component
+            await siteState.save();
         }
     }} style="color: {color}">
         {#if checked}

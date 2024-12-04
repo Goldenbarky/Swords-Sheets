@@ -1,9 +1,8 @@
 <script lang="ts">
-    import { mode, theme } from "$lib/Theme";
     import { SOURCES, dndzone } from "svelte-dnd-action";
     import DraggableHandle from "$lib/Components/Icons/DraggableHandle.svelte";
     import CheckedBox from "./CheckedBox.svelte";
-    import { DatabaseConnection } from "$lib/Database.svelte";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         feature: TitleDescriptionType;
@@ -32,29 +31,30 @@
 			dragDisabled = true;
 		}
 
-        await dbContext.save();
+        await siteState.save();
 	}
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
-{#if $mode === "edit"}
+{#if characterController.mode === "edit"}
     <div class="row" style="align-items: flex-start;">
         <button 
             class="custom-box custom-button custom-tiny-button"
             style="margin-top:0.5rem;" 
-            onclick={async () => {
+            onclick={() => {
                 removeFunction();
-                await dbContext.save();
+                siteState.save();
             }}
         >
             -
         </button>
         <div style="width:100%;">
             <div class="row" style="width:100%;">
-                <div class="custom-title placeholder" onfocusout={dbContext.save} bind:innerText={feature.Title} contenteditable="true" placeholder="Title"></div>
+                <div class="custom-title placeholder" onfocusout={() => siteState.save()} bind:innerText={feature.Title} contenteditable="true" placeholder="Title"></div>
                 <div class="row" style="padding-left: 0.5rem; width: fit-content;">
                     <i class="custom-subtitle"># of uses: </i>
-                    <input onchange={dbContext.save} bind:value={feature.Uses.Max}>
+                    <input onchange={() => siteState.save()} bind:value={feature.Uses.Max}>
                 </div>
             </div>
             {#if orderable}
@@ -62,8 +62,8 @@
                     {#each newList as paragraph (paragraph.id)}
                         <div class="row">
                             <div style="margin-top: 0.2rem;">
-                                <p class="placeholder" style="color:var(--secondary);" onfocusout={dbContext.save} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"></p>
-                                <p class="placeholder" onfocusout={dbContext.save} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"></p>
+                                <p class="placeholder" style="color:var(--secondary);" onfocusout={() => siteState.save()} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"></p>
+                                <p class="placeholder" onfocusout={() => siteState.save()} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"></p>
                             </div>
                             <div style="display: flex; place-content: end; flex-grow: 1">
                                 <DraggableHandle bind:dragDisabled/>
@@ -74,13 +74,13 @@
             {:else}
                 {#each feature.Description as paragraph}
                     <div class="row">
-                        <button class="custom-box custom-button custom-tiny-button" onclick={async () => {
+                        <button class="custom-box custom-button custom-tiny-button" onclick={() => {
                             feature.Description = feature.Description.filter(x => x !== paragraph);
-                            await dbContext.save();
+                            siteState.save();
                         }}>-</button>
                         <div style="margin-top: 0.2rem;">
-                            <p class="placeholder" style="color:var(--secondary);" onfocusout={dbContext.save} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"></p>
-                            <p class="placeholder" onfocusout={dbContext.save} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"></p>
+                            <p class="placeholder" style="color:var(--secondary);" onfocusout={() => siteState.save()} bind:innerText={paragraph.Subtitle} contenteditable="true" placeholder="Optional Subtitle"></p>
+                            <p class="placeholder" onfocusout={() => siteState.save()} bind:innerText={paragraph.Paragraph} contenteditable="true" placeholder="Description"></p>
                         </div>
                     </div>
                 {/each}
@@ -93,11 +93,11 @@
 {:else}
     <div class="row" style="width:100%;">
         <div class="custom-title">{feature.Title}</div>
-        <div class="row {$mode === "view" ? "disabled" : ""}" style="width: fit-content; padding-left: 0.5rem;">
+        <div class="row {characterController.mode === "view" ? "disabled" : ""}" style="width: fit-content; padding-left: 0.5rem;">
             {#each Array(Number(feature.Uses.Max)) as _, i}
                 <CheckedBox 
                     checkmark="X"
-                    color={$theme.secondary}
+                    color={siteState.theme.secondary}
                     checked = {i < feature.Uses.Used}
                     bind:checked_counter = {feature.Uses.Used}
                 />

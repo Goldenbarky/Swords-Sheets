@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
-    import { mode } from "$lib/Theme";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         current: number;
@@ -20,16 +19,17 @@
         max_edit_modes = ["edit"]
     }: Props = $props();
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 <div class="row" style="margin:0.5rem;">
-    <input class="value" disabled={!current_edit_modes.includes($mode)} onchange={dbContext.save} bind:value={current}/>
+    <input class="value" disabled={!current_edit_modes.includes(characterController.mode)} onchange={() => siteState.save()} bind:value={current}/>
     <div class="buffer" style="border-right: 1px solid var(--border)"></div>
     <div class="buffer"></div>
     <div class="custom-title {bold_label ? 'bold' : 'not-bold'}">{label}</div>
     <div class="buffer" style="border-right: 1px solid var(--border)"></div>
     <div class="buffer"></div>
-    <input class="value max" disabled={!max_edit_modes.includes($mode)} onchange={dbContext.save} bind:value={max}/>
+    <input class="value max" disabled={!max_edit_modes.includes(characterController.mode)} onchange={() => siteState.save()} bind:value={max}/>
 </div>
 <style lang="scss">
     .custom-title {

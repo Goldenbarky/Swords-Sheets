@@ -1,15 +1,17 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { levenshteinDistance, upsertNewCampaign } from "$lib/GenericFunctions";
+    import { levenshteinDistance } from "$lib/GenericFunctions";
+    import { DatabaseClient } from "$lib/Database.svelte";
     import Divider from "./Helpers/Divider.svelte";
 
     interface Props {
-        userAuthorized: any;
+        userAuthorized: boolean;
         shown: boolean;
         all_characters: CharacterDataRow[];
     }
 
-    let { userAuthorized, shown = $bindable(), all_characters = $bindable() }: Props = $props();
+    let { userAuthorized, shown = $bindable(), all_characters }: Props = $props();
+    all_characters = all_characters.filter(x => !x.data.Campaign);
 
     let campaign_name: string = $state('');
     let characters: string[] = $state([]);
@@ -17,15 +19,13 @@
 
     let character_query = $state("");
 
-    $effect(() => {
-        all_characters = all_characters.filter(x => !x.data.Campaign);
-    });
-
     let filter_array = $derived(
         all_characters.filter(x => x.name.toLowerCase().includes(character_query.toLowerCase()))
             .sort((a, b) => levenshteinDistance(a.name.toLowerCase(), character_query.toLowerCase()) - levenshteinDistance(b.name.toLowerCase(), character_query.toLowerCase()))
             .slice(0, 5)
     );
+    
+    const dbClient = DatabaseClient.getDatabaseClient();
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
     <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
@@ -113,8 +113,13 @@
                 style="border: solid 1px var(--border);"
                 onclick={async () => {
                     if (userAuthorized) {
-                        let campaign = await upsertNewCampaign(campaign_name, campaign_level, characters);
-                        let campaign_id = campaign?.data?.id;
+                        let campaign = await dbClient.upsertNewCampaign(campaign_name, campaign_level, characters);
+                        if (!campaign) {
+                            shown = false;
+                            return;
+                        }
+
+                        let campaign_id = campaign.id;
                         goto(
                             `/campaign/${campaign_id}`,
                         );

@@ -1,5 +1,4 @@
 <script lang="ts">
-    //@ts-nocheck
     import AbilitySelector from "$lib/Components/AbilitySelector.svelte";
     import CheckedBox from "$lib/Components/Generic/CheckedBox.svelte";
     import DynamicNumberLabel from "$lib/Components/Generic/DynamicNumberLabel.svelte";
@@ -7,11 +6,13 @@
     import ToggleSwitch from "$lib/Components/Generic/ToggleSwitch.svelte";
     import Divider from "$lib/Components/Helpers/Divider.svelte";
     import Spell from "$lib/Components/Spell.svelte";
-    import { updateDatabase, levenshteinDistance, calcSpellToHit, calcSaveDC, bonusToString } from "$lib/GenericFunctions";
-    import { mode, theme } from "$lib/Theme";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { levenshteinDistance } from "$lib/GenericFunctions";
 
-    export let spells:Record<string, unknown>[];
-    export let character: CharacterSheet;
+    let { character = $bindable(), spells }: { character: CharacterSheet, spells: Record<string, unknown> } = $props();
+
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 
     let spell_levels = [
         "Cantrips",
@@ -27,10 +28,11 @@
     ];
 
     const removeSpell = (spell: any) => {
-        character.Spellcasting.Spells[spell.level] = character.Spellcasting.Spells[spell.level].filter(x => !(x.Spell_Name === spell.name && x.Source === (spell.source ?? x.Source)));
+        character.Spellcasting.Spells[spell.level] = character.Spellcasting.Spells[spell.level].filter(x => !(x.Spell_Name === spell.name && (x.Source ?? spell.source) === spell.source));
         if(spell.level !== 0) spells_known--;
+        console.log(character.Spellcasting.Spells[spell.level]);
 
-        updateDatabase();
+        siteState.save();
     }
 
     const calcKnown = () => {
@@ -57,10 +59,10 @@
         return prepared;
     }
 
-    let num_prepared = calcPrepared();
-    let attack_modifier = calcSpellToHit();
-    let save_dc = calcSaveDC();
-    let spells_known = calcKnown();
+    let num_prepared = $state(calcPrepared());
+    let attack_modifier = $state(characterController.getSpellToHitBonus());
+    let save_dc = $state(characterController.getSaveDc());
+    let spells_known = $state(calcKnown());
 
     const changePrepared = (prepared:string, changeToAlways:boolean = false) => {
         if(changeToAlways) {
@@ -73,20 +75,20 @@
     }
 
     const changeAbility = () => {
-        attack_modifier = calcSpellToHit();
-        save_dc = calcSaveDC();
+        attack_modifier = characterController.getSpellToHitBonus();
+        save_dc = characterController.getSaveDc();
     }
 
     const spell_names = Object.values(spells);
-    let spell_query = "";
+    let spell_query = $state("");
 
-    $: filter_array = spell_names.filter(x => x.name.toLowerCase().includes(spell_query.toLowerCase())).sort((a, b) => {
+    const filter_array = $derived(spell_names.filter(x => x.name.toLowerCase().includes(spell_query.toLowerCase())).sort((a, b) => {
         return levenshteinDistance(a.name.toLowerCase(), spell_query.toLowerCase()) - levenshteinDistance(b.name.toLowerCase(), spell_query.toLowerCase());
-    }).slice(0, 5);
+    }).slice(0, 5));
 </script>
 
 <div class="columns has-text-centered" style="background-color: var(--background);">
-    <div class="edge"/>
+    <div class="edge"></div>
     <div class="custom-column center">
         <div class="center" style="width: fit-content; display: flex; flex-direction: column; align-items: center; position: relative;">
             <div class="row" style="position: relative;">
@@ -95,43 +97,43 @@
                         <div class="custom-title">Spellcasting</div>
                         <NumberLabel
                             label="Attack Modifier"
-                            number={bonusToString(attack_modifier?.total)}
+                            number={CharacterSheetController.bonusToString(attack_modifier.total)}
                             bold_label={false}
                             label_font_size="medium"
                             calculation={attack_modifier}
                         />
                         <NumberLabel
                             label="Save DC"
-                            number={save_dc?.total}
+                            number={save_dc.total}
                             bold_label={false}
                             label_font_size="medium"
                             calculation={save_dc}
                         />
                     </div>
-                    {#if $mode === "edit"}
+                    {#if characterController.mode === "edit"}
                         <AbilitySelector
                             category_name = "Spellcasting"
-                            bind:selected_ability = {character.Spellcasting.Ability}
+                            bind:selected_ability = {character.Spellcasting.Ability as keyof AbilityScoreType}
                             onChange = {changeAbility}
                         />
                     {/if}
                 </div>
                 <div style="display: flex; flex-direction: column; position: absolute; right: -19px">
                     {#each [0, 1, 2, 3] as bonus}
-                        {#if $mode === "edit" || (bonus === character.Spellcasting.Bonus && bonus !== 0)}
-                            <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                            <div class="custom-box custom-side-tab {$mode !== "edit" ? "disable" : ""} {character.Spellcasting.Bonus === bonus ? "selected" : ""}" on:click={() => {
+                        {#if characterController.mode === "edit" || (bonus === character.Spellcasting.Bonus && bonus !== 0)}
+                            <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                            <div class="custom-box custom-side-tab {characterController.mode !== "edit" ? "disable" : ""} {character.Spellcasting.Bonus === bonus ? "selected" : ""}" onclick={() => {
                                 character.Spellcasting.Bonus = bonus;
-                                attack_modifier = calcSpellToHit();
-                                save_dc = calcSaveDC();
-                                updateDatabase();
+                                attack_modifier = characterController.getSpellToHitBonus();
+                                save_dc = characterController.getSaveDc();
+                                siteState.save();
                             }}>+{bonus}</div>
                         {/if}
                     {/each}
                 </div>
             </div>
         </div>
-        {#if $mode === "edit"}
+        {#if characterController.mode === "edit"}
             <div class="custom-box" style="width:100%; margin-top: 1rem; margin-bottom: 0px;">
                 <div class="custom-title">Add A New Spell</div>
                 <input bind:value={spell_query}/>
@@ -139,20 +141,21 @@
                     <Divider
                         orientation="horizontal"
                     />
-                    {#each filter_array as spell}
-                        <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                        <div class="custom-button" style="font-size:medium;" on:click={() => {
+                    {#each filter_array as spell (spell)}
+                        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                        <div class="custom-button" style="font-size:medium;" onclick={() => {
                             if(!character.Spellcasting.Spells[spell.level].find(x => spell.name === x.Spell_Name && spell.source === x.Source)) {
-                                character.Spellcasting.Spells[spell.level] = [...character.Spellcasting.Spells[spell.level], ({"Spell_Name":spell.name, "Prepared":"false", "Source": spell.source})].sort((a, b) => a.Spell_Name.localeCompare(b.Spell_Name));
+                                character.Spellcasting.Spells[spell.level].push(({"Spell_Name":spell.name, "Prepared":"false", "Source": spell.source}))
+                                character.Spellcasting.Spells[spell.level].sort((a, b) => a.Spell_Name.localeCompare(b.Spell_Name));
                                 if(spell.level !== 0) spells_known++;
-                                updateDatabase();
+                                siteState.save();
                             }
                         }}>{spell.name} <b>{spell.source}</b></div>
                     {/each}
                 {/if}
             </div>
         {/if}
-        {#if $mode === "edit" || character.Spellcasting.Learned_Caster}
+        {#if characterController.mode === "edit" || character.Spellcasting.Learned_Caster}
             <div class="custom-box" style="padding-bottom: 0px; width: 20.5rem; margin-bottom: 0px; margin-top: 1rem;">
                 <NumberLabel
                     label="Spells Known"
@@ -161,7 +164,7 @@
                 />
             </div>
         {/if}
-        {#if $mode == "edit"}
+        {#if characterController.mode == "edit"}
             <div class="custom-box" style="border-top: 0px; border-radius: 0px 0px 6px 6px; padding-top: 0.5rem; margin-bottom: 0px">
                 <ToggleSwitch
                     title="Show Known Count?"
@@ -169,7 +172,7 @@
                 />
             </div>
         {/if}
-        {#if $mode === "edit" || character.Spellcasting.Prepared_Caster}
+        {#if characterController.mode === "edit" || character.Spellcasting.Prepared_Caster}
         <div class="custom-box" style="padding-bottom: 0px; margin-bottom: 0px; margin-top: 1rem;">
             <DynamicNumberLabel
                 label="Spells Prepared"
@@ -180,7 +183,7 @@
             />
         </div>
         {/if}
-        {#if $mode == "edit"}
+        {#if characterController.mode == "edit"}
             <div class="custom-box" style="border-top: 0px; border-radius: 0px 0px 6px 6px; padding-top: 0.5rem; margin-bottom: 0px">
                 <ToggleSwitch
                     title="Show Prepared Count?"
@@ -191,40 +194,40 @@
         <div class="custom-box" style="width: 100%; margin-top: 1rem;">
             <div class="custom-title">Spell Slots</div>
             {#each Object.values(character.Spellcasting.Spell_Slots) as slots, i}
-                {#if $mode === "edit" || slots !== 0}
+                {#if characterController.mode === "edit" || slots !== 0}
                     <div class="row custom-subtitle" style="width:100%; text-align:center;">
-                        {#if $mode === "edit"}
-                            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.5rem;" on:click={() => {
+                        {#if characterController.mode === "edit"}
+                            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.5rem;" onclick={() => {
                                 if(character.Spellcasting.Spell_Slots[i+1] > 0) {
                                     character.Spellcasting.Spell_Slots[i+1]--;
-                                    updateDatabase();
+                                    siteState.save();
                                 }
                             }}>-</button>
                         {/if}
                         <div class="custom-subtitle" style="border-width: 0px; margin-bottom: 0px; width: 8rem; text-align: center;">
                             {spell_levels[i + 1]}
                         </div>
-                        {#if $mode === "edit"}
-                            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.5rem;" on:click={() => {
+                        {#if characterController.mode === "edit"}
+                            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.5rem;" onclick={() => {
                                 if(character.Spellcasting.Spell_Slots[i+1] < 10) {
                                     character.Spellcasting.Spell_Slots[i+1]++;
-                                    updateDatabase();
+                                    siteState.save();
                                 }
                             }}>+</button>
                         {/if}
                     </div>
-                    <div class="row {$mode === "view" ? "disable" : ""}">
+                    <div class="row {characterController.mode === "view" ? "disable" : ""}">
                         {#each Array(slots) as _, j}
                             <CheckedBox 
                                 checkmark="X"
-                                color={$theme.secondary}
+                                color={siteState.theme.secondary}
                                 checked = {j < character.Spellcasting.Slots_Expended[i+1]}
                                 bind:checked_counter = {character.Spellcasting.Slots_Expended[i+1]}
                             />
                         {/each}
                     </div>
                     {#if Object.values(character.Spellcasting.Spell_Slots)[i+1] !== 0}
-                        <div style="height:0.5rem;"/>
+                        <div style="height:0.5rem;"></div>
                     {/if}
                 {/if}
             {/each}
@@ -253,7 +256,7 @@
             {/key}
         </div>
     </div>
-    <div class="edge"/>
+    <div class="edge"></div>
 </div>
 
 <style lang="scss">

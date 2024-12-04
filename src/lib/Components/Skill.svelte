@@ -1,7 +1,5 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
-    import { bonusToString } from "$lib/GenericFunctions";
-    import { mode } from "$lib/Theme";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
     import type { Calculation } from "./Classes/DataClasses";
     import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
 
@@ -13,8 +11,8 @@
 
     let { proficiency = $bindable(), name, bonusCalculator }: Props = $props();
     
-    let maths: Calculation | null = $state(null);
-    let bonus: string = $state('');
+    let maths: Calculation = $state(bonusCalculator(name));
+    let bonus: string = $derived(CharacterSheetController.bonusToString(maths!.total));
 
     const proficiencyCycle = (proficiency:string) => {
         switch(proficiency) {
@@ -31,26 +29,26 @@
 
     $effect(() => {
         maths = bonusCalculator(name);
-        bonus = bonusToString(maths.total);
 
         proficiency;
     });
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getSiteState();
 </script>
 
 <div class="skill-div">
-    <div class="proficiency-buffer {$mode !== "edit" ? "disable" : ""}">
-        <button class="skill-proficiency" disabled={$mode !== "edit"} onclick={async () => {
+    <div class="proficiency-buffer {characterController.mode !== "edit" ? "disable" : ""}">
+        <button class="skill-proficiency" disabled={characterController.mode !== "edit"} onclick={() => {
             proficiency = proficiencyCycle(proficiency); 
-            await dbContext.save();
+            siteState.save();
         }}>
             {proficiency}
         </button>
     </div>
     <div class="skill-name">{name}</div>
     <div class="skill-bonus">{bonus}</div>
-    {#if $mode === "edit" && maths}
+    {#if characterController.mode === "edit" && maths}
         <CalculationVisualizer
             maths = {maths}
         />

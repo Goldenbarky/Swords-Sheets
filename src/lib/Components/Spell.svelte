@@ -1,8 +1,7 @@
 <script lang="ts">
     import SpellDescription from "./SpellDescription.svelte";
     import StringLabel from "./Generic/StringLabel.svelte";
-    import { mode } from "$lib/Theme";
-    import { DatabaseConnection } from "$lib/Database.svelte";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         //@ts-nocheck
@@ -110,7 +109,8 @@
 
     let shown = $state(false);
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 
 <div class="container">
@@ -122,9 +122,9 @@
                 <div class="custom-subtitle cantrip always-prepared">{spell["name"]}</div>
             {:else}
                 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                <div class="custom-subtitle {$mode !== "use" ? "disable" : ""}" onclick={async () => {
+                <div class="custom-subtitle {characterController?.mode !== "use" ? "disable" : ""}" onclick={() => {
                     prepared = prepared === "true" ? "false" : "true";
-                    await dbContext.save();
+                    siteState.save();
                     onChange(prepared);
                 }}>
                 {#if String(prepared) !== "false"}<span class="highlighted">{spell["name"]}</span>
@@ -144,9 +144,9 @@
                         </div>
                     </div>
                 {/each}
-                {#if $mode === "edit"}
+                {#if characterController?.mode === "edit"}
                     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                    <div class="spell-detail custom-button {prepared === "always" ? "" : "not-selected"}" onclick={async () => {
+                    <div class="spell-detail custom-button {prepared === "always" ? "" : "not-selected"}" onclick={() => {
                         if(prepared === "always") {
                             prepared = "false";
                         } else {
@@ -154,7 +154,7 @@
                             prepared = "always";
                         }
                         
-                        await dbContext.save();
+                        siteState.save();
                     }}>A
                         <div class="box tooltip-box">
                             <div class="tooltip-text">Always Prepared</div>

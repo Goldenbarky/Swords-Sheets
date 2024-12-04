@@ -1,10 +1,12 @@
 <script lang="ts">
-    import { mode } from "$lib/Theme";
+    import { CharacterSheetController } from "$lib/Database.svelte";
     import CheckedBox from "./Generic/CheckedBox.svelte";
+
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 
 <fieldset class="row">
-    <div class="row boxes {$mode === "view" ? "disable" : ""}">
+    <div class="row boxes {characterController.mode === "view" ? "disable" : ""}">
         {#each Array(3) as _}
             <CheckedBox
                 color="red"
@@ -15,7 +17,7 @@
         <div style="width: 0.5rem; border-right: 1px solid var(--border)"></div>
         <div style="width: 0.5rem;"></div>
     </div>
-    <div class="row boxes {$mode === "view" ? "disable" : ""}">
+    <div class="row boxes {characterController.mode === "view" ? "disable" : ""}">
         {#each Array(3) as _}
             <CheckedBox
                 color="green"

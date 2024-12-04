@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
-    import { mode } from "$lib/Theme";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         name: string;
@@ -10,13 +9,14 @@
 
     let { name, score = $bindable(), mod }: Props = $props();
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 
 <div class="ability-box">
     <div class="box custom-box ability-score-box">
         <div class="ability-name">{name}</div>
-        <input class="ability-score" disabled={$mode !== "edit"} onchange={dbContext.save} bind:value={score}/>
+        <input class="ability-score" disabled={characterController?.mode !== "edit"} onchange={() => siteState.save()} bind:value={score}/>
     </div>
     <div class="box custom-box ability-mod">{mod}</div>
 </div>

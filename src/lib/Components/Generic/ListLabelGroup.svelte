@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { mode } from "$lib/Theme";
+    import { CharacterSheetController } from "$lib/Database.svelte";
     import ListLabel from "./ListLabel.svelte";
 
     interface Props {
@@ -10,10 +10,11 @@
     }
 
     let { lists }: Props = $props();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 
 {#each lists as {label, list}, i}
-    {#if $mode === "edit" || list.length >= 1}
+    {#if characterController.mode === "edit" || list.length >= 1}
         <ListLabel label={label} bind:list={lists[i].list}/>
         {#if i != lists.length - 1}
             <div style="margin: 0rem; border-top: 1px solid var(--border); height: 1px"></div>

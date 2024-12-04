@@ -1,6 +1,5 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
-    import { mode } from "$lib/Theme";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
     import DropDownArrow from "./Generic/DropDownArrow.svelte";
     import NumberLabel from "./Generic/NumberLabel.svelte";
 
@@ -21,11 +20,13 @@
         "Wisdom",
         "Charisma",
     ] as (keyof AbilityScoreType)[];
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 <div style="position: relative; width:100%;">
     <div class="custom-box" style="background-color: #00000000;">
-        <input class="custom-title {$mode === "edit" ? 'editable' : ''}" disabled={$mode !== "edit"} onchange={dbContext.save} bind:value={shield.Name} placeholder={"Armor Enhancement"}/>
+        <input class="custom-title {characterController.mode === "edit" ? 'editable' : ''}" disabled={characterController.mode !== "edit"} onchange={() => siteState.save()} bind:value={shield.Name} placeholder={"Armor Enhancement"}/>
         <div>
             <NumberLabel
                 bind:number={shield.Base}
@@ -37,16 +38,16 @@
             />
         </div>
     </div>
-    {#if $mode === "edit"}
+    {#if characterController.mode === "edit"}
         <div style="display: flex; flex-direction: column; position: absolute; left: -19px; top: 6px;">
             {#each [0, 1] as item_bonus}
                 {#if shield.Bonus === item_bonus && item_bonus !== 0}
                     <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" style="cursor: default;">+{item_bonus}</div>
-                {:else if $mode === "edit"}
+                {:else if characterController.mode === "edit"}
                     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                    <div class="custom-box custom-side-tab left {item_bonus === shield.Bonus ? "selected" : ""}" onclick={async () => {
+                    <div class="custom-box custom-side-tab left {item_bonus === shield.Bonus ? "selected" : ""}" onclick={() => {
                         shield.Bonus = item_bonus;
-                        await dbContext.save();
+                        siteState.save();
                     }}>+{item_bonus}</div>
                 {/if}
             {/each}
@@ -55,11 +56,11 @@
             {#each [2, 3] as item_bonus}
                 {#if shield.Bonus === item_bonus && item_bonus !== 0}
                     <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" style="cursor: default;">+{item_bonus}</div>
-                {:else if $mode === "edit"}
+                {:else if characterController.mode === "edit"}
                     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                    <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" onclick={async () => {
+                    <div class="custom-box custom-side-tab right {item_bonus === shield.Bonus ? "selected" : ""}" onclick={() => {
                         shield.Bonus = item_bonus;
-                        await dbContext.save();
+                        siteState.save();
                     }}>+{item_bonus}</div>
                 {/if}
             {/each}
@@ -80,7 +81,7 @@
                     <div class="column" style="display: flex; flex-direction: column; justify-content: space-evenly; padding: 0;">
                         {#each abilities as ability}
                             <span class="bonus" style="width: 1.75rem;">
-                                +<input style="width: 1rem;" onchange={dbContext.save} bind:value={shield.Saving_Throw_Mods[ability]} placeholder={"0"}/>
+                                +<input style="width: 1rem;" onchange={() => siteState.save()} bind:value={shield.Saving_Throw_Mods[ability]} placeholder={"0"}/>
                             </span>
                         {/each}
                     </div>

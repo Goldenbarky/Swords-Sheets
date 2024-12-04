@@ -1,6 +1,9 @@
-import { mode } from "$lib/Theme";
+import { redirect } from "@sveltejs/kit";
 import type { PageLoad } from "./$types";
 
-export const load: PageLoad = async ({ fetch, data, depends }) => {
-    mode.set("view");
+export const load: PageLoad = async ({ parent }) => {
+    const { siteState } = await parent();
+    if (!siteState.characterController) redirect(303, '/');
+
+    siteState.characterController.mode = 'view';
 }

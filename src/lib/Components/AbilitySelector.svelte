@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
+    import { SiteState } from "$lib/Database.svelte";
     import DropDownArrow from "./Generic/DropDownArrow.svelte";
 
     interface Props {
@@ -27,7 +27,7 @@
 
     let shown = $state(false);
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const siteState = SiteState.getSiteState();
 </script>
 
 <div style="width: 100%; height: 1.2rem; position:absolute; z-index:{z_index}; bottom: -1px; display:flex; flex-direction:column; place-items:center;">
@@ -39,9 +39,9 @@
             <div class="custom-title">{category_name} Ability</div>
             {#each abilities as ability (ability)}
                 <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                <div class="custom-subtitle {ability === selected_ability ? "selected" : ""}" onclick={async () => {
+                <div class="custom-subtitle {ability === selected_ability ? "selected" : ""}" onclick={() => {
                     selected_ability = ability;
-                    await dbContext.save();
+                    siteState.save();
                     onChange();
                 }}>{ability}</div>
             {/each}

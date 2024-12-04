@@ -1,7 +1,6 @@
 <script lang="ts">
     import TitleDescription from "$lib/Components/Generic/TitleDescription.svelte";
-    import { DatabaseConnection } from "$lib/Database.svelte";
-    import { mode } from "$lib/Theme";
+    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
     import ToggleSwitch from "./Generic/ToggleSwitch.svelte";
 
     interface Props {
@@ -17,7 +16,8 @@
         return list.filter(x => x.Title !== title);
     }
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 
 <div class="box custom-box">
@@ -30,21 +30,21 @@
         />
         <div style="height:0.5rem;"></div>
     {/each}
-    {#if $mode === "edit"}
+    {#if characterController?.mode === "edit"}
         <div class="row">
             <button 
                 class="custom-box custom-button custom-tiny-button" 
                 style="margin-top:0.5rem;" 
-                onclick={async () => {
+                onclick={() => {
                     features.push({Title:"", Description:[{Subtitle:"", Paragraph:""}], Uses: {Max:0, Used:0}});
-                    await dbContext.save();
+                    siteState.save();
                 }}
             >
                 +
             </button>
             <div>
                 <div style="width:100%;">
-                    <div class="custom-subtitle placeholder" onfocusout={dbContext.save}>New Feature</div>
+                    <div class="custom-subtitle placeholder" onfocusout={() => siteState.save()}>New Feature</div>
                 </div>
             </div>
         </div>

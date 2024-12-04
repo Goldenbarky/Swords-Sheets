@@ -1,24 +1,23 @@
 <script lang="ts">
     import "../../app.scss";
-    import { theme } from "$lib/Theme";
     import MainPage from '$lib/Pages/CharacterSheet/MainPage.svelte';
-    import { DatabaseConnection } from "$lib/Database.svelte";
+    import { CharacterSheetController } from "$lib/Database.svelte";
     
     let { data, children } = $props();
     
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    let reactiveController = $state(data.siteState.characterController!)
+    CharacterSheetController.setCharacterController(reactiveController);
 </script>
 <div class="outer"
-    style:--primary={$theme.primary}
-    style:--secondary={$theme.secondary}
-    style:--background={$theme.background}
-    style:--background_hover={$theme.background_hover}
-    style:--text={$theme.text}
-    style:--border={$theme.border}>
+    style:--primary={data.siteState.theme.primary}
+    style:--secondary={data.siteState.theme.secondary}
+    style:--background={data.siteState.theme.background}
+    style:--background_hover={data.siteState.theme.background_hover}
+    style:--text={data.siteState.theme.text}
+    style:--border={data.siteState.theme.border}>
     {@render children()}
-    {#if dbContext.activeCharacterRow}
+    {#if data.siteState.characterController?.character}
         <MainPage
-            bind:sheet={dbContext.activeCharacterRow}
             spells={data.spells}
         />
     {/if}

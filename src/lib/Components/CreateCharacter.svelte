@@ -1,10 +1,10 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
     import { PUBLIC_SITE_URL } from "$env/static/public";
-    import { upsertNewCharacter } from "$lib/GenericFunctions";
+    import { DatabaseClient } from "$lib/Database.svelte";
 
     interface Props {
-        userAuthorized: any;
+        userAuthorized: boolean;
         shown: boolean;
     }
 
@@ -13,6 +13,8 @@
     let character_name: string = $state('');
     let character_class: string = $state('');
     let character_level: number = $state(0);
+
+    const dbClient = DatabaseClient.getDatabaseClient();
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
     <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
@@ -86,7 +88,11 @@
                 style="border: solid 1px var(--border);"
                 onclick={async () => {
                     if (userAuthorized) {
-                        await upsertNewCharacter(character_class, character_level, character_name);
+                        const character = await dbClient.upsertNewCharacter(character_class, character_level, character_name);
+                        if (!character) {
+                            shown = false;
+                            return;
+                        }
                         goto(
                             `${PUBLIC_SITE_URL}${character_name}/edit`,
                         );

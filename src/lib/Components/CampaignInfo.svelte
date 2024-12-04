@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { DatabaseConnection } from "$lib/Database.svelte";
+    import { CharacterSheetController, DatabaseClient, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         shown: boolean;
@@ -9,7 +9,9 @@
         shown = $bindable(),
     }: Props = $props();
 
-    const dbContext = DatabaseConnection.getDatabaseContext();
+    const dbClient = DatabaseClient.getDatabaseClient();
+    const siteState = SiteState.getSiteState();
+    const characterController = CharacterSheetController.getCharacterController();
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
     <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
@@ -20,50 +22,46 @@
         }}
     ></div>
     <div class="modal-content" style="display: grid; align-items: center; justify-items: center;">
-        {#if !dbContext.activeCharacterRow}
-            <div>loading character...</div>
-        {:else}
-            {#if dbContext.activeCharacterRow.data.Campaign}
-                {#await dbContext.getCampaign(dbContext.activeCharacterRow.data.Campaign)}
-                    <div>loading campaign...</div>
-                {:then campaign}
-                    {#if campaign}
-                        <div class="custom-box column" style="width: fit-content; height: fit-content;">
-                            <div class="custom-title">Campaign Info</div>
-                            <div class="row">
-                                <div class="custom-subtitle">{campaign.name}</div>
-                            </div>
+        {#if characterController.character.data.Campaign}
+            {#await dbClient.getCampaignById(characterController.character.data.Campaign)}
+                <div>loading campaign...</div>
+            {:then campaign}
+                {#if campaign}
+                    <div class="custom-box column" style="width: fit-content; height: fit-content;">
+                        <div class="custom-title">Campaign Info</div>
+                        <div class="row">
+                            <div class="custom-subtitle">{campaign.name}</div>
                         </div>
-                    {:else}
-                        <div>Error finding campaign</div>
-                    {/if}
-                {/await}
-            {:else}
-                {#await dbContext.getInvitesForCharacter(dbContext.activeCharacterRow.id)}
-                    <div>loading invites...</div>
-                {:then invites}
-                    {#if invites}
-                        {#each invites as invite}
-                            <div class="custom-box column" style="width: fit-content; height: fit-content;">
-                                <div class="custom-title">Campaign Invites</div>
-                                <div class="custom-box" style="padding-bottom: 0rem;">
-                                    <div class="row">
-                                        <div class="custom-subtitle" style="margin-right: 0.5rem;">{invite.name}</div>
-                                        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
-                                        <div class="custom-box custom-button" style="margin-right: 0.5rem; color: green" onclick={async () => {
-                                            dbContext.activeCharacterRow!.data.Campaign = invite.id;
-                                            await dbContext.save();
-                                        }}>&#x2714;</div>
-                                        <div class="custom-box custom-button" style="color: red">&#x2716;</div>
-                                    </div>
+                    </div>
+                {:else}
+                    <div>Error finding campaign</div>
+                {/if}
+            {/await}
+        {:else}
+            {#await dbClient.getCampaignInvitesForCharacterId(characterController.character.id)}
+                <div>loading invites...</div>
+            {:then invites}
+                {#if invites}
+                    {#each invites as invite}
+                        <div class="custom-box column" style="width: fit-content; height: fit-content;">
+                            <div class="custom-title">Campaign Invites</div>
+                            <div class="custom-box" style="padding-bottom: 0rem;">
+                                <div class="row">
+                                    <div class="custom-subtitle" style="margin-right: 0.5rem;">{invite.name}</div>
+                                    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
+                                    <div class="custom-box custom-button" style="margin-right: 0.5rem; color: green" onclick={() => {
+                                        characterController.character.data.Campaign = invite.id;
+                                        siteState.save();
+                                    }}>&#x2714;</div>
+                                    <div class="custom-box custom-button" style="color: red">&#x2716;</div>
                                 </div>
-                            </div>  
-                        {/each}
-                    {:else}
-                        <div>no invites</div>
-                    {/if}
-                {/await}
-            {/if}
+                            </div>
+                        </div>  
+                    {/each}
+                {:else}
+                    <div>no invites</div>
+                {/if}
+            {/await}
         {/if}
     </div>
 </div>
