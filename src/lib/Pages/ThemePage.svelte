@@ -9,7 +9,7 @@
     import { Calculation } from '$lib/Components/Classes/DataClasses';
     import { SiteState } from '$lib/Database.svelte';
 
-    const siteState = SiteState.getSiteState();
+    const siteState = SiteState.getContext();
 
     let skill1 = new Calculation();
     let skill2 = new Calculation();

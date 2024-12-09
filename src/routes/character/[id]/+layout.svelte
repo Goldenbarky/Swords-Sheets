@@ -1,12 +1,10 @@
 <script lang="ts">
-    import "../../app.scss";
+    import "$lib/../app.scss";
     import MainPage from '$lib/Pages/CharacterSheet/MainPage.svelte';
-    import { CharacterSheetController } from "$lib/Database.svelte";
     
     let { data, children } = $props();
     
-    let reactiveController = $state(data.siteState.characterController!)
-    CharacterSheetController.setCharacterController(reactiveController);
+    data.siteState.characterController?.setContext();
 </script>
 <div class="outer"
     style:--primary={data.siteState.theme.primary}

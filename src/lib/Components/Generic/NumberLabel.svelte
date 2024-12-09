@@ -2,7 +2,7 @@
     import { Calculation } from "../Classes/DataClasses";
     import Divider from "../Helpers/Divider.svelte";
     import CalculationVisualizer from "./CalculationVisualizer.svelte";
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
 
     let {
         number = $bindable(),
@@ -32,8 +32,8 @@
 
     let placeholder = "\u{221E}";
 
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 
 <div

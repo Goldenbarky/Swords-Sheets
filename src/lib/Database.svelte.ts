@@ -8,7 +8,31 @@ import ThemeTemplate from '$lib/Data/ThemeTemplate.json';
 import { createNewCampaign, createNewCharacter, skill_score_dictionary } from './GenericFunctions';
 import { Calculation } from './Components/Classes/DataClasses';
 
-export class CharacterSheetController {
+export class CampaignController {
+    #campaign: CampaignDataRow = $state()!;
+
+    mode: 'view' | 'use' | 'edit' = $state('view');
+
+    constructor(campaignRow: CampaignDataRow) {
+        this.#campaign = campaignRow;
+    }
+
+    setContext() {
+        setContext('campaignController', this);
+    }
+
+    static getContext(): CampaignController {
+        let v = getContext<CampaignController>('campaignController');
+        if (!v) console.trace('campaign controller is not in context yet');
+        return v;
+    }
+
+    get campaign() {
+        return this.#campaign;
+    }
+}
+
+export class CharacterController {
     #character: CharacterDataRow = $state()!;
 
     mode: 'view' | 'use' | 'edit' = $state('view');
@@ -17,54 +41,12 @@ export class CharacterSheetController {
         return `${bonus >= 0 ? "+" : ""}${bonus.toString()}`;
     }
 
-    static getCharacterController(): CharacterSheetController {
-        return getContext('charactercontroller');
-    }
-
-    static levelToProficiencyBonus(level: number): number {
-        return Math.floor((level + 3) / 4) + 1;
-    }
-
-    static scoreToModifier(score: number): number {
-        return Math.floor(score / 2) - 5;
-    }
-
-    static setCharacterController(controller: CharacterSheetController) {
-        setContext('charactercontroller', controller);
-    }
-
-    constructor(characterRow: CharacterDataRow) {
-        this.#character = characterRow;
-    }
-
-    get character(): CharacterDataRow {
-        return this.#character;
-    }
-    
-    calcBonus(
-        ability: keyof AbilityScoreType,
-        proficiency: string,
-    ): Calculation {
+    static calcArmorClass(characterSheet: CharacterSheet): Calculation {
         let maths = new Calculation();
     
-        maths.addVariables({ name: ability, bonus: CharacterSheetController.scoreToModifier(this.#character.data.Stats.Ability_Scores[ability]) });
-    
-        if (proficiency === "P") maths.addVariables({ name: "Proficiency", bonus: this.getProficiencyBonus() });
-        else if (proficiency === "E") maths.addVariables({ name: "Expertise", bonus: this.getProficiencyBonus() * 2 });
-    
-        return maths;
-    }
-
-    getAbilityModifier(ability: keyof AbilityScoreType): number {
-        return CharacterSheetController.scoreToModifier(this.#character.data.Stats.Ability_Scores[ability]);
-    }
-    
-    getArmorClass() {
-        let maths = new Calculation();
-    
-        let armor = this.#character.data.Equipment.Armor;
-        let ability_bonus = this.calcBonus(armor.Ability, "").total;
-        let enhancements = this.#character.data.Equipment.Shields;
+        let armor = characterSheet.Equipment.Armor;
+        let ability_bonus = CharacterController.calcBonus(characterSheet, armor.Ability, "").total;
+        let enhancements = characterSheet.Equipment.Shields;
     
         maths.addVariables({ name: armor.Name, bonus: Number(armor.Base) + Number(armor.Bonus) })
     
@@ -83,13 +65,28 @@ export class CharacterSheetController {
         return maths;
     }
 
-    getPassiveBonus(skill: keyof SkillProficiencyType) {
+    static calcBonus(
+        characterSheet: CharacterSheet,
+        ability: keyof AbilityScoreType,
+        proficiency: string,
+    ): Calculation {
+        let maths = new Calculation();
+    
+        maths.addVariables({ name: ability, bonus: CharacterController.scoreToModifier(characterSheet.Stats.Ability_Scores[ability]) });
+    
+        if (proficiency === "P") maths.addVariables({ name: "Proficiency", bonus: CharacterController.getProficiencyBonus(characterSheet) });
+        else if (proficiency === "E") maths.addVariables({ name: "Expertise", bonus: CharacterController.getProficiencyBonus(characterSheet) * 2 });
+    
+        return maths;
+    }
+
+    static calcPassiveBonus(characterSheet: CharacterSheet, skill: keyof SkillProficiencyType): Calculation {
         let maths = new Calculation();
     
         maths.addVariables({ name:"Base", bonus:10 });
-        let observant = this.#character.data.Features.Feats.find(x => x.Title === "Observant");
+        let observant = characterSheet.Features.Feats.find(x => x.Title === "Observant");
     
-        maths.join(this.getSkillBonus(skill));
+        maths.join(CharacterController.calcSkillBonus(characterSheet, skill));
     
         if (["Investigation", "Perception"].includes(skill) && observant) {
             maths.addVariables({ name: "Observant", bonus: 5 });
@@ -98,57 +95,51 @@ export class CharacterSheetController {
         return maths;
     }
 
-    getProficiencyBonus(): number {
-        let level = Number(this.#character.data.Level);
-
-        return CharacterSheetController.levelToProficiencyBonus(level);
-    }
-
-    getSavingBonus(saving_throw: keyof AbilityScoreType): Calculation {
-        let proficiency = this.#character.data.Stats.Proficiencies.Saving_Throws[saving_throw];
-    
-        let maths = this.calcBonus(saving_throw, proficiency);
-        this.#character.data.Equipment.Shields.forEach(shield => maths.addVariables({
-            name: shield.Name, 
-            bonus: Number(shield.Saving_Throw_Mods[saving_throw])
-        }));
-    
-        return maths;
-    }
-
-    getSaveDc(): Calculation {
+    static calcSaveDc(characterSheet: CharacterSheet): Calculation {
         let maths = new Calculation();
 
         maths.addVariables({ name:"Base", bonus:8 });
         
-        maths.join(this.getSpellToHitBonus());
+        maths.join(CharacterController.calcSpellToHit(characterSheet));
 
         return maths;
     }
 
-    getSkillBonus(skill: keyof SkillProficiencyType): Calculation {
-        let proficiency = this.character.data.Stats.Proficiencies.Skills[skill];
+    static calcSavingBonus(characterSheet: CharacterSheet, savingThrow: keyof AbilityScoreType) {
+        let proficiency = characterSheet.Stats.Proficiencies.Saving_Throws[savingThrow];
+    
+        let maths = CharacterController.calcBonus(characterSheet, savingThrow, proficiency);
+        characterSheet.Equipment.Shields.forEach(shield => maths.addVariables({
+            name: shield.Name, 
+            bonus: Number(shield.Saving_Throw_Mods[savingThrow])
+        }));
+    
+        return maths;
+    }
+    
+    static calcSkillBonus(characterSheet: CharacterSheet, skill: keyof SkillProficiencyType): Calculation {
+        let proficiency = characterSheet.Stats.Proficiencies.Skills[skill];
         let score: keyof AbilityScoreType = skill_score_dictionary[skill] as keyof AbilityScoreType;
     
-        return this.calcBonus(score, proficiency);
+        return CharacterController.calcBonus(characterSheet, score, proficiency);
     }
 
-    getSpellToHitBonus() {
+    static calcSpellToHit(characterSheet: CharacterSheet): Calculation {
         let maths = new Calculation();
     
-        let ability = this.#character.data.Spellcasting.Ability as keyof AbilityScoreType;
-        let ability_mod = CharacterSheetController.scoreToModifier(this.#character.data.Stats.Ability_Scores[ability]);
+        let ability = characterSheet.Spellcasting.Ability as keyof AbilityScoreType;
+        let ability_mod = CharacterController.scoreToModifier(characterSheet.Stats.Ability_Scores[ability]);
     
         maths.addVariables({ name: ability, bonus: ability_mod });
-        maths.addVariables({ name: "Proficiency", bonus: this.getProficiencyBonus() });
-        maths.addVariables({ name: "Magic Item", bonus: this.#character.data.Spellcasting.Bonus });
+        maths.addVariables({ name: "Proficiency", bonus: CharacterController.getProficiencyBonus(characterSheet) });
+        maths.addVariables({ name: "Magic Item", bonus: characterSheet.Spellcasting.Bonus });
     
         return maths;
     }
-    
-    getWeaponToHitBonus = (weapon:Weapon) => {
-        let proficiency_bonus = this.getProficiencyBonus();
-        let modifier = this.getAbilityModifier(weapon.Ability);
+
+    static calcWeaponToHit(characterSheet: CharacterSheet, weapon: Weapon): Calculation {
+        let proficiency_bonus = CharacterController.getProficiencyBonus(characterSheet);
+        let modifier = CharacterController.getAbilityModifier(weapon.Ability, characterSheet);
     
         let maths = new Calculation();
     
@@ -160,11 +151,90 @@ export class CharacterSheetController {
         
         return maths;
     }
+    
+    static getAbilityModifier(ability: keyof AbilityScoreType, characterSheet: CharacterSheet): number {
+        return CharacterController.scoreToModifier(characterSheet.Stats.Ability_Scores[ability]);
+    }
+
+    static getProficiencyBonus(characterSheet: CharacterSheet): number {
+        let level = Number(characterSheet.Level);
+
+        return CharacterController.levelToProficiencyBonus(level);
+    }
+
+    static levelToProficiencyBonus(level: number): number {
+        return Math.floor((level + 3) / 4) + 1;
+    }
+
+    static scoreToModifier(score: number): number {
+        return Math.floor(score / 2) - 5;
+    }
+
+    constructor(characterRow: CharacterDataRow) {
+        this.#character = characterRow;
+    }
+
+    setContext() {
+        setContext('characterController', this);
+    }
+
+    static getContext(): CharacterController {
+        let v = getContext<CharacterController>('characterController');
+        if (!v) console.trace('character controller is not in context yet');
+        return v;
+    }
+
+    get character(): CharacterDataRow {
+        return this.#character;
+    }
+    
+    calcBonus(
+        ability: keyof AbilityScoreType,
+        proficiency: string,
+    ): Calculation {
+        return CharacterController.calcBonus(this.#character.data, ability, proficiency);
+    }
+
+    getAbilityModifier(ability: keyof AbilityScoreType): number {
+        return CharacterController.getAbilityModifier(ability, this.#character.data);
+    }
+    
+    getArmorClassCalc(): Calculation {
+        return CharacterController.calcArmorClass(this.#character.data);
+    }
+
+    getPassiveBonusCalc(skill: keyof SkillProficiencyType): Calculation {
+        return CharacterController.calcPassiveBonus(this.#character.data, skill);
+    }
+
+    getProficiencyBonus(): number {
+        return CharacterController.getProficiencyBonus(this.#character.data);
+    }
+
+    getSaveDcCalc(): Calculation {
+        return CharacterController.calcSaveDc(this.#character.data);
+    }
+    
+    getSavingBonusCalc(saving_throw: keyof AbilityScoreType): Calculation {
+        return CharacterController.calcSavingBonus(this.#character.data, saving_throw);
+    }
+
+    getSkillBonusCalc(skill: keyof SkillProficiencyType): Calculation {
+        return CharacterController.calcSkillBonus(this.#character.data, skill);
+    }
+
+    getSpellToHitBonusCalc(): Calculation {
+        return CharacterController.calcSpellToHit(this.#character.data);
+    }
+    
+    getWeaponToHitBonusCalc(weapon:Weapon): Calculation {
+        return CharacterController.calcWeaponToHit(this.#character.data, weapon);
+    }
 }
 
 export class SiteState {
-    #campaign: CampaignDataRow | null = $state(null);
-    #characterController: CharacterSheetController | null = $state(null);
+    #campaignController: CampaignController | null = $state(null);
+    #characterController: CharacterController | null = $state(null);
     #dbCtx: DatabaseClient;
     #originalTheme: Theme = ThemeTemplate;
     #saveStatus: 'NOT' | 'SAVING' | 'FAILED' | 'SUCCEEDED' = $state('NOT');
@@ -172,16 +242,22 @@ export class SiteState {
     characterSheet = $derived(this.#characterController?.character.data);
     theme = $derived(this.#characterController?.character.theme ?? this.#originalTheme);
 
-    static getSiteState(): SiteState {
-        return getContext<SiteState>('sitestate');
+    setContext() {
+        setContext('siteState', this);
     }
 
-    static setSiteState(siteState: SiteState) {
-        setContext('sitestate', siteState);
+    static getContext(): SiteState {
+        let v = getContext<SiteState>('siteState');
+        if (!v) console.trace('database is not in context yet');
+        return v;
     }
 
     constructor(dbCtx: DatabaseClient) {
         this.#dbCtx = dbCtx;
+    }
+
+    get campaignController() {
+        return this.#campaignController;
     }
 
     get characterController() {
@@ -202,8 +278,8 @@ export class SiteState {
             return resp;
         }
 
-        if (this.#campaign) {
-            const resp = await this.#dbCtx.saveCampaign(this.#campaign);
+        if (this.#campaignController) {
+            const resp = await this.#dbCtx.saveCampaign(this.#campaignController.campaign);
             this.#saveStatus = !!resp ? 'SUCCEEDED' : 'FAILED';
             return resp;
         }
@@ -212,32 +288,34 @@ export class SiteState {
         return null;
     }
 
-    async pullCharacter(name: string): Promise<CharacterSheetController | null> {
+    async pullCharacter(name: string): Promise<CharacterController | null> {
         const character = await this.#dbCtx.getCharacterByName(name);
 
         if (!!character) {
-            this.#characterController = new CharacterSheetController(character);
+            this.#characterController = new CharacterController(character);
         }
-        this.#originalTheme = this.#characterController?.character.theme ?? ThemeTemplate;
+        this.#originalTheme = $state.snapshot(this.#characterController?.character.theme) ?? ThemeTemplate;
         return this.#characterController;
     }
 
-    async pullCampaign(id: string): Promise<CampaignDataRow | null> {
+    async pullCampaign(id: string): Promise<CampaignController | null> {
         const campaign = await this.#dbCtx.getCampaignById(id);
 
-        this.#campaign = campaign;
-        this.#originalTheme = this.#campaign?.theme ?? ThemeTemplate;
-        return this.#campaign;
+        if (!!campaign) {
+            this.#campaignController = new CampaignController(campaign);
+        }
+        this.#originalTheme = $state.snapshot(this.#campaignController?.campaign.theme) ?? ThemeTemplate;
+        return this.#campaignController;
     }
 
     resetTheme() {
         if (this.#characterController) {
-            this.#characterController.character.theme = this.#originalTheme;
+            this.#characterController.character.theme = structuredClone(this.#originalTheme);
             return;
         }
 
-        if (this.#campaign) {
-            this.#campaign.theme = this.#originalTheme;
+        if (this.#campaignController) {
+            this.#campaignController.campaign.theme = structuredClone(this.#originalTheme);
         }
     }
 }
@@ -247,12 +325,14 @@ export class DatabaseClient {
     #session: Session | null = $state(null);
     #user: User | null = $state(null);
 
-    static getDatabaseClient(): DatabaseClient {
-        return getContext<DatabaseClient>('database');
+    setContext() {
+        setContext('database', this);
     }
 
-    static setDatabaseClient(db: DatabaseClient) {
-        setContext('database', db);
+    static getContext(): DatabaseClient {
+        let v = getContext<DatabaseClient>('database');
+        if (!v) console.trace('database is not in context yet');
+        return v;
     }
 
     constructor(db: SupabaseClient, session?: Session | null, user?: User | null) {

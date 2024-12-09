@@ -1,8 +1,14 @@
 <script lang="ts">
-    import StateContext from "$lib/Components/Helpers/StateContext.svelte";
     let { data, children } = $props();
+
+    data.dbClient.setContext();
+    data.siteState.setContext();
 </script>
 
-<StateContext dbClient={data.dbClient} siteState={data.siteState}>
+<svelte:boundary>
     {@render children()}
-</StateContext>
+
+    {#snippet failed(error)}
+        <div>Yo something seriously got messed up, put an issue in the github please {error}</div>
+    {/snippet}
+</svelte:boundary>

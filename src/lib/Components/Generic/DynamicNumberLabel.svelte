@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         current: number;
@@ -19,8 +19,8 @@
         max_edit_modes = ["edit"]
     }: Props = $props();
 
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 <div class="row" style="margin:0.5rem;">
     <input class="value" disabled={!current_edit_modes.includes(characterController.mode)} onchange={() => siteState.save()} bind:value={current}/>

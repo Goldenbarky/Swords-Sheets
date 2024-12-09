@@ -6,13 +6,13 @@
     import ToggleSwitch from "$lib/Components/Generic/ToggleSwitch.svelte";
     import Divider from "$lib/Components/Helpers/Divider.svelte";
     import Spell from "$lib/Components/Spell.svelte";
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import { levenshteinDistance } from "$lib/GenericFunctions";
 
     let { character = $bindable(), spells }: { character: CharacterSheet, spells: Record<string, unknown> } = $props();
 
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 
     let spell_levels = [
         "Cantrips",
@@ -30,7 +30,6 @@
     const removeSpell = (spell: any) => {
         character.Spellcasting.Spells[spell.level] = character.Spellcasting.Spells[spell.level].filter(x => !(x.Spell_Name === spell.name && (x.Source ?? spell.source) === spell.source));
         if(spell.level !== 0) spells_known--;
-        console.log(character.Spellcasting.Spells[spell.level]);
 
         siteState.save();
     }
@@ -60,8 +59,8 @@
     }
 
     let num_prepared = $state(calcPrepared());
-    let attack_modifier = $state(characterController.getSpellToHitBonus());
-    let save_dc = $state(characterController.getSaveDc());
+    let attack_modifier = $state(characterController.getSpellToHitBonusCalc());
+    let save_dc = $state(characterController.getSaveDcCalc());
     let spells_known = $state(calcKnown());
 
     const changePrepared = (prepared:string, changeToAlways:boolean = false) => {
@@ -75,8 +74,8 @@
     }
 
     const changeAbility = () => {
-        attack_modifier = characterController.getSpellToHitBonus();
-        save_dc = characterController.getSaveDc();
+        attack_modifier = characterController.getSpellToHitBonusCalc();
+        save_dc = characterController.getSaveDcCalc();
     }
 
     const spell_names = Object.values(spells);
@@ -97,7 +96,7 @@
                         <div class="custom-title">Spellcasting</div>
                         <NumberLabel
                             label="Attack Modifier"
-                            number={CharacterSheetController.bonusToString(attack_modifier.total)}
+                            number={CharacterController.bonusToString(attack_modifier.total)}
                             bold_label={false}
                             label_font_size="medium"
                             calculation={attack_modifier}
@@ -124,8 +123,8 @@
                             <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
                             <div class="custom-box custom-side-tab {characterController.mode !== "edit" ? "disable" : ""} {character.Spellcasting.Bonus === bonus ? "selected" : ""}" onclick={() => {
                                 character.Spellcasting.Bonus = bonus;
-                                attack_modifier = characterController.getSpellToHitBonus();
-                                save_dc = characterController.getSaveDc();
+                                attack_modifier = characterController.getSpellToHitBonusCalc();
+                                save_dc = characterController.getSaveDcCalc();
                                 siteState.save();
                             }}>+{bonus}</div>
                         {/if}

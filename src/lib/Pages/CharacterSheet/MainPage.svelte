@@ -8,7 +8,8 @@
     import ThemePage from '../ThemePage.svelte';
     import { fade } from 'svelte/transition';
     import CampaignInfo from '$lib/Components/CampaignInfo.svelte';
-    import { DatabaseClient, SiteState } from '$lib/Database.svelte';
+    import { CharacterController, DatabaseClient, SiteState } from '$lib/Database.svelte';
+    import SaveIndicator from '$lib/Components/Helpers/SaveIndicator.svelte';
 
     let { spells } = $props();
 
@@ -22,9 +23,9 @@
     let tabParam = $page.url.searchParams.get('activetab');
     let activeTab = $state(tabParam ?? "Stats");
 
-    const dbClient = DatabaseClient.getDatabaseClient();
-    const siteState = SiteState.getSiteState();
-    const characterController = $derived(siteState.characterController!);
+    const dbClient = DatabaseClient.getContext();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
     const sheet = $derived(characterController.character);
 </script>
 <section class="hero is-small">
@@ -56,10 +57,10 @@
             </div>
             <div class="column custom-column" style="flex: none;">
                 <div style="display: flex; flex-direction: column;">
-                    <button class="custom-box custom-button {characterController.mode === "view" ? "selected" : ""}" onclick={() => goto(`/${sheet.name}/?activetab=${activeTab}`)}>View</button>
+                    <button class="custom-box custom-button {characterController.mode === "view" ? "selected" : ""}" onclick={() => goto(`/character/${sheet.name}/?activetab=${activeTab}`)}>View</button>
                     {#if dbClient.user && sheet.owner_id === dbClient.user.id}
-                        <button class="custom-box custom-button {characterController.mode === "use" ? "selected" : ""}" onclick={() => goto(`/${sheet.name}/use?activetab=${activeTab}`)}>Use</button>
-                        <button class="custom-box custom-button {characterController.mode === "edit" ? "selected" : ""}" onclick={() => goto(`/${sheet.name}/edit?activetab=${activeTab}`)}>Edit</button>
+                        <button class="custom-box custom-button {characterController.mode === "use" ? "selected" : ""}" onclick={() => goto(`/character/${sheet.name}/use?activetab=${activeTab}`)}>Use</button>
+                        <button class="custom-box custom-button {characterController.mode === "edit" ? "selected" : ""}" onclick={() => goto(`/character/${sheet.name}/edit?activetab=${activeTab}`)}>Edit</button>
                     {/if}
                 </div>
             </div>
@@ -83,7 +84,7 @@
                             <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
                             <a onclick={() => {
                                 activeTab = tab;
-                                goto(`/${sheet.name}/${characterController.mode === "view" ? "" : characterController.mode }?activetab=${tab}`);
+                                goto(`/character/${sheet.name}/${characterController.mode === "view" ? "" : characterController.mode }?activetab=${tab}`);
                             }}>{tab}</a>
                         </li>
                     {/if}
@@ -120,49 +121,9 @@
 <CampaignInfo bind:shown={campaignInfoShown} />
 
 <!-- tODO fix  -->
-{#key siteState.saveStatus !== 'NOT'}
-    <div class="save-indicator" out:fade={{ delay: 1000 }}>
-        {#if siteState.saveStatus === 'SAVING'}
-            <div class="save-saving">
-                
-            </div>
-        {:else if siteState.saveStatus === 'SUCCEEDED'}
-            <div class="save-saved">
-                
-            </div>
-        {:else}
-            <div class="save-errored">
-                
-            </div>
-        {/if}
-    </div>
-{/key}
+<SaveIndicator />
+
 <style lang="scss">
-    .save-indicator {
-        position: absolute;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 25px;
-        overflow: clip;
-        border: solid black 2px;
-        top: 20px;
-        left: 50%;
-        color: black;
-        opacity: 1;
-        transition: background-color 0.5s ease-in, opacity 1s ease-in;
-    }
-    .save-indicator:has(.save-saving) {
-        opacity: 1;
-        background-color: yellow;
-    }
-    .save-indicator:has(.save-saved) {
-        opacity: 0;
-        background-color: green;
-    }
-    .save-indicator:has(.save-errored) {
-        opacity: 0;
-        background-color: red;
-    }
     .custom-title {
         color: white;
         margin:0;

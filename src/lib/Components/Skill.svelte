@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import type { Calculation } from "./Classes/DataClasses";
     import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
 
@@ -12,7 +12,7 @@
     let { proficiency = $bindable(), name, bonusCalculator }: Props = $props();
     
     let maths: Calculation = $state(bonusCalculator(name));
-    let bonus: string = $derived(CharacterSheetController.bonusToString(maths!.total));
+    let bonus: string = $derived(CharacterController.bonusToString(maths!.total));
 
     const proficiencyCycle = (proficiency:string) => {
         switch(proficiency) {
@@ -33,8 +33,8 @@
         proficiency;
     });
 
-    const characterController = CharacterSheetController.getCharacterController();
-    const siteState = SiteState.getSiteState();
+    const characterController = CharacterController.getContext();
+    const siteState = SiteState.getContext();
 </script>
 
 <div class="skill-div">

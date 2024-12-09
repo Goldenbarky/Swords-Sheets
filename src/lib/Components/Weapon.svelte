@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import AbilitySelector from "./AbilitySelector.svelte";
     import FeaturesBox from "./FeaturesBox.svelte";
     import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
@@ -18,13 +18,13 @@
     const calcDamageMod = () => {
         let modifier = characterController.getAbilityModifier(weapon.Ability);
 
-        return CharacterSheetController.bonusToString(modifier + bonus);
+        return CharacterController.bonusToString(modifier + bonus);
     }
 
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 
-    let to_hit = $state(characterController.getWeaponToHitBonus(weapon));
+    let to_hit = $state(characterController.getWeaponToHitBonusCalc(weapon));
     let damage_mod = $state(calcDamageMod());
     let shown:boolean = $state(false);
 
@@ -49,7 +49,7 @@
                             <div class="custom-title">{weapon.Name}</div>
                         {/if}
                         <div class="row" style="align-items:center">
-                            <div class="custom-subtitle">{CharacterSheetController.bonusToString(to_hit.total)} To Hit</div>
+                            <div class="custom-subtitle">{CharacterController.bonusToString(to_hit.total)} To Hit</div>
                             <CalculationVisualizer
                                 maths={to_hit}
                             />
@@ -63,7 +63,7 @@
                                     checked={weapon.Proficient}
                                     onChange={() => {
                                         weapon.Proficient = !weapon.Proficient;
-                                        to_hit = characterController.getWeaponToHitBonus(weapon);
+                                        to_hit = characterController.getWeaponToHitBonusCalc(weapon);
                                         damage_mod = calcDamageMod();
                                         siteState.save();
                                     }}
@@ -116,7 +116,7 @@
                 <AbilitySelector
                     category_name = "Weapon"
                     bind:selected_ability = {weapon.Ability}
-                    onChange = {() => { to_hit = characterController.getWeaponToHitBonus(weapon); damage_mod = calcDamageMod(); }}
+                    onChange = {() => { to_hit = characterController.getWeaponToHitBonusCalc(weapon); damage_mod = calcDamageMod(); }}
                 />
             {/if}
         </div>
@@ -127,7 +127,7 @@
                     <div class="custom-box custom-side-tab {item_bonus === bonus ? "selected" : ""}" onclick={() => {
                         weapon.Bonus = item_bonus;
                         bonus = item_bonus;
-                        to_hit = characterController.getWeaponToHitBonus(weapon);
+                        to_hit = characterController.getWeaponToHitBonusCalc(weapon);
                         damage_mod = calcDamageMod();
                         siteState.save();
                     }}>+{item_bonus}</div>

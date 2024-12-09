@@ -7,7 +7,7 @@
 
     import ShieldTemplate from "$lib/Data/ShieldTemplate.json";
     import MagicItemTemplate from "$lib/Data/MagicItemTemplate.json";
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         character: CharacterSheet;
@@ -15,8 +15,8 @@
 
     let { character = $bindable() }: Props = $props();
 
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 
     const removeWeapon = (weapon:any) => {
         character.Equipment.Weapons = character.Equipment.Weapons.filter(x => x !== weapon);

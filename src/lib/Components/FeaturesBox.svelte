@@ -1,6 +1,6 @@
 <script lang="ts">
     import TitleDescription from "$lib/Components/Generic/TitleDescription.svelte";
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import ToggleSwitch from "./Generic/ToggleSwitch.svelte";
 
     interface Props {
@@ -16,8 +16,8 @@
         return list.filter(x => x.Title !== title);
     }
 
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 
 <div class="box custom-box">

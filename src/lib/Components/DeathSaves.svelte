@@ -1,8 +1,8 @@
 <script lang="ts">
-    import { CharacterSheetController } from "$lib/Database.svelte";
+    import { CharacterController } from "$lib/Database.svelte";
     import CheckedBox from "./Generic/CheckedBox.svelte";
 
-    const characterController = CharacterSheetController.getCharacterController();
+    const characterController = CharacterController.getContext();
 </script>
 
 <fieldset class="row">

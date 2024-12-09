@@ -17,7 +17,7 @@
         onChange,
     }: Props = $props();
 
-    const siteState = SiteState.getSiteState();
+    const siteState = SiteState.getContext();
 </script>
 
 <div class="checkbox-container" style="{checked ? `outline-color: ${color}` : ""}">

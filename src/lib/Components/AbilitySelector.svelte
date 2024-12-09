@@ -27,7 +27,7 @@
 
     let shown = $state(false);
 
-    const siteState = SiteState.getSiteState();
+    const siteState = SiteState.getContext();
 </script>
 
 <div style="width: 100%; height: 1.2rem; position:absolute; z-index:{z_index}; bottom: -1px; display:flex; flex-direction:column; place-items:center;">

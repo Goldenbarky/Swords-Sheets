@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import FeaturesBox from "./FeaturesBox.svelte";
 
     interface Props {
@@ -11,8 +11,8 @@
 
     let shown:boolean = $state(false);
 
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 <div class="container" style="margin-bottom:0.5rem; flex:none;">
     <div class="custom-box">

@@ -11,7 +11,7 @@
 <div class="grid">
     {#each characters as character, i (character)}
         <CharacterSummary
-            bind:character={characters[i]}
+            character={characters[i]}
         />
     {/each}
 </div>

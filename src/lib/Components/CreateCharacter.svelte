@@ -14,7 +14,7 @@
     let character_class: string = $state('');
     let character_level: number = $state(0);
 
-    const dbClient = DatabaseClient.getDatabaseClient();
+    const dbClient = DatabaseClient.getContext();
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
     <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
@@ -94,7 +94,7 @@
                             return;
                         }
                         goto(
-                            `${PUBLIC_SITE_URL}${character_name}/edit`,
+                            `/character/${character_name}/edit`,
                         );
                     }
                 }}

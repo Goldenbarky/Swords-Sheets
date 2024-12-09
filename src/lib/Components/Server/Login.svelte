@@ -1,7 +1,7 @@
 <script lang="ts">
     import { DatabaseClient } from "$lib/Database.svelte";
 
-    const dbClient = DatabaseClient.getDatabaseClient();
+    const dbClient = DatabaseClient.getContext();
 </script>
 <div class="column custom-column" style="flex: none;">
     {#if !dbClient.user}

@@ -48,8 +48,7 @@
         getCampaigns();
     });
 
-    const dbClient = DatabaseClient.getDatabaseClient();
-    const siteState = SiteState.getSiteState();
+    const dbClient = DatabaseClient.getContext();
 
     let user = $derived(dbClient.user);
     let userAuthorized = $derived(

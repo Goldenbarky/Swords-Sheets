@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import AbilitySelector from "./AbilitySelector.svelte";
     import NumberLabel from "./Generic/NumberLabel.svelte";
 
@@ -10,8 +10,8 @@
 
     let { armor = $bindable(), z_index }: Props = $props();
     
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 <div style="position: relative; width:100%;">
     <div class="custom-box">

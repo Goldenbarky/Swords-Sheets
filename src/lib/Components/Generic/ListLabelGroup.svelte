@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CharacterSheetController } from "$lib/Database.svelte";
+    import { CharacterController } from "$lib/Database.svelte";
     import ListLabel from "./ListLabel.svelte";
 
     interface Props {
@@ -10,7 +10,7 @@
     }
 
     let { lists }: Props = $props();
-    const characterController = CharacterSheetController.getCharacterController();
+    const characterController = CharacterController.getContext();
 </script>
 
 {#each lists as {label, list}, i}

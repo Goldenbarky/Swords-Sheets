@@ -9,11 +9,11 @@
     import * as GenericFunctions from "$lib/GenericFunctions";
     import CheckedBox from "$lib/Components/Generic/CheckedBox.svelte";
     import Divider from "$lib/Components/Helpers/Divider.svelte";
-    import { CharacterSheetController } from "$lib/Database.svelte";
+    import { CharacterController } from "$lib/Database.svelte";
 
     let { character = $bindable() }: { character: CharacterSheet; } = $props();
 
-    const characterController = CharacterSheetController.getCharacterController();
+    const characterController = CharacterController.getContext();
 
     let proficiencies = ["Weapons", "Armor", "Tools", "Languages"] as (keyof Proficiencies)[];
 
@@ -30,8 +30,8 @@
             <AbilityBox
                 name={ability}
                 bind:score={character.Stats.Ability_Scores[ability]}
-                mod={CharacterSheetController.bonusToString(
-                    CharacterSheetController.scoreToModifier(character.Stats.Ability_Scores[ability]),
+                mod={CharacterController.bonusToString(
+                    CharacterController.scoreToModifier(character.Stats.Ability_Scores[ability]),
                 )}
             />
         {/each}
@@ -60,7 +60,7 @@
             <div class="custom-title">Passive Skills</div>
             {#key character.Stats.Ability_Scores}
                 {#each GenericFunctions.passive_skills as passive_skill}
-                {@const bonusCalculation = characterController.getPassiveBonus(passive_skill)}
+                {@const bonusCalculation = characterController.getPassiveBonusCalc(passive_skill)}
                     <NumberLabel
                         label={passive_skill}
                         number={bonusCalculation?.total}
@@ -92,7 +92,7 @@
                                 ability
                             ]}
                             name={ability}
-                            bonusCalculator={(a) => characterController.getSavingBonus(a)}
+                            bonusCalculator={(a) => characterController.getSavingBonusCalc(a)}
                         />
                 {/each}
             {/key}
@@ -104,7 +104,7 @@
                     <Skill
                         name={skill}
                         bind:proficiency={character.Stats.Proficiencies.Skills[skill]}
-                        bonusCalculator={(s) => characterController.getSkillBonus(s)}
+                        bonusCalculator={(s) => characterController.getSkillBonusCalc(s)}
                     />
                 {/each}
             {/key}
@@ -128,9 +128,9 @@
             <NumberLabel bind:number={character.Stats.Health.Temp} label="Temp HP" number_edit_modes={["use"]}/>
         </div>
         <div class="custom-box" style="width:17rem; padding:0px;">
-            <NumberLabel number={characterController.getArmorClass().total} label={"Armor Class"} calculation={characterController.getArmorClass()}/>
+            <NumberLabel number={characterController.getArmorClassCalc().total} label={"Armor Class"} calculation={characterController.getArmorClassCalc()}/>
             <NumberLabel bind:number={character.Stats.Speed} label={"Speed"} number_edit_modes={["edit"]}/>
-            <NumberLabel number={CharacterSheetController.bonusToString(characterController.calcBonus("Dexterity", "")?.total)} label={"Initiative"}/>
+            <NumberLabel number={CharacterController.bonusToString(characterController.calcBonus("Dexterity", "")?.total)} label={"Initiative"}/>
         </div>
         <div class="custom-box" style="width: 100%;">
             <div class="custom-title">Death Saves</div>

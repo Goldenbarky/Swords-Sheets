@@ -1,12 +1,13 @@
 <script lang="ts">
     import MainPage from "$lib/Pages/CampaignPages/MainPage.svelte";
 
-    export let data;
+    let { data } = $props();
+    data.siteState.campaignController?.setContext();
 </script>
 
-<MainPage
-    campaign={data.campaign}
-/>
+{#if data.siteState.campaignController?.campaign}
+    <MainPage />
+{/if}
 
 <style lang="scss">
     :root {

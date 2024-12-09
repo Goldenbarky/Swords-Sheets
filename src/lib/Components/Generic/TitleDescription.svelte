@@ -2,7 +2,7 @@
     import { SOURCES, dndzone } from "svelte-dnd-action";
     import DraggableHandle from "$lib/Components/Icons/DraggableHandle.svelte";
     import CheckedBox from "./CheckedBox.svelte";
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         feature: TitleDescriptionType;
@@ -34,8 +34,8 @@
         await siteState.save();
 	}
 
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 {#if characterController.mode === "edit"}
     <div class="row" style="align-items: flex-start;">

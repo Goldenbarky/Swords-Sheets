@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CharacterSheetController, DatabaseClient, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, DatabaseClient, SiteState } from "$lib/Database.svelte";
 
     interface Props {
         shown: boolean;
@@ -9,9 +9,9 @@
         shown = $bindable(),
     }: Props = $props();
 
-    const dbClient = DatabaseClient.getDatabaseClient();
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const dbClient = DatabaseClient.getContext();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
     <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->

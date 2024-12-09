@@ -1,5 +1,5 @@
 <script lang="ts">
-    import { CharacterSheetController, SiteState } from "$lib/Database.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import Divider from "../Helpers/Divider.svelte";
 
 
@@ -11,8 +11,8 @@
 
     let { label, list = $bindable(), editable = true }: Props = $props();
 
-    const siteState = SiteState.getSiteState();
-    const characterController = CharacterSheetController.getCharacterController();
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 <div class="row" style="margin:0.5rem; width: 100%;">
     <div class="custom-title">{label}</div>
