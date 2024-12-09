@@ -63,9 +63,9 @@
     {/if}
 </div>
 
-<style lang="scss">
+<style>
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: left;
         width: 100%;

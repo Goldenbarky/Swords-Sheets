@@ -31,9 +31,9 @@
     <div class="buffer"></div>
     <input class="value max" disabled={!max_edit_modes.includes(characterController.mode)} onchange={() => siteState.save()} bind:value={max}/>
 </div>
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align:center;

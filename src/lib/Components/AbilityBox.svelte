@@ -20,7 +20,7 @@
     </div>
     <div class="box custom-box ability-mod">{mod}</div>
 </div>
-<style lang="scss">
+<style>
     .ability-box {
         display: flex;
         align-content: center;

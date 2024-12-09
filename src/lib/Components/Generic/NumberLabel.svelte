@@ -94,9 +94,9 @@
     </div>
 </div>
 
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;

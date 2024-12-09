@@ -4,7 +4,7 @@
 
 <MainPage />
 
-<style lang="scss">
+<style>
     :root {
         --background: #1b1919;
         --background_hover: #2f2f2f;

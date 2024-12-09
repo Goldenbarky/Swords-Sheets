@@ -60,7 +60,7 @@
         </div>
     </div>
 {/each}
-<style lang="scss">
+<style>
     .ability-box {
         display: flex;
         align-content: center;

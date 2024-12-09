@@ -1,5 +1,5 @@
 <script lang="ts">
-    import "$lib/../app.scss";
+    import "$lib/../app.css";
     import CharacterPreview from "$lib/Components/Generic/CharacterPreview.svelte";
     import Login from "$lib/Components/Server/Login.svelte";
     import CreateCharacter from "$lib/Components/CreateCharacter.svelte";
@@ -163,7 +163,7 @@
     />
 {/if}
 
-<style lang="scss">
+<style>
     :root {
         --background: #1b1919;
         --background_hover: #2f2f2f;
@@ -264,7 +264,7 @@
         padding: 1rem;
     }
     .custom-title {
-        @extend .title !optional;
+        
         width: fit-content;
         font-size: x-large;
         justify-content: center;

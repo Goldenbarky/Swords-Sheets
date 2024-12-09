@@ -165,7 +165,7 @@
     {/if}
 {/if}
 
-<style lang="scss">
+<style>
     p {
         font-size: small;
         text-align: left;

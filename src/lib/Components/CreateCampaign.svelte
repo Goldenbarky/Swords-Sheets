@@ -132,7 +132,7 @@
     </div>
 </div>
 
-<style lang="scss">
+<style>
     .modal {
         position: absolute;
         width: 100vw;
@@ -152,7 +152,7 @@
         cursor: default;
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;
@@ -163,7 +163,7 @@
         width: 100%;
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: left;
         width: fit-content;

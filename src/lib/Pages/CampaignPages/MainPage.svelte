@@ -7,7 +7,7 @@
     import CombatPage from './CombatPage.svelte';
     import ThemePage from '../ThemePage.svelte';
     import { fade } from 'svelte/transition';
-    import "$lib/../app.scss";
+    import "$lib/../app.css";
     import EditCampaign from '$lib/Components/EditCampaign.svelte';
 
     let characters:CharacterDataRow[] = $state([]);
@@ -79,7 +79,7 @@
     bind:campaign={campaignController.campaign}
 />
 
-<style lang="scss">
+<style>
     .save-indicator {
         position: absolute;
         width: 2rem;

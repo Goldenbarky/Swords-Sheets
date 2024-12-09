@@ -18,7 +18,7 @@
         <img src={dbClient.user.user_metadata.avatar_url} referrerpolicy="no-referrer" class="profile-pic"/>
     {/if}
 </div>
-<style lang="scss">
+<style>
     .custom-column {
         padding-top: 0;
         padding-bottom: 0;

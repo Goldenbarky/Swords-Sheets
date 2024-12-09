@@ -36,9 +36,9 @@
         {/if}
     </div>
 </div>
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: medium;
         font-weight: bold;
         display: flex;

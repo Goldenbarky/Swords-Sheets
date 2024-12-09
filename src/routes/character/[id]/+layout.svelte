@@ -1,5 +1,5 @@
 <script lang="ts">
-    import "$lib/../app.scss";
+    import "$lib/../app.css";
     import MainPage from '$lib/Pages/CharacterSheet/MainPage.svelte';
     
     let { data, children } = $props();
@@ -20,7 +20,7 @@
         />
     {/if}
 </div>
-<style lang="scss">
+<style>
     :global(.center) {
         align-content: center;
     }

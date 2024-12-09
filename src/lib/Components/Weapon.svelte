@@ -155,7 +155,7 @@
     {/if}
 </div>
 
-<style lang="scss">
+<style>
     .container {
         display: flex;
         flex-grow: 0;
@@ -182,7 +182,7 @@
         border-top: 0px !important;
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: center;
         width: 100%;

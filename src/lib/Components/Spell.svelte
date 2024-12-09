@@ -213,7 +213,7 @@
     </div>
 </div>
 
-<style lang="scss">
+<style>
     .custom-box {
         display: block;
         padding: 0.75rem;
@@ -266,7 +266,7 @@
         color: var(--secondary);
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         width: fit-content;
         color: var(--text);

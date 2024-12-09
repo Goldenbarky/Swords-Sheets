@@ -114,9 +114,9 @@
     {/each}
 {/if}
 
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: left;
         width: fit-content;

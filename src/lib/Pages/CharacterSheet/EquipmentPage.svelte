@@ -166,9 +166,9 @@
     </div>
     <div class="edge"></div>
 </div>
-<style lang="scss">
+<style>
     .custom-column {
-        @extend .column !optional;
+        
         margin: 0.75rem;
         margin-top: 1.5rem;
         padding: 0px;
@@ -182,7 +182,7 @@
         margin-right: 2rem;
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;

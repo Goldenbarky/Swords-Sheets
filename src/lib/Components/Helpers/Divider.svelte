@@ -14,7 +14,7 @@
     <div style="width: 100%; height: 0.5rem;"></div>
 {/if}
 
-<style lang="scss">
+<style>
     .buffer {
         width: 0.5rem;
     }

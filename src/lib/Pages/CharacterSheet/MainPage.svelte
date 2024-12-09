@@ -123,7 +123,7 @@
 <!-- tODO fix  -->
 <SaveIndicator />
 
-<style lang="scss">
+<style>
     .custom-title {
         color: white;
         margin:0;

@@ -15,7 +15,7 @@
     </label>
 </div>
 
-<style lang="scss">
+<style>
     .custom-title {
         color: var(--text);
     }

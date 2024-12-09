@@ -17,7 +17,7 @@
         <div class="custom-subtitle">Level {campaign.data.Level} campaign</div>
     </div>
 </div>
-<style lang="scss">
+<style>
     .custom-box {
         border: 2px solid var(--border);
         padding: 0rem;
@@ -36,7 +36,7 @@
         border-bottom: 1px solid var(--border);
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;
@@ -47,7 +47,7 @@
         width: fit-content;
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: left;
         width: fit-content;

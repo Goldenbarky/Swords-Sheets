@@ -16,7 +16,7 @@
     {/each}
 </div>
 
-<style lang="scss">
+<style>
     .grid {
         display: grid;
         width: 100%;

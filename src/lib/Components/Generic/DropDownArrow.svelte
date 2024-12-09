@@ -19,7 +19,7 @@
     </div>
 </div>
 
-<style lang="scss">
+<style>
     .bubble {
         border: 2px solid var(--border);
         border-radius: 0.5rem;

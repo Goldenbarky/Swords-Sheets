@@ -54,7 +54,7 @@
         />
     {/if}
 </div>
-<style lang="scss">
+<style>
     .skill-div {
         display: flex;
         flex-direction: row;

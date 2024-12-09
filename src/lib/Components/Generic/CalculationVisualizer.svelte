@@ -47,9 +47,9 @@
         </div>
     </div>
 </div>
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: medium;
         justify-content: center;
         text-align: center;

@@ -186,9 +186,9 @@
         </div>
     </div>
 </div>
-<style lang="scss">
+<style>
     .custom-column {
-        @extend .column !optional;
+        
         margin: 0rem 0rem 0rem 0.5rem;
         padding: 0rem 0rem 0rem 0rem;
         flex-direction: column;
@@ -216,7 +216,7 @@
         width: 100%;
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;
@@ -227,7 +227,7 @@
         width: fit-content;
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: center;
         width: 100%;
