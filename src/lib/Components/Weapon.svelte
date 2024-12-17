@@ -1,48 +1,55 @@
 <script lang="ts">
-    import { bonusToString, calcBonus, calcWeaponToHit, getAbilityModifier, updateDatabase } from "$lib/GenericFunctions";
-    import { mode } from "$lib/Theme";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import AbilitySelector from "./AbilitySelector.svelte";
     import FeaturesBox from "./FeaturesBox.svelte";
     import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
     import CheckedBox from "./Generic/CheckedBox.svelte";
     import Divider from "./Helpers/Divider.svelte";
 
-    export let weapon:Weapon;
-    export let removeFunction:Function = () => {};
-
-    let bonus = weapon.Bonus;
-
-    const calcDamageMod = () => {
-        let modifier = getAbilityModifier(weapon.Ability) as number;
-
-        return bonusToString(modifier + bonus);
+    interface Props {
+        weapon: Weapon;
+        removeFunction?: Function;
     }
 
-    let to_hit = calcWeaponToHit(weapon);
-    let damage_mod = calcDamageMod();
-    let shown:boolean = false;
+    let { weapon = $bindable(), removeFunction = () => {} }: Props = $props();
+
+    let bonus = $state(weapon.Bonus);
+
+    const calcDamageMod = () => {
+        let modifier = characterController.getAbilityModifier(weapon.Ability);
+
+        return CharacterController.bonusToString(modifier + bonus);
+    }
+
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
+
+    let to_hit = $state(characterController.getWeaponToHitBonusCalc(weapon));
+    let damage_mod = $state(calcDamageMod());
+    let shown:boolean = $state(false);
+
 </script>
 <div class="container" style="width: 100%;">
     <div class="row" style="width:100%;">
-        {#if $mode === "edit"}
+        {#if characterController.mode === "edit"}
             <div style="display: flex; flex-direction: column; position: absolute; left: -19px; height: 0;">
-                <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.45rem;" on:click={() => {
+                <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.45rem;" onclick={() => {
                     removeFunction();
-                    updateDatabase();
+                    siteState.save();
                 }}>-</button>
             </div>
         {/if}
         <div style="position: relative; width:100%;">
             <div class="custom-box" style="padding-top: 0.5rem; width:100%;">
-                <div class="row" style="width: 100%; {$mode === "edit" ? "min-height:6.5rem;" : ""}">
+                <div class="row" style="width: 100%; {characterController.mode === "edit" ? "min-height:6.5rem;" : ""}">
                     <div class="column" style="padding: 0px;">
-                        {#if $mode === "edit"}
-                            <div class="custom-title placeholder" style="display:inline-block" on:focusout={updateDatabase} bind:innerText={weapon.Name} contenteditable="true" placeholder="Weapon Name"/>
+                        {#if characterController.mode === "edit"}
+                            <div class="custom-title placeholder" style="display:inline-block" onfocusout={() => siteState.save()} bind:innerText={weapon.Name} contenteditable="true" placeholder="Weapon Name"></div>
                         {:else}
                             <div class="custom-title">{weapon.Name}</div>
                         {/if}
                         <div class="row" style="align-items:center">
-                            <div class="custom-subtitle">{bonusToString(to_hit.total)} To Hit</div>
+                            <div class="custom-subtitle">{CharacterController.bonusToString(to_hit.total)} To Hit</div>
                             <CalculationVisualizer
                                 maths={to_hit}
                             />
@@ -50,18 +57,18 @@
                     </div>
                     <Divider/>
                     <div class="column" style="padding:0px;">
-                        {#if $mode === "edit"}
+                        {#if characterController.mode === "edit"}
                             <div class="row" style="align-items:center;">
                                 <CheckedBox
                                     checked={weapon.Proficient}
                                     onChange={() => {
                                         weapon.Proficient = !weapon.Proficient;
-                                        to_hit = calcWeaponToHit(weapon);
+                                        to_hit = characterController.getWeaponToHitBonusCalc(weapon);
                                         damage_mod = calcDamageMod();
-                                        updateDatabase();
+                                        siteState.save();
                                     }}
                                 />
-                                <div style="width: 0.5rem;"/>
+                                <div style="width: 0.5rem;"></div>
                                 <div style="color: var(--text);">Proficient?</div>
                             </div>
                             <Divider
@@ -69,12 +76,12 @@
                             />
                         {/if}
                         <div class="row">
-                            {#if $mode === "edit"}
-                                <div class="damage placeholder" on:focusout={updateDatabase} bind:innerText={weapon.Base_Damage.Dice} contenteditable="true" placeholder="Dice"/>
-                                <div style="width: 0.275rem;"/>
+                            {#if characterController.mode === "edit"}
+                                <div class="damage placeholder" onfocusout={() => siteState.save()} bind:innerText={weapon.Base_Damage.Dice} contenteditable="true" placeholder="Dice"></div>
+                                <div style="width: 0.275rem;"></div>
                                 <div class="damage"> {damage_mod}</div>
-                                <div style="width: 0.275rem;"/>
-                                <div class="damage placeholder" on:focusout={updateDatabase} bind:innerText={weapon.Base_Damage.Type} contenteditable="true" placeholder="Damage Type"/>
+                                <div style="width: 0.275rem;"></div>
+                                <div class="damage placeholder" onfocusout={() => siteState.save()} bind:innerText={weapon.Base_Damage.Type} contenteditable="true" placeholder="Damage Type"></div>
                             {:else}
                                 <div class="damage">{`${weapon.Base_Damage.Dice} ${damage_mod} ${weapon.Base_Damage.Type}`}</div>
                             {/if}
@@ -86,43 +93,43 @@
                         {/if}
                         {#each weapon.Extra_Damage as damage}
                             <div class="row">
-                                {#if $mode === "edit"}
-                                    <button class="custom-box custom-button custom-tiny-button" on:click={() => {
+                                {#if characterController.mode === "edit"}
+                                    <button class="custom-box custom-button custom-tiny-button" onclick={() => {
                                         weapon.Extra_Damage = weapon.Extra_Damage.filter(x => x !== damage);
-                                        updateDatabase();
+                                        siteState.save();
                                     }}>-</button>
-                                    <div class="damage placeholder" on:focusout={updateDatabase} bind:innerText={damage.Damage} contenteditable="true" placeholder="0dX"/>
-                                    <div style="width: 0.275rem;"/>
-                                    <div class="damage placeholder" on:focusout={updateDatabase} bind:innerText={damage.Type} contenteditable="true" placeholder="Damage Type"/>
+                                    <div class="damage placeholder" onfocusout={() => siteState.save()} bind:innerText={damage.Damage} contenteditable="true" placeholder="0dX"></div>
+                                    <div style="width: 0.275rem;"></div>
+                                    <div class="damage placeholder" onfocusout={() => siteState.save()} bind:innerText={damage.Type} contenteditable="true" placeholder="Damage Type"></div>
                                 {:else}
                                     <div class="damage">{`${damage.Damage} ${damage.Type}`}</div>
                                 {/if}
                             </div>
                         {/each}
-                        {#if $mode === "edit"}
-                            <button class="custom-box custom-button" on:click={() => weapon.Extra_Damage = [...weapon.Extra_Damage, {Damage:"",Type:""}]}>+</button>
+                        {#if characterController.mode === "edit"}
+                            <button class="custom-box custom-button" onclick={() => weapon.Extra_Damage.push({Damage:"",Type:""})}>+</button>
                         {/if}
                     </div>
                 </div>
             </div>
-            {#if $mode === "edit"}
+            {#if characterController.mode === "edit"}
                 <AbilitySelector
                     category_name = "Weapon"
                     bind:selected_ability = {weapon.Ability}
-                    onChange = {() => { to_hit = calcWeaponToHit(weapon); damage_mod = calcDamageMod(); }}
+                    onChange = {() => { to_hit = characterController.getWeaponToHitBonusCalc(weapon); damage_mod = calcDamageMod(); }}
                 />
             {/if}
         </div>
         <div style="display: flex; flex-direction: column; position: absolute; right: -19px">
             {#each [0, 1, 2, 3] as item_bonus}
-                {#if $mode === "edit" || (item_bonus === bonus && item_bonus !== 0)}
-                    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                    <div class="custom-box custom-side-tab {item_bonus === bonus ? "selected" : ""}" on:click={() => {
+                {#if characterController.mode === "edit" || (item_bonus === bonus && item_bonus !== 0)}
+                    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                    <div class="custom-box custom-side-tab {item_bonus === bonus ? "selected" : ""}" onclick={() => {
                         weapon.Bonus = item_bonus;
                         bonus = item_bonus;
-                        to_hit = calcWeaponToHit(weapon);
+                        to_hit = characterController.getWeaponToHitBonusCalc(weapon);
                         damage_mod = calcDamageMod();
-                        updateDatabase();
+                        siteState.save();
                     }}>+{item_bonus}</div>
                 {/if}
             {/each}
@@ -136,9 +143,9 @@
             />
         </div>
     {/if}
-    {#if $mode === "edit" || weapon.Entries.length >= 1}
-        <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions-->
-        <div class="custom-box bubble" on:click = {() => {
+    {#if characterController.mode === "edit" || weapon.Entries.length >= 1}
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
+        <div class="custom-box bubble" onclick={() => {
             shown = !shown
             }}>
             <div style="margin-top: -0.6rem; user-select: none">
@@ -148,7 +155,7 @@
     {/if}
 </div>
 
-<style lang="scss">
+<style>
     .container {
         display: flex;
         flex-grow: 0;
@@ -175,7 +182,7 @@
         border-top: 0px !important;
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: center;
         width: 100%;

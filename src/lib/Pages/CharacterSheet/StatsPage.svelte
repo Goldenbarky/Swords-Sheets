@@ -1,5 +1,4 @@
 <script lang="ts">
-    //@ts-nocheck
     import AbilityBox from "$lib/Components/AbilityBox.svelte";
     import NumberLabel from "$lib/Components/Generic/NumberLabel.svelte";
     import DynamicNumberLabel from "$lib/Components/Generic/DynamicNumberLabel.svelte";
@@ -7,16 +6,18 @@
     import Skill from "$lib/Components/Skill.svelte";
     import DeathSaves from "$lib/Components/DeathSaves.svelte";
     import FeaturesBox from "$lib/Components/FeaturesBox.svelte";
-    import { mode } from "$lib/Theme";
     import * as GenericFunctions from "$lib/GenericFunctions";
     import CheckedBox from "$lib/Components/Generic/CheckedBox.svelte";
     import Divider from "$lib/Components/Helpers/Divider.svelte";
+    import { CharacterController } from "$lib/Database.svelte";
 
-    export let character: CharacterSheet;
+    let { character = $bindable() }: { character: CharacterSheet; } = $props();
+
+    const characterController = CharacterController.getContext();
 
     let proficiencies = ["Weapons", "Armor", "Tools", "Languages"] as (keyof Proficiencies)[];
 
-    let observant = character.Features.Feats.find(x => x.Title === "Observant");
+    let observant = $derived(character.Features.Feats.find(x => x.Title === "Observant"));
 </script>
 
 <div
@@ -29,8 +30,8 @@
             <AbilityBox
                 name={ability}
                 bind:score={character.Stats.Ability_Scores[ability]}
-                mod={GenericFunctions.bonusToString(
-                    GenericFunctions.scoreToModifier(character.Stats.Ability_Scores[ability]),
+                mod={CharacterController.bonusToString(
+                    CharacterController.scoreToModifier(character.Stats.Ability_Scores[ability]),
                 )}
             />
         {/each}
@@ -39,7 +40,7 @@
         <div class="custom-box" style="width:18rem; padding:0px;">
             {#key character.Level}
                 <NumberLabel
-                    number={`+${GenericFunctions.getPB()}`}
+                    number={`+${characterController.getProficiencyBonus()}`}
                     label="Proficiency Bonus"
                 />
             {/key}
@@ -47,7 +48,7 @@
         <div class="custom-box" style="min-width: 18rem; padding-bottom: 0px;">
             <div class="custom-title">Proficiencies</div>
             {#each proficiencies as proficiency, i}
-                {#if $mode === "edit" || character.Stats.Proficiencies[proficiency].length >= 1}
+                {#if characterController.mode === "edit" || character.Stats.Proficiencies[proficiency].length >= 1}
                     {#if i != 0}
                         <Divider orientation="horizontal"/>
                     {/if}
@@ -59,7 +60,7 @@
             <div class="custom-title">Passive Skills</div>
             {#key character.Stats.Ability_Scores}
                 {#each GenericFunctions.passive_skills as passive_skill}
-                {@const bonusCalculation = GenericFunctions.calcPassiveBonuses(passive_skill)}
+                {@const bonusCalculation = characterController.getPassiveBonusCalc(passive_skill)}
                     <NumberLabel
                         label={passive_skill}
                         number={bonusCalculation?.total}
@@ -70,16 +71,16 @@
                 {/each}
             {/key}
         </div>
-        {#if $mode === "edit"}
+        {#if characterController.mode === "edit"}
             <div class="custom-box row" style="border-top: 0px; border-radius: 0px 0px 6px 6px; padding-top:0.5rem; pointer-events: none;">
                 <CheckedBox
                     checked={observant}
                 />
-                <div style="width: 0.5rem;"/>
+                <div style="width: 0.5rem;"></div>
                 <div style="color: var(--text);">Observant?</div>
             </div>
         {/if}
-        <div style="height: 1rem;"/>
+        <div style="height: 1rem;"></div>
     </div>
     <div class="custom-column center">
         <div class="custom-box">
@@ -91,7 +92,7 @@
                                 ability
                             ]}
                             name={ability}
-                            bonusCalculator={(a) => GenericFunctions.calcSavingBonus(a)}
+                            bonusCalculator={(a) => characterController.getSavingBonusCalc(a)}
                         />
                 {/each}
             {/key}
@@ -103,7 +104,7 @@
                     <Skill
                         name={skill}
                         bind:proficiency={character.Stats.Proficiencies.Skills[skill]}
-                        bonusCalculator={(s) => GenericFunctions.calcSkillBonus(s)}
+                        bonusCalculator={(s) => characterController.getSkillBonusCalc(s)}
                     />
                 {/each}
             {/key}
@@ -127,9 +128,9 @@
             <NumberLabel bind:number={character.Stats.Health.Temp} label="Temp HP" number_edit_modes={["use"]}/>
         </div>
         <div class="custom-box" style="width:17rem; padding:0px;">
-            <NumberLabel number={GenericFunctions.calcAC().total} label={"Armor Class"} calculation={GenericFunctions.calcAC()}/>
+            <NumberLabel number={characterController.getArmorClassCalc().total} label={"Armor Class"} calculation={characterController.getArmorClassCalc()}/>
             <NumberLabel bind:number={character.Stats.Speed} label={"Speed"} number_edit_modes={["edit"]}/>
-            <NumberLabel number={GenericFunctions.bonusToString(GenericFunctions.calcBonus("Dexterity", "")?.total)} label={"Initiative"}/>
+            <NumberLabel number={CharacterController.bonusToString(characterController.calcBonus("Dexterity", "")?.total)} label={"Initiative"}/>
         </div>
         <div class="custom-box" style="width: 100%;">
             <div class="custom-title">Death Saves</div>
@@ -145,9 +146,8 @@
     <div class="edge"></div>
 </div>
 
-<style lang="scss">
+<style>
     .custom-column {
-        @extend .column !optional;
         margin: 0.75rem;
         margin-top: 1.5rem;
         padding: 0px;
@@ -157,7 +157,6 @@
         background-color: var(--background);
     }
     .custom-title {
-        @extend .title !optional;
         font-size: x-large;
         justify-content: center;
         text-align: center;

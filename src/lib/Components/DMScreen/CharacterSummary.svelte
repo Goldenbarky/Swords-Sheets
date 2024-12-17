@@ -1,23 +1,24 @@
 <script lang="ts">
-    import { bonusToString, calcAC, calcPassiveBonuses, calcSaveDC, calcSpellToHit, calcWeaponToHit, getPB, passive_skills, spell_slot_levels } from "$lib/GenericFunctions";
+    import { CharacterController } from "$lib/Database.svelte";
+    import { passive_skills, spell_slot_levels } from "$lib/GenericFunctions";
     import Divider from "../Helpers/Divider.svelte";
     import AbilityBoxSummaries from "./AbilityBoxSummaries.svelte";
 
-    export let character:CharacterDataRow;
+    let { character }: { character: CharacterDataRow } = $props();
 
     let characterTheme:Theme = character.theme;
     let character_sheet:CharacterSheet = character.data;
 
-    let to_hit = calcSpellToHit(character_sheet)?.total as number;
+    let to_hit = $state(CharacterController.calcSpellToHit(character_sheet)?.total as number);
 
     character_sheet.Equipment.Weapons.forEach(x => {
-        let weapon_to_hit = calcWeaponToHit(x, character_sheet).total;
+        let weapon_to_hit = CharacterController.calcWeaponToHit(character_sheet, x).total;
         if(weapon_to_hit > to_hit) to_hit = weapon_to_hit;
     });
 </script>
-<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div class="custom-box" style="height: 26.9rem;" style:--primary={characterTheme.primary} style:--secondary={characterTheme.secondary} style:--background={characterTheme.background} style:--background_hover={characterTheme.background_hover} style:--border={characterTheme.border} style:--text={characterTheme.text}>
-    <div class="color-tab"/>
+    <div class="color-tab"></div>
     <div class="border">
         <div class="custom-title">{character.name}</div>
         <div class="custom-subtitle" style="text-align: left; width: fit-content;">Level {character_sheet.Level} {character_sheet.Class}</div>
@@ -33,7 +34,7 @@
                 <div class="custom-box content-box" style="width: fit-content;">
                     <div class="custom-subtitle">AC</div>
                     <div class="text">
-                        {calcAC(character_sheet)?.total}
+                        {CharacterController.calcArmorClass(character_sheet).total}
                     </div>
                 </div>
                 <div class="custom-box content-box" style="width: fit-content;">
@@ -72,7 +73,7 @@
                                 orientation="vertical"
                             />
                             <div class="row">
-                                <div class="stat-score">{bonusToString(getPB(character_sheet))}</div>
+                                <div class="stat-score">{CharacterController.bonusToString(CharacterController.getProficiencyBonus(character_sheet))}</div>
                             </div>
                         </div>
                         <div class="row" style="padding-bottom: 0.25rem;">
@@ -83,7 +84,7 @@
                                 orientation="vertical"
                             />
                             <div class="row">
-                                <div class="stat-score">{bonusToString(to_hit)}</div>
+                                <div class="stat-score">{CharacterController.bonusToString(to_hit)}</div>
                             </div>
                         </div>
                         <div class="row">
@@ -109,7 +110,7 @@
                                     orientation="vertical"
                                 />
                                 <div class="row">
-                                    <div class="stat-score">{calcPassiveBonuses(skill, character_sheet)?.total}</div>
+                                    <div class="stat-score">{CharacterController.calcPassiveBonus(character_sheet, skill).total}</div>
                                 </div>
                             </div>
                         {/each}
@@ -125,7 +126,7 @@
                                 orientation="vertical"
                             />
                             <div class="row">
-                                <div class="stat-score">{calcSaveDC(character_sheet)?.total}</div>
+                                <div class="stat-score">{CharacterController.calcSaveDc(character_sheet).total}</div>
                             </div>
                         </div>
                     </div>
@@ -185,9 +186,9 @@
         </div>
     </div>
 </div>
-<style lang="scss">
+<style>
     .custom-column {
-        @extend .column !optional;
+        
         margin: 0rem 0rem 0rem 0.5rem;
         padding: 0rem 0rem 0rem 0rem;
         flex-direction: column;
@@ -215,7 +216,7 @@
         width: 100%;
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;
@@ -226,7 +227,7 @@
         width: fit-content;
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: center;
         width: 100%;

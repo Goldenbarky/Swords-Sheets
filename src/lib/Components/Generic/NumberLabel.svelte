@@ -1,68 +1,105 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
-    import { mode } from "$lib/Theme";
     import { Calculation } from "../Classes/DataClasses";
     import Divider from "../Helpers/Divider.svelte";
     import CalculationVisualizer from "./CalculationVisualizer.svelte";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
 
-    export let number:number;
-    export let label:string;
-    export let label_placeholder:string = "Placeholder";
-    export let bold_label:boolean=true;
-    export let number_edit_modes:string[]=[];
-    export let label_edit_modes:string[]=[];
-    export let incremental:boolean = false;
-    export let number_font_size:string = "large";
-    export let label_font_size:string = "x-large";
-    export let vertical_margins:boolean = true;
-    // @ts-ignore
-    export let calculation:Calculation = undefined;
+    let {
+        number = $bindable(),
+        label = $bindable(),
+        label_placeholder = "Placeholder",
+        bold_label = true,
+        number_edit_modes = [],
+        label_edit_modes = [],
+        incremental = false,
+        number_font_size = "large",
+        label_font_size = "x-large",
+        vertical_margins = true,
+        calculation,
+    }: {
+        number: number;
+        label: string;
+        label_placeholder?: string;
+        bold_label?: boolean;
+        number_edit_modes?: string[];
+        label_edit_modes?: string[];
+        incremental?: boolean;
+        number_font_size?: string;
+        label_font_size?: string;
+        vertical_margins?: boolean;
+        calculation?: Calculation;
+    } = $props();
 
     let placeholder = "\u{221E}";
-    
+
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 
-<div class="row" style="{vertical_margins ? 'margin:0.5rem;' : 'margin-left:0.5rem; margin-right:0.5rem;'}">
+<div
+    class="row"
+    style={vertical_margins
+        ? "margin:0.5rem;"
+        : "margin-left:0.5rem; margin-right:0.5rem;"}
+>
     <div class="row" style="align-items:center;">
-        {#if incremental && number_edit_modes.includes($mode) && typeof(number) === "number"}
-            <button class="custom-box custom-button custom-tiny-button" style="font-size: {number_font_size}" on:click={() => {
-                number--;
-                updateDatabase();
-            }}>
-                <div style="position: relative; top: 2.5px">
-                    -
-                </div>
+        {#if incremental && number_edit_modes.includes(characterController.mode)}
+            <button
+                class="custom-box custom-button custom-tiny-button"
+                style="font-size: {number_font_size}"
+                onclick={() => {
+                    number--;
+                    siteState.save();
+                }}
+            >
+                <div style="position: relative; top: 2.5px">-</div>
             </button>
         {/if}
-        <input class="value {number_edit_modes.includes($mode) ? 'editable' : ''}" style="font-size: {number_font_size}" disabled={!number_edit_modes.includes($mode)} on:change={updateDatabase} bind:value={number} placeholder={placeholder}/>
-        {#if incremental && number_edit_modes.includes($mode)}
-            <button class="custom-box custom-button custom-tiny-button" style="font-size: {number_font_size}" on:click={() => {
-                number++;
-                updateDatabase();
-            }}>
-                <div style="position: relative; top: 2.5px">
-                    +
-                </div>
+        <input
+            class="value {number_edit_modes.includes(characterController.mode) ? 'editable' : ''}"
+            style="font-size: {number_font_size}"
+            disabled={!number_edit_modes.includes(characterController.mode)}
+            onchange={() => siteState.save()}
+            bind:value={number}
+            {placeholder}
+        />
+        {#if incremental && number_edit_modes.includes(characterController.mode)}
+            <button
+                class="custom-box custom-button custom-tiny-button"
+                style="font-size: {number_font_size}"
+                onclick={() => {
+                    number++;
+                    siteState.save();
+                }}
+            >
+                <div style="position: relative; top: 2.5px">+</div>
             </button>
         {/if}
     </div>
-    <Divider/>
-    <input class="custom-title {bold_label ? 'bold' : 'not-bold'} {label_edit_modes.includes($mode) ? 'editable' : ''}" style="font-size: {label_font_size}" disabled={!label_edit_modes.includes($mode)} on:change={updateDatabase} bind:value={label} placeholder={label_placeholder}/>
+    <Divider />
+    <input
+        class="custom-title {bold_label
+            ? 'bold'
+            : 'not-bold'} {label_edit_modes.includes(characterController.mode) ? 'editable' : ''}"
+        style="font-size: {label_font_size}"
+        disabled={!label_edit_modes.includes(characterController.mode)}
+        onchange={() => siteState.save()}
+        bind:value={label}
+        placeholder={label_placeholder}
+    />
     <div class="row" style="align-items: center">
-        {#if calculation !== undefined }
-            <CalculationVisualizer
-                maths={calculation}
-            />
+        {#if calculation !== undefined}
+            <CalculationVisualizer maths={calculation} />
         {/if}
     </div>
 </div>
 
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
-        text-align:center;
+        text-align: center;
         width: var(--width, calc(100% - 3.5rem));
         cursor: default;
         user-select: none;

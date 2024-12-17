@@ -1,17 +1,17 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
 
-    export let character;
+    let { character } = $props();
 </script>
-<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-<div class="custom-box" on:click={() => {goto(`/${character.name}`)}}>
-    <div class="color-tab" style="background-color: {character.theme.primary}"/>
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+<div class="custom-box" onclick={() => {goto(`/character/${character.name}`)}}>
+    <div class="color-tab" style="background-color: {character.theme.primary}"></div>
     <div class="border">
         <div class="custom-title">{character.name}</div>
         <div class="custom-subtitle">Level {character.data.Level} {character.data.Class}</div>
     </div>
 </div>
-<style lang="scss">
+<style>
     .custom-box {
         border: 2px solid var(--border);
         padding: 0rem;
@@ -30,7 +30,7 @@
         border-bottom: 1px solid var(--border);
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;
@@ -41,7 +41,7 @@
         width: fit-content;
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: left;
         width: fit-content;

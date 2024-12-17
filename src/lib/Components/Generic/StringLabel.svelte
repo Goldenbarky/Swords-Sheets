@@ -1,8 +1,12 @@
 <script lang="ts">
     import Divider from "../Helpers/Divider.svelte";
 
-    export let value:string;
-    export let label:string;
+    interface Props {
+        value: string;
+        label: string;
+    }
+
+    let { value, label }: Props = $props();
 </script>
 
 <div class="row" style="margin:0.2rem; justify-content: space-evenly; width: 100%;">
@@ -12,7 +16,6 @@
     </div>
     <div class="value" style="width: 40%;">{value}</div>
 </div>
-
 <style>
     .custom-title {
         font-size: small;

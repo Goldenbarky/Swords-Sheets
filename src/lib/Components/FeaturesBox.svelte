@@ -1,45 +1,50 @@
 <script lang="ts">
     import TitleDescription from "$lib/Components/Generic/TitleDescription.svelte";
-    import { updateDatabase } from "$lib/GenericFunctions";
-    import { mode } from "$lib/Theme";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import ToggleSwitch from "./Generic/ToggleSwitch.svelte";
 
-    export let title:string;
-    export let features:TitleDescriptionType[];
+    interface Props {
+        title: string;
+        features: TitleDescriptionType[];
+    }
 
-    let reorderable = false;
+    let { title, features = $bindable() }: Props = $props();
+
+    let reorderable = $state(false);
 
     const removeFeature = (list:TitleDescriptionType[], title:string) => {
         return list.filter(x => x.Title !== title);
     }
 
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 
 <div class="box custom-box">
     <div class="custom-title">{title}</div>
     {#each features as feature, i (feature)}
         <TitleDescription
-            bind:feature={feature}
+            bind:feature={features[i]}
             removeFunction={() => features = removeFeature(features, feature.Title)}
             orderable={reorderable}
         />
-        <div style="height:0.5rem;"/>
+        <div style="height:0.5rem;"></div>
     {/each}
-    {#if $mode === "edit"}
+    {#if characterController?.mode === "edit"}
         <div class="row">
             <button 
                 class="custom-box custom-button custom-tiny-button" 
                 style="margin-top:0.5rem;" 
-                on:click={async () => {
-                    features = [...features, {Title:"", Description:[{Subtitle:"", Paragraph:""}], Uses: {Max:0, Used:0}}];
-                    await updateDatabase();
+                onclick={() => {
+                    features.push({Title:"", Description:[{Subtitle:"", Paragraph:""}], Uses: {Max:0, Used:0}});
+                    siteState.save();
                 }}
             >
                 +
             </button>
             <div>
                 <div style="width:100%;">
-                    <div class="custom-subtitle placeholder" on:focusout={updateDatabase}>New Feature</div>
+                    <div class="custom-subtitle placeholder" onfocusout={() => siteState.save()}>New Feature</div>
                 </div>
             </div>
         </div>
@@ -52,9 +57,9 @@
     {/if}
 </div>
 
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;
@@ -64,7 +69,7 @@
         color: var(--secondary);
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: left;
         width: fit-content;

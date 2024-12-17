@@ -1,15 +1,15 @@
 <script lang="ts">
-    //@ts-nocheck
     import AbilityBox from '$lib/Components/AbilityBox.svelte';
     import ListLabel from '$lib/Components/Generic/ListLabel.svelte';
     import NumberLabel from '$lib/Components/Generic/NumberLabel.svelte';
     import Skill from '$lib/Components/Skill.svelte';
     import CheckedBox from '$lib/Components/Generic/CheckedBox.svelte';
     import Divider from "$lib/Components/Helpers/Divider.svelte";
-    import { updateTheme, resetColors } from '$lib/GenericFunctions';
-    import { theme } from '$lib/Theme';
     import ColorPicker from "svelte-awesome-color-picker";
     import { Calculation } from '$lib/Components/Classes/DataClasses';
+    import { SiteState } from '$lib/Database.svelte';
+
+    const siteState = SiteState.getContext();
 
     let skill1 = new Calculation();
     let skill2 = new Calculation();
@@ -21,18 +21,18 @@
 
 </script>
 <div class="columns has-text-centered">
-    <div class="edge"/>
+    <div class="edge"></div>
     <div class="column" style="align-items: flex-start;">
         <div class="custom-box color-picker">
-            {#each Object.keys($theme) as color}
-                <ColorPicker bind:hex={$theme[color]} label={color} --cp-border-color={$theme["text"]}/>
+            {#each Object.keys(siteState.theme) as color}
+                <ColorPicker bind:hex={siteState.theme[color]} label={color} --cp-border-color={siteState.theme["text"]}/>
             {/each}
         </div>
         <div class="row" style="justify-content: space-evenly;">
-            <button class="custom-box custom-button" on:click={updateTheme}>Save</button>
-            <button class="custom-box custom-button" on:click={resetColors}>Revert</button>
+            <button class="custom-box custom-button" onclick={() => siteState.save()}>Save</button>
+            <button class="custom-box custom-button" onclick={() => siteState.resetTheme()}>Revert</button>
         </div>
-        <div style="height:2rem;"/>
+        <div style="height:2rem;"></div>
         <div class="custom-box">
             <p class="paragraph">If you're having trouble picking a color scheme try using <a href="https://www.coolors.co" target="_blank">coolors.co</a></p>
         </div>
@@ -40,7 +40,7 @@
     <div class="column test-area">
         <AbilityBox
             name="Ability Score Box"
-            score=21
+            score={21}
             mod="+5"
         />
         <div class="custom-box" style="width:18rem; padding:0px;">
@@ -49,14 +49,14 @@
                 label="Label"
             />
         </div>
-        <div style="height:1rem;"/>
+        <div style="height:1rem;"></div>
         <div class="custom-box">
             <div class="custom-title">Title</div>
             <ListLabel
                 label="List 1"
                 list={["Item 1", "Item 2"]}
             />
-            <div style="margin: 0rem; border-top: 1px solid var(--border); height: 1px; width: 100%;"/>
+            <div style="margin: 0rem; border-top: 1px solid var(--border); height: 1px; width: 100%;"></div>
             <ListLabel
                 label="List 2"
                 list={["Item 1", "Item 2"]}
@@ -99,7 +99,7 @@
                 {#each Array(3) as _, j}
                     <CheckedBox 
                         checkmark="X"
-                        color={$theme.secondary}
+                        color={siteState.theme.secondary}
                         checked = {j === 0}
                     />
                 {/each}
@@ -127,12 +127,12 @@
             </div>
         </div>
     </div>
-    <div class="edge"/>
+    <div class="edge"></div>
 </div>
 
-<style lang="scss">
+<style>
     .column {
-        @extend .column !optional;
+        
         margin: 0.75rem;
         margin-top: 1.5rem;
         padding: 0px;
@@ -143,7 +143,7 @@
         background-color: var(--background);
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;
@@ -156,7 +156,7 @@
         width: 100%;
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: left;
         width: fit-content;

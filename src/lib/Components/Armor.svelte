@@ -1,15 +1,21 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
-    import { mode } from "$lib/Theme";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import AbilitySelector from "./AbilitySelector.svelte";
     import NumberLabel from "./Generic/NumberLabel.svelte";
 
-    export let armor:Armor;
-    export let z_index:number;
+    interface Props {
+        armor: Armor;
+        z_index: number;
+    }
+
+    let { armor = $bindable(), z_index }: Props = $props();
+    
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 <div style="position: relative; width:100%;">
     <div class="custom-box">
-        <input class="custom-title {$mode === "edit" ? 'editable' : ''}" disabled={$mode !== "edit"} on:change={updateDatabase} bind:value={armor.Name} placeholder={"Armor"}/>
+        <input class="custom-title {characterController?.mode === "edit" ? 'editable' : ''}" disabled={characterController?.mode !== "edit"} onchange={() => siteState.save()} bind:value={armor.Name} placeholder={"Armor"}/>
         <div>
             <NumberLabel
                 bind:number={armor.Base}
@@ -18,7 +24,7 @@
                 number_edit_modes={["edit"]}
                 label_font_size="medium"
             />
-            {#if $mode === "edit" || Number(armor.Limit) !== 0}
+            {#if characterController?.mode === "edit" || Number(armor.Limit) !== 0}
                 <NumberLabel
                     bind:number={armor.Limit}
                     label={`${armor.Ability} Max`}
@@ -29,7 +35,7 @@
             {/if}
         </div>
     </div>
-    {#if $mode === "edit"}
+    {#if characterController?.mode === "edit"}
         <AbilitySelector
             category_name = "AC"
             bind:selected_ability = {armor.Ability}
@@ -39,22 +45,22 @@
     <div style="display: flex; flex-direction: column; position: absolute; right: -19px; top: 0;">
         {#each [0, 1, 2, 3] as item_bonus}
             {#if armor.Bonus === item_bonus && item_bonus !== 0}
-                <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
                 <div class="custom-box custom-side-tab {item_bonus === armor.Bonus ? "selected" : ""}" style="cursor: default;">+{item_bonus}</div>
-            {:else if $mode === "edit"}
-                <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                <div class="custom-box custom-side-tab {item_bonus === armor.Bonus ? "selected" : ""}" on:click={() => {
+            {:else if characterController?.mode === "edit"}
+                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                <div class="custom-box custom-side-tab {item_bonus === armor.Bonus ? "selected" : ""}" onclick={() => {
                     armor.Bonus = item_bonus;
-                    updateDatabase();
+                    siteState.save();
                 }}>+{item_bonus}</div>
             {/if}
         {/each}
     </div>
 </div>
 
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: center;
         width: fit-content;

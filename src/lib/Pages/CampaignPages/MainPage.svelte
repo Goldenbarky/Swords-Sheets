@@ -1,51 +1,24 @@
 <script lang="ts">
     import { goto } from '$app/navigation';
     import { page } from '$app/stores';
-    import { batchGetCharactersFromID, saveCampaign, savingPromise, setCampaign, user as writeUser } from '$lib/GenericFunctions';
+    import { CampaignController, DatabaseClient, SiteState } from '$lib/Database.svelte';
     import Login from '$lib/Components/Server/Login.svelte';
     import SummaryPage from './SummaryPage.svelte';
     import CombatPage from './CombatPage.svelte';
-    import CharacterPage from './CharacterPage.svelte';
-    import { mode } from '$lib/Theme';
-    import type { User } from '@supabase/supabase-js';
-    import { getContext, onMount } from 'svelte';
     import ThemePage from '../ThemePage.svelte';
     import { fade } from 'svelte/transition';
-    import "$lib/../app.scss";
+    import "$lib/../app.css";
     import EditCampaign from '$lib/Components/EditCampaign.svelte';
 
-    export let campaign:CampaignDataRow;
+    let characters:CharacterDataRow[] = $state([]);
+    let edit_campaign = $state(false);
 
-    let characters:CharacterDataRow[] = [];
-    let edit_campaign = false;
-
-    let origUser = getContext<{ user: User } | null>('user')?.user;
-    $: user = origUser ?? $writeUser;
-
-    let savePromise: null | (() => Promise<number>) = null;
-
-    const finuto = async (num: number) => {
-        // oops
-
-        if (num !== 200) {
-            console.error('Saving to database: ', num);
-        } else {
-            savePromise = null;
-            $savingPromise = false;
-        }
-    }
+    const dbClient = DatabaseClient.getContext();
+    const siteState = SiteState.getContext();
+    const campaignController = CampaignController.getContext();
     
-    $: if ($savingPromise === true) {
-        savePromise = saveCampaign;
-        batchGetCharactersFromID(campaign.data.Characters).then((s) => {
-            if (!s) return;
-            characters = s.filter(x => !!x.data.Campaign);
-        });
-    }
-
-    onMount(async () => {
-        setCampaign(campaign);
-        batchGetCharactersFromID(campaign.data.Characters).then((s) => {
+    $effect(() => {
+        dbClient.getCharactersByIds(campaignController.campaign.data.Characters).then((s) => {
             if (!s) return;
             characters = s.filter(x => !!x.data.Campaign);
         });
@@ -53,7 +26,7 @@
 
     let tabs = ["Summary", "Combat", "Theme"];
     let tabParam = $page.url.searchParams.get('activetab');
-    let activeTab = tabParam ?? "Summary";
+    let activeTab = $state(tabParam ?? "Summary");
 </script>
 <section class="hero is-small">
     <div
@@ -62,27 +35,25 @@
     >
         <div class="columns" style="margin: 0">
             <div class="column custom-column" style="padding: 0;">
-                <p class="title custom-title" style="margin-bottom: 1.5rem;">{campaign.name}</p>
+                <p class="title custom-title" style="margin-bottom: 1.5rem;">{campaignController.campaign.name}</p>
             </div>
             <div class="column custom-column" style="flex: none;">
                 <div style="display: flex; flex-direction: column;">
-                    <button class="custom-box custom-button" on:click={() => goto(`/`)}>Go Home</button>
-                    <button class="custom-box custom-button" on:click={() => edit_campaign = true}>Edit Characters</button>
+                    <button class="custom-box custom-button" onclick={() => goto(`/`)}>Go Home</button>
+                    <button class="custom-box custom-button" onclick={() => edit_campaign = true}>Edit Characters</button>
                 </div>
             </div>
-            <Login
-                user={user}
-            />
+            <Login />
         </div>
         <div class="custom-tabs is-boxed">
             <ul style="display: flex; flex-direction: row;">
                 {#each tabs as tab}
-                    {#if tab !== "Theme" || $mode === "edit"}
+                    {#if tab !== "Theme" || campaignController.mode === "edit"}
                         <li class:is-active={activeTab===tab}>
-                            <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
-                            <a on:click={() => {
+                            <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
+                            <a onclick={() => {
                                 activeTab = tab;
-                                goto(`/campaign/${campaign.id}/${$mode === "view" ? "" : $mode }?activetab=${tab}`);
+                                goto(`/campaign/${campaignController.campaign.id}/${campaignController.mode === "view" ? "" : campaignController.mode }?activetab=${tab}`);
                             }}>{tab}</a>
                         </li>
                     {/if}
@@ -93,44 +64,22 @@
 </section>
 {#if activeTab==="Summary"}
     <SummaryPage
-        bind:characters={characters}
+        characters={characters}
     />
 {:else if activeTab==="Combat"}
     <CombatPage/>
 {:else if activeTab==="Theme"}
-    {#if $mode === "edit"}
+    {#if campaignController.mode === "edit"}
         <ThemePage/>
     {/if}
 {/if}
 
 <EditCampaign
     bind:shown={edit_campaign}
-    bind:campaign={campaign}
+    bind:campaign={campaignController.campaign}
 />
 
-{#if savePromise !== null}
-    <div class="save-indicator" out:fade={{ delay: 1000 }}>
-        {#await savePromise()}
-            <div class="save-saving">
-                
-            </div>
-        {:then num}
-            {#if num === 200}
-                <div class="save-saved">
-                    
-                </div>
-            {:else}
-                <div class="save-errored">
-                    
-                </div>
-            {/if}
-            {#await finuto(num)}
-                {""}
-            {/await}
-        {/await}
-    </div>
-{/if}
-<style lang="scss">
+<style>
     .save-indicator {
         position: absolute;
         width: 2rem;

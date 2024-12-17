@@ -1,14 +1,10 @@
 <script lang="ts">
     import MainPage from "$lib/Pages/MainPage.svelte";
-
-    export let data;
 </script>
 
-<MainPage
-    data = {data}
-/>
+<MainPage />
 
-<style lang="scss">
+<style>
     :root {
         --background: #1b1919;
         --background_hover: #2f2f2f;

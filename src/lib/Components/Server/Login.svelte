@@ -1,20 +1,24 @@
 <script lang="ts">
-    import { signInWithGoogle } from "$lib/GenericFunctions";
+    import { DatabaseClient } from "$lib/Database.svelte";
 
-    export let user;
+    const dbClient = DatabaseClient.getContext();
 </script>
 <div class="column custom-column" style="flex: none;">
-    {#if !user}
-        <button class="custom-box custom-button" 
-            on:click={async () => await signInWithGoogle()}>
-            Log in
-        </button>
+    {#if !dbClient.user}
+        <div style="height:5rem;">
+            <button class="custom-box custom-button" 
+                onclick={() => {
+                    dbClient.signInWithGoogle();
+                }}>
+                Log in
+            </button>
+        </div>
     {:else}
         <!-- svelte-ignore a11y-missing-attribute -->
-        <img src={user.user_metadata.avatar_url} class="profile-pic"/>
+        <img src={dbClient.user.user_metadata.avatar_url} referrerpolicy="no-referrer" class="profile-pic"/>
     {/if}
 </div>
-<style lang="scss">
+<style>
     .custom-column {
         padding-top: 0;
         padding-bottom: 0;
@@ -45,6 +49,8 @@
     }
     .profile-pic {
         width: 5rem;
+        height: 5rem;
+        background-color: gray;
         border-radius: 999px;
         border: 2px solid var(--text);
         user-select: none;
