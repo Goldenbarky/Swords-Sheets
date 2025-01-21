@@ -83,7 +83,7 @@
                     if (userAuthorized) {
                         await upsertNewCharacter(character_class, character_level, character_name);
                         goto(
-                            `https://justin.pakj.games/${character_name}/edit`,
+                            `https://justin.pakj.dev/${character_name}/edit`,
                         );
                     }
                 }}
