@@ -1,8 +1,9 @@
 <script lang="ts">
-    import { abilities, bonusToString, calcSavingBonus, scoreToModifier } from "$lib/GenericFunctions";
+    import { CharacterController } from "$lib/Database.svelte";
+    import { abilities } from "$lib/GenericFunctions";
     import Divider from "../Helpers/Divider.svelte";
 
-    export let character_sheet:CharacterSheet;
+    let { character_sheet }: { character_sheet: CharacterSheet } = $props();
 
     let ability_scores = character_sheet.Stats.Ability_Scores;
 
@@ -22,11 +23,11 @@
                 <div class="row" style="width: 2rem; justify-content: center;">
                     <div class="label">Ability</div>
                 </div>
-                <div style="width: 1rem;"/>
+                <div style="width: 1rem;"></div>
                 <div class="row" style="width: 1.2rem; justify-content: center;">
                     <div class="label">Mod.</div>
                 </div>
-                <div style="width: 1rem;"/>
+                <div style="width: 1rem;"></div>
                 <div class="row" style="width: 1.2rem; justify-content: center;">
                     <div class="label">Save</div>
                 </div>
@@ -42,16 +43,16 @@
                         orientation="vertical"
                     />
                     <div class="row">
-                        <div class="ability-score">{bonusToString(
-                            scoreToModifier(ability_scores[ability]),
+                        <div class="ability-score">{CharacterController.bonusToString(
+                            CharacterController.scoreToModifier(ability_scores[ability]),
                         )}</div>
                     </div>
                     <Divider
                         orientation="vertical"
                     />
                     <div class="row" style="align-items: center;">
-                        <div class="ability-score">{bonusToString(
-                            calcSavingBonus(ability, character_sheet)?.total
+                        <div class="ability-score">{CharacterController.bonusToString(
+                            CharacterController.calcSavingBonus(character_sheet, ability).total
                         )}</div>
                     </div>
                 </div>
@@ -59,7 +60,7 @@
         </div>
     </div>
 {/each}
-<style lang="scss">
+<style>
     .ability-box {
         display: flex;
         align-content: center;

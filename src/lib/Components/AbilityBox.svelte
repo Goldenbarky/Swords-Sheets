@@ -1,20 +1,26 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
-    import { mode } from "$lib/Theme";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
 
-    export let name:string;
-    export let score:number;
-    export let mod:string;
+    interface Props {
+        name: string;
+        score: number;
+        mod: string;
+    }
+
+    let { name, score = $bindable(), mod }: Props = $props();
+
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
 
 <div class="ability-box">
     <div class="box custom-box ability-score-box">
         <div class="ability-name">{name}</div>
-        <input class="ability-score" disabled={$mode !== "edit"} on:change={updateDatabase} bind:value={score}/>
+        <input class="ability-score" disabled={characterController?.mode !== "edit"} onchange={() => siteState.save()} bind:value={score}/>
     </div>
     <div class="box custom-box ability-mod">{mod}</div>
 </div>
-<style lang="scss">
+<style>
     .ability-box {
         display: flex;
         align-content: center;

@@ -1,15 +1,18 @@
 <script lang="ts">
-    import { bonusToString, updateDatabase } from "$lib/GenericFunctions";
-    import { mode } from "$lib/Theme";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import type { Calculation } from "./Classes/DataClasses";
     import CalculationVisualizer from "./Generic/CalculationVisualizer.svelte";
 
-    export let proficiency:string;
-    export let name:string;
-    export let bonusCalculator:(arg0: string) => Calculation;
+    interface Props {
+        proficiency: string;
+        name: string;
+        bonusCalculator: (arg0: string) => Calculation;
+    }
+
+    let { proficiency = $bindable(), name, bonusCalculator }: Props = $props();
     
-    let maths:Calculation;
-    let bonus:string;
+    let maths: Calculation = $state(bonusCalculator(name));
+    let bonus: string = $derived(CharacterController.bonusToString(maths!.total));
 
     const proficiencyCycle = (proficiency:string) => {
         switch(proficiency) {
@@ -24,32 +27,34 @@
         }
     }
 
-    $: {
+    $effect(() => {
         maths = bonusCalculator(name);
-        bonus = bonusToString(maths.total);
 
-        proficiency = proficiency;
-    }
+        proficiency;
+    });
+
+    const characterController = CharacterController.getContext();
+    const siteState = SiteState.getContext();
 </script>
 
 <div class="skill-div">
-    <div class="proficiency-buffer {$mode !== "edit" ? "disable" : ""}">
-        <button class="skill-proficiency" disabled={$mode !== "edit"} on:click={() => {
+    <div class="proficiency-buffer {characterController.mode !== "edit" ? "disable" : ""}">
+        <button class="skill-proficiency" disabled={characterController.mode !== "edit"} onclick={() => {
             proficiency = proficiencyCycle(proficiency); 
-            updateDatabase();
+            siteState.save();
         }}>
             {proficiency}
         </button>
     </div>
     <div class="skill-name">{name}</div>
     <div class="skill-bonus">{bonus}</div>
-    {#if $mode === "edit"}
+    {#if characterController.mode === "edit" && maths}
         <CalculationVisualizer
             maths = {maths}
         />
     {/if}
 </div>
-<style lang="scss">
+<style>
     .skill-div {
         display: flex;
         flex-direction: row;

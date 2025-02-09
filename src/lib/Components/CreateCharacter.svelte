@@ -1,22 +1,29 @@
 <script lang="ts">
     import { goto } from "$app/navigation";
-    import { upsertNewCharacter } from "$lib/GenericFunctions";
+    import { PUBLIC_SITE_URL } from "$env/static/public";
+    import { DatabaseClient } from "$lib/Database.svelte";
 
-    export let userAuthorized;
-    export let shown:boolean;
+    interface Props {
+        userAuthorized: boolean;
+        shown: boolean;
+    }
 
-    let character_name: string;
-    let character_class: string;
-    let character_level: number;
+    let { userAuthorized, shown = $bindable() }: Props = $props();
+
+    let character_name: string = $state('');
+    let character_class: string = $state('');
+    let character_level: number = $state(0);
+
+    const dbClient = DatabaseClient.getContext();
 </script>
 <div class="modal {shown ? 'is-active' : ''}">
-    <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
+    <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
     <div
         class="modal-background"
-        on:click={() => {
+        onclick={() => {
             shown = false;
         }}
-    />
+></div>
     <div class="modal-content" style="display: grid; align-items: center; justify-items: center;">
         <div class="custom-box column" style="width: fit-content; height: fit-content;">
             <div class="custom-title">Make a New Character</div>
@@ -44,22 +51,22 @@
                         bind:value={character_class}
                     />
                     <datalist id="classes">
-                        <option value="Artificer" />
-                        <option value="Barbarian" />
-                        <option value="Bard" />
-                        <option value="Cleric" />
-                        <option value="Druid" />
-                        <option value="Fighter" />
-                        <option value="Monk" />
-                        <option value="Paladin" />
-                        <option value="Ranger" />
-                        <option value="Rogue" />
-                        <option value="Sorcerer" />
-                        <option value="Warlock" />
-                        <option value="Wizard" />
+                        <option value="Artificer"></option>
+                        <option value="Barbarian"></option>
+                        <option value="Bard"></option>
+                        <option value="Cleric"></option>
+                        <option value="Druid"></option>
+                        <option value="Fighter"></option>
+                        <option value="Monk"></option>
+                        <option value="Paladin"></option>
+                        <option value="Ranger"></option>
+                        <option value="Rogue"></option>
+                        <option value="Sorcerer"></option>
+                        <option value="Warlock"></option>
+                        <option value="Wizard"></option>
                     </datalist>
                 </div>
-                <div style="width: 1rem;" />
+                <div style="width: 1rem;"></div>
                 <div
                     class="column"
                     style="padding-left: 0px; padding-right: 0px;"
@@ -79,11 +86,15 @@
                     ? 'disabled'
                     : ''}"
                 style="border: solid 1px var(--border);"
-                on:click={async () => {
+                onclick={async () => {
                     if (userAuthorized) {
-                        await upsertNewCharacter(character_class, character_level, character_name);
+                        const character = await dbClient.upsertNewCharacter(character_class, character_level, character_name);
+                        if (!character) {
+                            shown = false;
+                            return;
+                        }
                         goto(
-                            `https://justin.pakj.dev/${character_name}/edit`,
+                            `/character/${character_name}/edit`,
                         );
                     }
                 }}
@@ -94,14 +105,14 @@
     </div>
 </div>
 
-<style lang="scss">
+<style>
     .modal {
         position: absolute;
         width: 100vw;
         height: 100vh;
     }
     .custom-title {
-        @extend .title !optional;
+        
         font-size: x-large;
         justify-content: center;
         text-align: center;
@@ -112,7 +123,7 @@
         width: 100%;
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         text-align: left;
         width: fit-content;

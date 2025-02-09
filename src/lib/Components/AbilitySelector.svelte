@@ -1,11 +1,20 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
+    import { SiteState } from "$lib/Database.svelte";
     import DropDownArrow from "./Generic/DropDownArrow.svelte";
 
-    export let category_name:string;
-    export let selected_ability:keyof AbilityScoreType;
-    export let onChange:Function = () => {};
-    export let z_index:number = 1;
+    interface Props {
+        category_name: string;
+        selected_ability: keyof AbilityScoreType;
+        onChange?: Function;
+        z_index?: number;
+    }
+
+    let {
+        category_name,
+        selected_ability = $bindable(),
+        onChange = () => {},
+        z_index = 1
+    }: Props = $props();
 
     let abilities = [
         "Strength",
@@ -16,7 +25,9 @@
         "Charisma",
     ] as (keyof AbilityScoreType)[];
 
-    let shown = false;
+    let shown = $state(false);
+
+    const siteState = SiteState.getContext();
 </script>
 
 <div style="width: 100%; height: 1.2rem; position:absolute; z-index:{z_index}; bottom: -1px; display:flex; flex-direction:column; place-items:center;">
@@ -26,11 +37,11 @@
     <div class="custom-box dropdown" style="{shown ? "" : "visibility: hidden; pointer-events: none"}">
         <div class="column">
             <div class="custom-title">{category_name} Ability</div>
-            {#each abilities as ability}
-                <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-                <div class="custom-subtitle {ability === selected_ability ? "selected" : ""}" on:click={() => {
+            {#each abilities as ability (ability)}
+                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                <div class="custom-subtitle {ability === selected_ability ? "selected" : ""}" onclick={() => {
                     selected_ability = ability;
-                    updateDatabase();
+                    siteState.save();
                     onChange();
                 }}>{ability}</div>
             {/each}
@@ -38,9 +49,9 @@
     </div>
 </div>
 
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: large;
         justify-content: center;
         text-align: center;
@@ -50,7 +61,7 @@
         color: var(--secondary);
     }
     .custom-subtitle {
-        @extend .title !optional;
+        
         font-size: large;
         width: fit-content;
         color: var(--text);

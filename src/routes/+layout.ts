@@ -1,8 +1,8 @@
 import type { LayoutLoad } from "./$types";
 
-import { browser } from '$app/environment';
 import { PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public'
 import { createBrowserClient, isBrowser, parse } from '@supabase/ssr'
+import { DatabaseClient, SiteState } from "$lib/Database.svelte";
 
 export const load: LayoutLoad = async ({ fetch, data, depends }) => {
     depends('supabase:auth');
@@ -28,9 +28,13 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
         data: { session },
     } = await supabase.auth.getSession();
 
+    let dbClient = new DatabaseClient(supabase, session, data.user);
+    let siteState = new SiteState(dbClient);
     return {
         supabase,
         session: session,
-        user: data.user
+        user: data.user,
+        dbClient,
+        siteState
     };
 }

@@ -1,45 +1,65 @@
 <script lang="ts">
-    import {
-        getUserNames,
-        getUsersCampaigns,
-        getUsersCharacters,
-        supabaseObject,
-        user as writeUser,
-    } from "$lib/GenericFunctions";
-    import "$lib/../app.scss";
+    import "$lib/../app.css";
     import CharacterPreview from "$lib/Components/Generic/CharacterPreview.svelte";
-    import { onMount } from "svelte";
     import Login from "$lib/Components/Server/Login.svelte";
     import CreateCharacter from "$lib/Components/CreateCharacter.svelte";
     import CreateCampaign from "$lib/Components/CreateCampaign.svelte";
     import CampaignPreview from "$lib/Components/Generic/CampaignPreview.svelte";
+    import { DatabaseClient, SiteState } from "$lib/Database.svelte";
 
-    export let data;
+    let activeTab: string = $state("");
 
-    let activeTab: string = "";
-
-    let users: any[];
-    let characters: CharacterDataRow[];
-    let campaigns:CampaignDataRow[];
-
-    let characterModal = false;
-    let campaignModal = false;
-
-    onMount(() => {
-        supabaseObject(data.supabase);
-        getUserNames().then((s) => {
-            if (!s) return;
-            users = s;
-        });
-
-        getUsersCharacters().then((s) => (characters = s!));
-        getUsersCampaigns().then((s) => (campaigns = s!));
+    type Loading = "LOADING" | "SUCCESS" | "FAIL";
+    let loadingStates: {
+        users: Loading;
+        characters: Loading;
+        campaigns: Loading;
+    } = $state({
+        users: "LOADING",
+        characters: "LOADING",
+        campaigns: "LOADING",
     });
 
-    $: user = $writeUser ?? data.user;
-    $: userAuthorized = user ? users?.find((x) => x.id === user.id) : false;
-    $: filteredCharacters = characters?.filter((x) => x.owner_id === activeTab);
-    $: filteredCampaigns = campaigns?.filter((x) => x.owner_id === activeTab);
+    let users = $state<{ id: string; display_name: string }[] | null>(null);
+    let characters = $state<CharacterDataRow[] | null>(null);
+    let campaigns = $state<CampaignDataRow[] | null>(null);
+
+    let characterModal = $state(false);
+    let campaignModal = $state(false);
+
+    async function getUsers() {
+        users = await dbClient.getAllUsers();
+        loadingStates.users = !!users ? "SUCCESS" : "FAIL";
+    }
+
+    async function getCharacters() {
+        characters = await dbClient.getAllCharacters();
+        loadingStates.characters = !!characters ? "SUCCESS" : "FAIL";
+    }
+
+    async function getCampaigns() {
+        campaigns = await dbClient.getAllCampaigns();
+        loadingStates.campaigns = !!campaigns ? "SUCCESS" : "FAIL";
+    }
+
+    $effect(() => {
+        getUsers();
+        getCharacters();
+        getCampaigns();
+    });
+
+    const dbClient = DatabaseClient.getContext();
+
+    let user = $derived(dbClient.user);
+    let userAuthorized = $derived(
+        user ? !!users?.find((x) => x.id === user.id) : false,
+    );
+    let filteredCharacters = $derived(
+        characters?.filter((x) => x.owner_id === activeTab) ?? [],
+    );
+    let filteredCampaigns = $derived(
+        campaigns?.filter((x) => x.owner_id === activeTab) ?? [],
+    );
 </script>
 
 <div>
@@ -56,7 +76,7 @@
                     {#if user}
                         <button
                             class="custom-box custom-button"
-                            on:click={async () => {
+                            onclick={async () => {
                                 characterModal = true;
                             }}
                         >
@@ -64,7 +84,7 @@
                         </button>
                         <button
                             class="custom-box custom-button"
-                            on:click={async () => {
+                            onclick={async () => {
                                 campaignModal = true;
                             }}
                         >
@@ -72,18 +92,16 @@
                         </button>
                     {/if}
                 </div>
-                <Login
-                    user={user}
-                />
+                <Login />
             </div>
             <div class="custom-tabs is-boxed">
                 <ul style="display: flex; flex-direction: row; height: 41px">
-                    {#if users}
-                        {#each users.sort((a, b) => a.display_name.localeCompare(b.display_name)) as tab}
+                    {#if loadingStates.users === 'SUCCESS' && users}
+                        {#each users.toSorted((a, b) => a.display_name.localeCompare(b.display_name) ) as tab}
                             <li class:is-active={activeTab === tab.id}>
-                                <!-- svelte-ignore a11y-missing-attribute a11y-no-static-element-interactions a11y-click-events-have-key-events-->
+                                <!-- svelte-ignore a11y_missing_attribute, a11y_no_static_element_interactions, a11y_click_events_have_key_events-->
                                 <a
-                                    on:click={() => {
+                                    onclick={() => {
                                         activeTab = tab.id;
                                     }}
                                 >
@@ -91,6 +109,10 @@
                                 </a>
                             </li>
                         {/each}
+                    {:else if loadingStates.users === 'FAIL'}
+                        <li class="wait-message">failed to load users</li>
+                    {:else}
+                        <li class="wait-message">loading...</li>
                     {/if}
                 </ul>
             </div>
@@ -98,50 +120,55 @@
     </section>
 </div>
 {#if activeTab}
-    <div style="height: 0.5rem;"/>
-    {#if filteredCampaigns.length > 0}
-        <div class="row">
-            <div class="custom-title">Campaigns</div>
-        </div>
-        <div class="grid">
+    <div style="height: 0.5rem;"></div>
+    {#if loadingStates.campaigns === "SUCCESS"}
+        {#if filteredCampaigns.length > 0}
+            <div class="row">
+                <div class="custom-title">Campaigns</div>
+            </div>
+            <div class="grid">
                 {#each filteredCampaigns as campaign}
-                    <CampaignPreview
-                        campaign={campaign}
-                    />
+                    <CampaignPreview {campaign} />
                 {/each}
-        </div>
+            </div>
+        {/if}
+    {:else if loadingStates.campaigns === 'FAIL'}
+        <div class="row wait-message">failed to load campaigns</div>
+    {:else}
+        <div class="row wait-message">loading...</div>
     {/if}
-    {#if filteredCharacters}
-        <div class="row">
-            <div class="custom-title">Characters</div>
-        </div>
-        <div class="grid">
-            
+    {#if loadingStates.characters === "SUCCESS"}
+        {#if filteredCharacters.length > 0}
+            <div class="row">
+                <div class="custom-title">Characters</div>
+            </div>
+            <div class="grid">
                 {#each filteredCharacters as character}
-                    <CharacterPreview
-                        character={character}
-                    />
+                    <CharacterPreview {character} />
                 {/each}
-        </div>
+            </div>
+        {/if}
+    {:else if loadingStates.characters === 'FAIL'}
+        <div class="row wait-message">failed to load characters</div>
+    {:else}
+        <div class="row wait-message">loading...</div>
     {/if}
 {/if}
-<CreateCharacter
-    userAuthorized={userAuthorized}
-    bind:shown={characterModal}
-/>
+<CreateCharacter {userAuthorized} bind:shown={characterModal} />
 {#if characters}
     <CreateCampaign
-        userAuthorized={userAuthorized}
+        {userAuthorized}
         bind:shown={campaignModal}
         all_characters={characters}
     />
 {/if}
-<style lang="scss">
+
+<style>
     :root {
         --background: #1b1919;
         --background_hover: #2f2f2f;
         --primary: #8f0002;
-        --secondary: #C62F31;
+        --secondary: #c62f31;
         --border: #adadad;
         --text: #adadad;
     }
@@ -237,7 +264,7 @@
         padding: 1rem;
     }
     .custom-title {
-        @extend .title !optional;
+        
         width: fit-content;
         font-size: x-large;
         justify-content: center;
@@ -248,5 +275,8 @@
         color: var(--secondary);
         user-select: none;
         cursor: default;
+    }
+    .wait-message {
+        color: var(--text);
     }
 </style>

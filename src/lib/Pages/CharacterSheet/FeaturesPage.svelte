@@ -1,11 +1,15 @@
 <script lang="ts">
     import FeaturesBox from "$lib/Components/FeaturesBox.svelte";
 
-    export let character: CharacterSheet;
+    interface Props {
+        character: CharacterSheet;
+    }
+
+    let { character = $bindable() }: Props = $props();
 </script>
 
 <div class="columns has-text-centered" style="background-color: var(--background);">
-    <div class="edge"/>
+    <div class="edge"></div>
     <div class="column custom-column center">
         <FeaturesBox
             title="Class Features"
@@ -18,12 +22,12 @@
             bind:features={character.Features.Feats}
         />
     </div>
-    <div class="edge"/>
+    <div class="edge"></div>
 </div>
 
-<style lang="scss">
+<style>
     .custom-column {
-        @extend .column !optional;
+        
         margin: 0.75rem;
         margin-top: 1.5rem;
         padding: 0px;

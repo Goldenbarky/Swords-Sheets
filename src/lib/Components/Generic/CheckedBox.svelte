@@ -1,22 +1,35 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
+    import {  SiteState } from "$lib/Database.svelte";
 
-    export let checked:boolean = false;
-    export let checkmark:string | undefined = undefined;
-    export let color:string | undefined = undefined;
-    export let checked_counter:number = -1;
-    export let onChange:Function = () => {};
+    interface Props {
+        checked?: boolean;
+        checkmark?: string | undefined;
+        color?: string | undefined;
+        checked_counter?: number;
+        onChange?: Function;
+    }
+
+    let {
+        checked = $bindable(false),
+        checkmark = undefined,
+        color = undefined,
+        checked_counter = $bindable(-1),
+        onChange,
+    }: Props = $props();
+
+    const siteState = SiteState.getContext();
 </script>
 
 <div class="checkbox-container" style="{checked ? `outline-color: ${color}` : ""}">
-    <!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
-    <div class="checkmark" on:click={() => {
+    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+    <div class="checkmark" onclick={async () => {
         checked = !checked
-        onChange();
+        onChange?.();
         if(checked_counter !== -1) {
             if(checked) checked_counter++;
             else checked_counter--;
-            updateDatabase();
+            // we should move this dependency for saving upwards as this is a generic component
+            await siteState.save();
         }
     }} style="color: {color}">
         {#if checked}

@@ -1,38 +1,44 @@
 <script lang="ts">
-    import { updateDatabase } from "$lib/GenericFunctions";
-    import { mode } from "$lib/Theme";
+    import { CharacterController, SiteState } from "$lib/Database.svelte";
     import Divider from "../Helpers/Divider.svelte";
 
-    export let label:string;
-    export let list:string[];
 
-    export let editable:boolean = true;
+    interface Props {
+        label: string;
+        list: string[];
+        editable?: boolean;
+    }
+
+    let { label, list = $bindable(), editable = true }: Props = $props();
+
+    const siteState = SiteState.getContext();
+    const characterController = CharacterController.getContext();
 </script>
-    <div class="row" style="margin:0.5rem; width: 100%;">
-        <div class="custom-title">{label}</div>
-        <Divider/>
-        <div class="list">
-            {#if editable && $mode === "edit"}
-                {#each list as item}
-                    <div class="row">
-                        <button class="custom-box custom-button custom-tiny-button" on:click={() => {
-                            list = list.filter(x => x !== item);
-                            updateDatabase();
-                        }}>-</button>
-                        <input class="item" on:change={updateDatabase} bind:value={item} placeholder="New {label}"/>
-                    </div>
-                {/each}
-                <button class="custom-box custom-button" on:click={() => list = [...list, ""]}>+</button>
-            {:else}
-                {#each list as item}
-                    <div style="cursor: default;">{item}</div>
-                {/each}
-            {/if}
-        </div>
+<div class="row" style="margin:0.5rem; width: 100%;">
+    <div class="custom-title">{label}</div>
+    <Divider/>
+    <div class="list">
+        {#if editable && characterController.mode === "edit"}
+            {#each list as item, i (item)}
+                <div class="row">
+                    <button class="custom-box custom-button custom-tiny-button" onclick={() => {
+                        list = list.filter(x => x !== item);
+                        siteState.save();
+                    }}>-</button>
+                    <input class="item" onchange={() => siteState.save()} bind:value={list[i]} placeholder="New {label}"/>
+                </div>
+            {/each}
+            <button class="custom-box custom-button" onclick={() => list.push("")}>+</button>
+        {:else}
+            {#each list as item (item)}
+                <div style="cursor: default;">{item}</div>
+            {/each}
+        {/if}
     </div>
-<style lang="scss">
+</div>
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: medium;
         font-weight: bold;
         display: flex;

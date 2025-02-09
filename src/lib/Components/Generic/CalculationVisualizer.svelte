@@ -1,13 +1,14 @@
 <script lang="ts">
-    import { bonusToString } from "$lib/GenericFunctions";
     import Divider from "../Helpers/Divider.svelte";
     import NumberLabel from "./NumberLabel.svelte";
     import { Calculation } from "../Classes/DataClasses";
+    import { CharacterController } from "$lib/Database.svelte";
 
-    export let maths:Calculation = new Calculation();
+    let { maths = new Calculation() }: { maths: Calculation } = $props();
+    //TODO: check if derived is needed here
     let variables = maths.getVariables();
 </script>
-<!-- svelte-ignore a11y-click-events-have-key-events a11y-no-static-element-interactions -->
+<!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
 <div class="spell-detail custom-button">?
     <div class="box tooltip-box">
         <div class="tooltip-text">
@@ -18,7 +19,7 @@
                         <Divider orientation="horizontal"/>
                     {/if}
                     <NumberLabel
-                        number={bonusToString(math.bonus)}
+                        number={CharacterController.bonusToString(math.bonus)}
                         label={math.name}
                         bold_label={false}
                         label_font_size="small"
@@ -28,13 +29,13 @@
                     />
                 {/if}
                 {#if i == variables.length - 1 && variables.length <= 1}
-                        <div style="height:0.5rem"/>
+                    <div style="height:0.5rem"></div>
                 {/if}
             {/each}
             {#if variables.length > 1}
                 <Divider orientation="horizontal"/>
                 <NumberLabel
-                    number={bonusToString(maths.total)}
+                    number={CharacterController.bonusToString(maths.total)}
                     label="Total"
                     bold_label={true}
                     label_font_size="medium"
@@ -46,9 +47,9 @@
         </div>
     </div>
 </div>
-<style lang="scss">
+<style>
     .custom-title {
-        @extend .title !optional;
+        
         font-size: medium;
         justify-content: center;
         text-align: center;
