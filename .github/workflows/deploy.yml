@@ -11,7 +11,7 @@ jobs:
     - name: executing remote ssh commands using password
       uses: appleboy/ssh-action@v1.2.0
       with:
-        host: justin.pakj.games
+        host: justin.pakj.dev
         username: kennedjustin7
         key: ${{ secrets.SSH_KEY }}
         #script_path: ./DnDSheets/scripts/rebuild.sh

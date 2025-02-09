@@ -9,7 +9,7 @@
     import { CharacterController, SiteState } from "$lib/Database.svelte";
     import { levenshteinDistance } from "$lib/GenericFunctions";
 
-    let { character = $bindable(), spells }: { character: CharacterSheet, spells: Record<string, unknown> } = $props();
+    let { character = $bindable(), spells }: { character: CharacterSheet, spells?: Record<string, unknown> } = $props();
 
     const siteState = SiteState.getContext();
     const characterController = CharacterController.getContext();
@@ -78,7 +78,7 @@
         save_dc = characterController.getSaveDcCalc();
     }
 
-    const spell_names = Object.values(spells);
+    const spell_names = $derived(spells ? Object.values(spells) : []);
     let spell_query = $state("");
 
     const filter_array = $derived(spell_names.filter(x => x.name.toLowerCase().includes(spell_query.toLowerCase())).sort((a, b) => {
@@ -240,15 +240,17 @@
                     {#if level.length != 0}
                         <div class="custom-subtitle" style="font-size: x-large;">{spell_levels[i] + " Spells"}</div>
                         <div class="grid">
-                            {#each level as item (item)}
-                                {@const spell = spells.find(x => x["name"] === item.Spell_Name && x["source"] === (item.Source ?? x["source"]))}
-                                <Spell
-                                    spell={spell}
-                                    bind:prepared={item.Prepared}
-                                    onChange = {changePrepared}
-                                    removeFunction = {removeSpell}
-                                />
-                            {/each}
+                            {#if spells}
+                                {#each level as item (item)}
+                                    {@const spell = spells.find(x => x["name"] === item.Spell_Name && x["source"] === (item.Source ?? x["source"]))}
+                                    <Spell
+                                        spell={spell}
+                                        bind:prepared={item.Prepared}
+                                        onChange = {changePrepared}
+                                        removeFunction = {removeSpell}
+                                    />
+                                {/each}
+                            {/if}
                         </div>
                     {/if}
                 {/each}
