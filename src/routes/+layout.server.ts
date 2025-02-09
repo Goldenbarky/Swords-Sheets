@@ -12,8 +12,30 @@ export const load: LayoutServerLoad = async ({ url, locals: { supabase, safeGetS
 
     const { session, user } = await safeGetSession();
 
+    let spellsCombined;
+
+    try {
+        const indexPage = await fetch('127.0.0.1:8080/spells/index.json');
+
+        const files = await indexPage.json();
+        const spellFiles = await Promise.all(
+            Object.values(files).map(n => fetch(`127.0.0.1:8080/spells/${n}`))
+        );
+        // TEMPORARY ADD ALL KIBBLE ELEMENTAL SPELLS
+        const kibblePage = await fetch("https://raw.githubusercontent.com/TheGiddyLimit/homebrew/master/spell/KibblesTasty%3B%20Kibbles'%20Generic%20Elemental%20Spells.json");
+        spellFiles.push(kibblePage);
+
+        const spellJsons = await Promise.all(spellFiles.map(x => x.json()));
+
+        spellsCombined = spellJsons.flatMap(x => x['spell']);
+    } catch {
+        console.log("oopsie woopsie - no spells");
+    }
+    
+
     return {
         session,
-        user
+        user,
+        spells: spellsCombined
     };
 };
