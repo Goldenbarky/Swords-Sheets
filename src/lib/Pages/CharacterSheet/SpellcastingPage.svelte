@@ -10,7 +10,7 @@
     import { updateDatabase, levenshteinDistance, calcSpellToHit, calcSaveDC, bonusToString } from "$lib/GenericFunctions";
     import { mode, theme } from "$lib/Theme";
 
-    export let spells:Record<string, unknown>[];
+    export let spells:Record<string, unknown>[] | undefined;
     export let character: CharacterSheet;
 
     let spell_levels = [
@@ -77,7 +77,7 @@
         save_dc = calcSaveDC();
     }
 
-    const spell_names = Object.values(spells);
+    const spell_names = spells? Object.values(spells) : [];
     let spell_query = "";
 
     $: filter_array = spell_names.filter(x => x.name.toLowerCase().includes(spell_query.toLowerCase())).sort((a, b) => {
@@ -238,15 +238,17 @@
                     {#if level.length != 0}
                         <div class="custom-subtitle" style="font-size: x-large;">{spell_levels[i] + " Spells"}</div>
                         <div class="grid">
-                            {#each level as item (item)}
-                                {@const spell = spells.find(x => x["name"] === item.Spell_Name && x["source"] === (item.Source ?? x["source"]))}
-                                <Spell
-                                    spell={spell}
-                                    bind:prepared={item.Prepared}
-                                    onChange = {changePrepared}
-                                    removeFunction = {removeSpell}
-                                />
-                            {/each}
+                            {#if spells}
+                                {#each level as item (item)}
+                                    {@const spell = spells.find(x => x["name"] === item.Spell_Name && x["source"] === (item.Source ?? x["source"]))}
+                                    <Spell
+                                        spell={spell}
+                                        bind:prepared={item.Prepared}
+                                        onChange = {changePrepared}
+                                        removeFunction = {removeSpell}
+                                    />
+                                {/each}
+                            {/if}
                         </div>
                     {/if}
                 {/each}
