@@ -2,53 +2,56 @@
     import SpellDescription from "./SpellDescription.svelte";
     import StringLabel from "./Generic/StringLabel.svelte";
     import { CharacterController, SiteState } from "$lib/Database.svelte";
+    import { tick } from "svelte";
 
     interface Props {
         //@ts-nocheck
         spell: {
-        name:string,
-        school:keyof typeof schools,
-        level:number,
-        meta:{
-            ritual:boolean
-        }
-        time:{
-            number:number,
-            unit:string
-        }[],
-        components:Record<string, boolean>,
-        range:{
-            type:string,
-            distance:{
-                type:string,
-                amount:number
-            }
-        },
-        duration:{
-            duration:{
-                type:string,
-                amount:number
-            },
-            type:string,
-            concentration:boolean
-        }[],
-        entries:string[],
-        entriesHigherLevel:{
-            entries:string[],
             name:string,
-            type:string
-        }[]
-    };
+            school:keyof typeof schools,
+            level:number,
+            meta:{
+                ritual:boolean
+            }
+            time:{
+                number:number,
+                unit:string
+            }[],
+            components:Record<string, boolean>,
+            range:{
+                type:string,
+                distance:{
+                    type:string,
+                    amount:number
+                }
+            },
+            duration:{
+                duration:{
+                    type:string,
+                    amount:number
+                },
+                type:string,
+                concentration:boolean
+            }[],
+            entries:string[],
+            entriesHigherLevel:{
+                entries:string[],
+                name:string,
+                type:string
+            }[]
+        };
         prepared?: string;
         onChange: Function;
         removeFunction: Function;
+        onExpand?: Function;
     }
 
     let {
         spell,
         prepared = $bindable("false"),
         onChange,
-        removeFunction
+        removeFunction,
+        onExpand,
     }: Props = $props();
 
     const getComponents = () => {
@@ -204,8 +207,10 @@
         </div>
     {/if}
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
-    <div class="custom-box bubble" onclick={() => {
+    <div class="custom-box bubble" onclick={async () => {
         shown = !shown
+        await tick()
+        onExpand?.();
         }}>
         <div style="margin-top: -0.6rem; user-select: none">
             {shown ? "-" : "+"}

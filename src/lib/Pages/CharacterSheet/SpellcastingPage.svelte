@@ -9,7 +9,11 @@
     import { CharacterController, SiteState } from "$lib/Database.svelte";
     import { levenshteinDistance } from "$lib/GenericFunctions";
 
-    let { character = $bindable(), spells }: { character: CharacterSheet, spells?: Record<string, unknown> } = $props();
+    let {
+        character = $bindable(),
+        spells,
+    }: { character: CharacterSheet; spells?: Record<string, unknown> } =
+        $props();
 
     const siteState = SiteState.getContext();
     const characterController = CharacterController.getContext();
@@ -24,79 +28,141 @@
         "Sixth Level",
         "Seventh Level",
         "Eighth Level",
-        "Ninth Level"
+        "Ninth Level",
     ];
 
     const removeSpell = (spell: any) => {
-        character.Spellcasting.Spells[spell.level] = character.Spellcasting.Spells[spell.level].filter(x => !(x.Spell_Name === spell.name && (x.Source ?? spell.source) === spell.source));
-        if(spell.level !== 0) spells_known--;
+        character.Spellcasting.Spells[spell.level] =
+            character.Spellcasting.Spells[spell.level].filter(
+                (x) =>
+                    !(
+                        x.Spell_Name === spell.name &&
+                        (x.Source ?? spell.source) === spell.source
+                    ),
+            );
+        if (spell.level !== 0) spells_known--;
 
         siteState.save();
-    }
+    };
 
     const calcKnown = () => {
         let num = 0;
 
-        for(let i = 1; i <= 9; i++) {
-            character.Spellcasting.Spells[i].forEach(x => num++);
+        for (let i = 1; i <= 9; i++) {
+            character.Spellcasting.Spells[i].forEach((x) => num++);
         }
 
         return num;
-    }
+    };
 
     const calcPrepared = () => {
         let prepared = 0;
 
-        Object.keys(character.Spellcasting.Spells).forEach(level => {
-            if(level !== "0") {
-                character.Spellcasting.Spells[level].forEach(spell => {
-                    if(String(spell.Prepared) === "true") prepared++;
+        Object.keys(character.Spellcasting.Spells).forEach((level) => {
+            if (level !== "0") {
+                character.Spellcasting.Spells[level].forEach((spell) => {
+                    if (String(spell.Prepared) === "true") prepared++;
                 });
             }
         });
 
         return prepared;
-    }
+    };
 
     let num_prepared = $state(calcPrepared());
     let attack_modifier = $state(characterController.getSpellToHitBonusCalc());
     let save_dc = $state(characterController.getSaveDcCalc());
     let spells_known = $state(calcKnown());
 
-    const changePrepared = (prepared:string, changeToAlways:boolean = false) => {
-        if(changeToAlways) {
-            if(prepared === "true") num_prepared--;
+    const changePrepared = (
+        prepared: string,
+        changeToAlways: boolean = false,
+    ) => {
+        if (changeToAlways) {
+            if (prepared === "true") num_prepared--;
             return;
         }
-        
-        if(prepared === "true") num_prepared++;
+
+        if (prepared === "true") num_prepared++;
         else num_prepared--;
-    }
+    };
 
     const changeAbility = () => {
         attack_modifier = characterController.getSpellToHitBonusCalc();
         save_dc = characterController.getSaveDcCalc();
-    }
+    };
 
     const spell_names = $derived(spells ? Object.values(spells) : []);
     let spell_query = $state("");
 
-    const filter_array = $derived(spell_names.filter(x => x.name.toLowerCase().includes(spell_query.toLowerCase())).sort((a, b) => {
-        return levenshteinDistance(a.name.toLowerCase(), spell_query.toLowerCase()) - levenshteinDistance(b.name.toLowerCase(), spell_query.toLowerCase());
-    }).slice(0, 5));
+    const filter_array = $derived(
+        spell_names
+            .filter((x) =>
+                x.name.toLowerCase().includes(spell_query.toLowerCase()),
+            )
+            .sort((a, b) => {
+                return (
+                    levenshteinDistance(
+                        a.name.toLowerCase(),
+                        spell_query.toLowerCase(),
+                    ) -
+                    levenshteinDistance(
+                        b.name.toLowerCase(),
+                        spell_query.toLowerCase(),
+                    )
+                );
+            })
+            .slice(0, 5),
+    );
+
+    let spellNameEl = $state<HTMLDivElement>()!;
+    let sidebarEl = $state<HTMLDivElement>()!;
+    let elems: HTMLDivElement[] = $state([]);
+
+    const editSizes = () => {
+        let clientRect = sidebarEl.getBoundingClientRect();
+        spellNameEl.style.marginLeft = `${clientRect.right - clientRect.left + 30}px`;
+        elems.forEach(element => {
+            let rect = element.getBoundingClientRect();
+            if (rect.top <= clientRect.bottom) {
+                element.style.marginLeft = `${clientRect.right - clientRect.left + 30}px`;
+            } else {
+                element.style.marginLeft = `0`;
+            }
+        });
+    }
+
+    $effect(() => {
+        characterController.mode;
+        editSizes();
+    })
 </script>
 
-<div class="columns has-text-centered" style="background-color: var(--background);">
+<div
+    class="columns has-text-centered"
+    style="background-color: var(--background); position:relative"
+>
     <div class="edge"></div>
-    <div class="custom-column center">
-        <div class="center" style="width: fit-content; display: flex; flex-direction: column; align-items: center; position: relative;">
+    <div
+        class="custom-column center"
+        style="position:absolute; left: 5%;"
+        bind:this={sidebarEl}
+    >
+        <div
+            class="center"
+            style="width: fit-content; display: flex; flex-direction: column; align-items: center; position: relative;"
+        >
             <div class="row" style="position: relative;">
-                <div style="display: flex; flex-direction: column; position: relative;">
+                <div
+                    style="display: flex; flex-direction: column; position: relative;"
+                >
                     <div class="custom-box" style="margin-bottom:0px;">
                         <div class="custom-title">Spellcasting</div>
                         <NumberLabel
                             label="Attack Modifier"
-                            number={CharacterController.bonusToString(attack_modifier.total)}
+                            number={CharacterController.bonusToString(
+                                attack_modifier.total,
+                            )}
                             bold_label={false}
                             label_font_size="medium"
                             calculation={attack_modifier}
@@ -111,51 +177,97 @@
                     </div>
                     {#if characterController.mode === "edit"}
                         <AbilitySelector
-                            category_name = "Spellcasting"
-                            bind:selected_ability = {character.Spellcasting.Ability as keyof AbilityScoreType}
-                            onChange = {changeAbility}
+                            category_name="Spellcasting"
+                            bind:selected_ability={character.Spellcasting
+                                .Ability as keyof AbilityScoreType}
+                            onChange={changeAbility}
                         />
                     {/if}
                 </div>
-                <div style="display: flex; flex-direction: column; position: absolute; right: -19px">
+                <div
+                    style="display: flex; flex-direction: column; position: absolute; right: -19px"
+                >
                     {#each [0, 1, 2, 3] as bonus}
                         {#if characterController.mode === "edit" || (bonus === character.Spellcasting.Bonus && bonus !== 0)}
                             <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                            <div class="custom-box custom-side-tab {characterController.mode !== "edit" ? "disable" : ""} {character.Spellcasting.Bonus === bonus ? "selected" : ""}" onclick={() => {
-                                character.Spellcasting.Bonus = bonus;
-                                attack_modifier = characterController.getSpellToHitBonusCalc();
-                                save_dc = characterController.getSaveDcCalc();
-                                siteState.save();
-                            }}>+{bonus}</div>
+                            <div
+                                class="custom-box custom-side-tab {characterController.mode !==
+                                'edit'
+                                    ? 'disable'
+                                    : ''} {character.Spellcasting.Bonus ===
+                                bonus
+                                    ? 'selected'
+                                    : ''}"
+                                onclick={() => {
+                                    character.Spellcasting.Bonus = bonus;
+                                    attack_modifier =
+                                        characterController.getSpellToHitBonusCalc();
+                                    save_dc =
+                                        characterController.getSaveDcCalc();
+                                    siteState.save();
+                                }}
+                            >
+                                +{bonus}
+                            </div>
                         {/if}
                     {/each}
                 </div>
             </div>
         </div>
         {#if characterController.mode === "edit"}
-            <div class="custom-box" style="width:100%; margin-top: 1rem; margin-bottom: 0px;">
+            <div
+                class="custom-box"
+                style="width:100%; margin-top: 1rem; margin-bottom: 0px;"
+            >
                 <div class="custom-title">Add A New Spell</div>
-                <input bind:value={spell_query}/>
+                <input bind:value={spell_query} />
                 {#if spell_query.length > 0}
-                    <Divider
-                        orientation="horizontal"
-                    />
+                    <Divider orientation="horizontal" />
                     {#each filter_array as spell (spell)}
                         <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                        <div class="custom-button" style="font-size:medium;" onclick={() => {
-                            if(!character.Spellcasting.Spells[spell.level].find(x => spell.name === x.Spell_Name && spell.source === x.Source)) {
-                                character.Spellcasting.Spells[spell.level].push(({"Spell_Name":spell.name, "Prepared":"false", "Source": spell.source}))
-                                character.Spellcasting.Spells[spell.level].sort((a, b) => a.Spell_Name.localeCompare(b.Spell_Name));
-                                if(spell.level !== 0) spells_known++;
-                                siteState.save();
-                            }
-                        }}>{spell.name} <b>{spell.source}</b></div>
+                        <div
+                            class="custom-button"
+                            style="font-size:medium;"
+                            onclick={() => {
+                                if (
+                                    !character.Spellcasting.Spells[
+                                        spell.level
+                                    ].find(
+                                        (x) =>
+                                            spell.name === x.Spell_Name &&
+                                            spell.source === x.Source,
+                                    )
+                                ) {
+                                    character.Spellcasting.Spells[
+                                        spell.level
+                                    ].push({
+                                        Spell_Name: spell.name,
+                                        Prepared: "false",
+                                        Source: spell.source,
+                                    });
+                                    character.Spellcasting.Spells[
+                                        spell.level
+                                    ].sort((a, b) =>
+                                        a.Spell_Name.localeCompare(
+                                            b.Spell_Name,
+                                        ),
+                                    );
+                                    if (spell.level !== 0) spells_known++;
+                                    siteState.save();
+                                }
+                            }}
+                        >
+                            {spell.name} <b>{spell.source}</b>
+                        </div>
                     {/each}
                 {/if}
             </div>
         {/if}
         {#if characterController.mode === "edit" || character.Spellcasting.Learned_Caster}
-            <div class="custom-box" style="padding-bottom: 0px; width: 20.5rem; margin-bottom: 0px; margin-top: 1rem;">
+            <div
+                class="custom-box"
+                style="padding-bottom: 0px; width: 20.5rem; margin-bottom: 0px; margin-top: 1rem;"
+            >
                 <NumberLabel
                     label="Spells Known"
                     number={spells_known}
@@ -164,7 +276,10 @@
             </div>
         {/if}
         {#if characterController.mode == "edit"}
-            <div class="custom-box" style="border-top: 0px; border-radius: 0px 0px 6px 6px; padding-top: 0.5rem; margin-bottom: 0px">
+            <div
+                class="custom-box"
+                style="border-top: 0px; border-radius: 0px 0px 6px 6px; padding-top: 0.5rem; margin-bottom: 0px"
+            >
                 <ToggleSwitch
                     title="Show Known Count?"
                     bind:toggle={character.Spellcasting.Learned_Caster}
@@ -172,18 +287,24 @@
             </div>
         {/if}
         {#if characterController.mode === "edit" || character.Spellcasting.Prepared_Caster}
-        <div class="custom-box" style="padding-bottom: 0px; margin-bottom: 0px; margin-top: 1rem;">
-            <DynamicNumberLabel
-                label="Spells Prepared"
-                current={num_prepared}
-                bind:max={character.Spellcasting.Max_Prepared}
-                bold_label={true}
-                current_edit_modes={[]}
-            />
-        </div>
+            <div
+                class="custom-box"
+                style="padding-bottom: 0px; margin-bottom: 0px; margin-top: 1rem;"
+            >
+                <DynamicNumberLabel
+                    label="Spells Prepared"
+                    current={num_prepared}
+                    bind:max={character.Spellcasting.Max_Prepared}
+                    bold_label={true}
+                    current_edit_modes={[]}
+                />
+            </div>
         {/if}
         {#if characterController.mode == "edit"}
-            <div class="custom-box" style="border-top: 0px; border-radius: 0px 0px 6px 6px; padding-top: 0.5rem; margin-bottom: 0px">
+            <div
+                class="custom-box"
+                style="border-top: 0px; border-radius: 0px 0px 6px 6px; padding-top: 0.5rem; margin-bottom: 0px"
+            >
                 <ToggleSwitch
                     title="Show Prepared Count?"
                     bind:toggle={character.Spellcasting.Prepared_Caster}
@@ -194,38 +315,72 @@
             <div class="custom-title">Spell Slots</div>
             {#each Object.values(character.Spellcasting.Spell_Slots) as slots, i}
                 {#if characterController.mode === "edit" || slots !== 0}
-                    <div class="row custom-subtitle" style="width:100%; text-align:center;">
+                    <div
+                        class="row custom-subtitle"
+                        style="width:100%; text-align:center;"
+                    >
                         {#if characterController.mode === "edit"}
-                            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.5rem;" onclick={() => {
-                                if(character.Spellcasting.Spell_Slots[i+1] > 0) {
-                                    character.Spellcasting.Spell_Slots[i+1]--;
-                                    siteState.save();
-                                }
-                            }}>-</button>
+                            <button
+                                class="custom-box custom-button custom-tiny-button"
+                                style="margin-top:0.5rem;"
+                                onclick={() => {
+                                    if (
+                                        character.Spellcasting.Spell_Slots[
+                                            i + 1
+                                        ] > 0
+                                    ) {
+                                        character.Spellcasting.Spell_Slots[
+                                            i + 1
+                                        ]--;
+                                        siteState.save();
+                                    }
+                                }}>-</button
+                            >
                         {/if}
-                        <div class="custom-subtitle" style="border-width: 0px; margin-bottom: 0px; width: 8rem; text-align: center;">
+                        <div
+                            class="custom-subtitle"
+                            style="border-width: 0px; margin-bottom: 0px; width: 8rem; text-align: center;"
+                        >
                             {spell_levels[i + 1]}
                         </div>
                         {#if characterController.mode === "edit"}
-                            <button class="custom-box custom-button custom-tiny-button" style="margin-top:0.5rem;" onclick={() => {
-                                if(character.Spellcasting.Spell_Slots[i+1] < 10) {
-                                    character.Spellcasting.Spell_Slots[i+1]++;
-                                    siteState.save();
-                                }
-                            }}>+</button>
+                            <button
+                                class="custom-box custom-button custom-tiny-button"
+                                style="margin-top:0.5rem;"
+                                onclick={() => {
+                                    if (
+                                        character.Spellcasting.Spell_Slots[
+                                            i + 1
+                                        ] < 10
+                                    ) {
+                                        character.Spellcasting.Spell_Slots[
+                                            i + 1
+                                        ]++;
+                                        siteState.save();
+                                    }
+                                }}>+</button
+                            >
                         {/if}
                     </div>
-                    <div class="row {characterController.mode === "view" ? "disable" : ""}">
+                    <div
+                        class="row {characterController.mode === 'view'
+                            ? 'disable'
+                            : ''}"
+                    >
                         {#each Array(slots) as _, j}
-                            <CheckedBox 
+                            <CheckedBox
                                 checkmark="X"
                                 color={siteState.theme.secondary}
-                                checked = {j < character.Spellcasting.Slots_Expended[i+1]}
-                                bind:checked_counter = {character.Spellcasting.Slots_Expended[i+1]}
+                                checked={j <
+                                    character.Spellcasting.Slots_Expended[
+                                        i + 1
+                                    ]}
+                                bind:checked_counter={character.Spellcasting
+                                    .Slots_Expended[i + 1]}
                             />
                         {/each}
                     </div>
-                    {#if Object.values(character.Spellcasting.Spell_Slots)[i+1] !== 0}
+                    {#if Object.values(character.Spellcasting.Spell_Slots)[i + 1] !== 0}
                         <div style="height:0.5rem;"></div>
                     {/if}
                 {/if}
@@ -234,25 +389,39 @@
     </div>
     <div class="column custom-column center">
         <div class="" style="width:100%;">
-            <div class="custom-title">Spells</div>
+            <div class="custom-title" bind:this={spellNameEl}>Spells</div>
             {#key character.Spellcasting.Spells}
                 {#each Object.values(character.Spellcasting.Spells) as level, i (level)}
-                    {#if level.length != 0}
-                        <div class="custom-subtitle" style="font-size: x-large;">{spell_levels[i] + " Spells"}</div>
-                        <div class="grid">
-                            {#if spells}
-                                {#each level as item (item)}
-                                    {@const spell = spells.find(x => x["name"] === item.Spell_Name && x["source"] === (item.Source ?? x["source"]))}
-                                    <Spell
-                                        spell={spell}
-                                        bind:prepared={item.Prepared}
-                                        onChange = {changePrepared}
-                                        removeFunction = {removeSpell}
-                                    />
-                                {/each}
-                            {/if}
-                        </div>
-                    {/if}
+                    <div bind:this={elems[i]}>
+                        {#if level.length != 0}
+                            <div
+                                class="custom-subtitle"
+                                style="font-size: x-large;"
+                            >
+                                {spell_levels[i] + " Spells"}
+                            </div>
+                            <div class="grid">
+                                {#if spells}
+                                    {#each level as item (item)}
+                                        {@const spell = spells.find(
+                                            (x) =>
+                                                x["name"] === item.Spell_Name &&
+                                                x["source"] ===
+                                                    (item.Source ??
+                                                        x["source"]),
+                                        )}
+                                        <Spell
+                                            {spell}
+                                            bind:prepared={item.Prepared}
+                                            onChange={changePrepared}
+                                            removeFunction={removeSpell}
+                                            onExpand={editSizes}
+                                        />
+                                    {/each}
+                                {/if}
+                            </div>
+                        {/if}
+                    </div>
                 {/each}
             {/key}
         </div>

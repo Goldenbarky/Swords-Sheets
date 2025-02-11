@@ -35,6 +35,7 @@ export const load: LayoutLoad = async ({ fetch, data, depends }) => {
         session: session,
         user: data.user,
         dbClient,
-        siteState
+        siteState,
+        spells: data.spells
     };
 }
