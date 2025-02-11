@@ -120,6 +120,8 @@
     let elems: HTMLDivElement[] = $state([]);
 
     const editSizes = () => {
+        if (!sidebarEl) return;
+        
         let clientRect = sidebarEl.getBoundingClientRect();
         spellNameEl.style.marginLeft = `${clientRect.right - clientRect.left + 30}px`;
         elems.forEach(element => {
@@ -391,7 +393,7 @@
         <div class="" style="width:100%;">
             <div class="custom-title" bind:this={spellNameEl}>Spells</div>
             {#key character.Spellcasting.Spells}
-                {#each Object.values(character.Spellcasting.Spells) as level, i (level)}
+                {#each Object.values(character.Spellcasting.Spells) as level, i (i)}
                     <div bind:this={elems[i]}>
                         {#if level.length != 0}
                             <div
