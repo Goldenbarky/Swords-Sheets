@@ -15,7 +15,7 @@
         index:string[]
     }[] = $state([]);
 
-    let paragraphs:string[] = [];
+    let paragraphs:string|object[] = [];
     entries.forEach(x => (x.type !== "quote") ? paragraphs.push(x) : "");
 
     const r = /(?:{@(\w+) ([\w ]+)[^}]*})|(?:Strength|Dexterity|Constitution|Intelligence|Wisdom|Charisma)(?= saving throw)|(penetrate)/;
@@ -23,13 +23,33 @@
     const scaleRegex = /{@scaledamage (\d+)d(\d+).*\|.+\|(\d)d\d+}/g;
     const diceRegex = /(\d+)d(\d+)/;
 
-    const formatParagraph = (paragraph:string, indexKey:number) => {
-        let formatted = [];
+    type FormattedDesc = (string | { type: 'highlighted'; value: string; } | { type: 'bold'; value: string; } | { type: 'damage'; value: string; });
+
+    const formatParagraph = (paragraph:string|object, indexKey:number, formatted: FormattedDesc[]): number => {
+        let newIndex = indexKey;
+        if (typeof paragraph === "object") {
+            if (paragraph.type === 'entries') {
+                if (paragraph.name) {
+                    formatted.push({ value: `${paragraph.name} `, type: 'bold' })
+                }
+                paragraph.entries.forEach(x => {
+                    newIndex = formatParagraph(x, newIndex, formatted);
+                });
+            } else if (paragraph.type === 'list') {
+                paragraph.items.forEach(x => {
+                    newIndex = formatParagraph(`• ${x}`, newIndex, formatted);
+                    formatted.push({ type: 'newline' });
+                });
+            } else {
+                formatted.push({type: 'bold', value: `Bad type: ${paragraph.type}`});
+            }
+            return newIndex;
+        }
 
         let m = r.exec(paragraph)
         if(m == null) {
             formatted.push(paragraph);
-            return formatted;
+            return newIndex + 1;
         }
 
         while(m !== null) {
@@ -81,24 +101,23 @@
                         let duplicateDamage = damageDetails.findIndex(x => x.dieSize === dieSize && x.base === base);
                         if(duplicateDamage !== -1) {
                             damageDetails[duplicateDamage].index.push(index[0]);
-                            formatted.push("d" + dieSize);
+                            formatted.push({ type: 'damage', value: "d" + dieSize });
 
                             m = r.exec(paragraph);
                             continue;
                         }
 
-                        formatted.push("d" + dieSize);
+                        formatted.push({ type: 'damage', value: "d" + dieSize });
                         damageDetails.push({base, dieSize, scale, damage, index});
                     }
                 }
                 else if(type == undefined || type === "condition" || type === "dice" || type === "damage") {
                     formatted.push(results[0]);
 
-                    if(type == undefined) formatted.push(m[0]);
-                    else formatted.push(text);
+                    if(type == undefined) formatted.push({ type: 'highlighted', value: m[0] });
+                    else formatted.push({ type: 'highlighted', value: text });
                 } else {
                     formatted.push(results[0] + text);
-                    formatted.push("");
                 }
             }
             
@@ -107,15 +126,18 @@
 
         if(paragraph !== "") formatted.push(paragraph);
 
-        return formatted
+        return newIndex + 1;
     }
 
-    let formattedDescription:string[][] = [];
+    let formattedDescription:FormattedDesc[][] = [];
     paragraphs.forEach((x, i) => {
-        formattedDescription.push(formatParagraph(x, i));
+        let formattedParagraph: string[] = [];
+        formatParagraph(x, i, formattedParagraph);
+        formattedDescription.push(formattedParagraph);
     });
 
-    let formattedUpcast = formatParagraph(upcast, 0);
+    let formattedUpcast: string[] = [];
+    formatParagraph(upcast, 0, formattedUpcast);
 
     let active:number = $state(level);
 </script>
@@ -123,12 +145,16 @@
     <p>
         {#each paragraph as entry, j (`${i}${j}`)}
             {@const damageIndex = damageDetails.findIndex(x => x.index.includes(`${i}${j}`))}
-            {#if j % 2 === 0}
-                {entry}
-            {:else if damageIndex !== -1}
-                <span class="highlighted">{damageDetails[damageIndex].damage}{entry}</span>
+            {#if entry?.type === 'highlighted'}
+                <span class="highlighted">{entry.value}</span>
+            {:else if entry?.type === 'damage'}
+                <span class="highlighted">{damageDetails[damageIndex].damage}{entry.value}</span>
+            {:else if entry?.type === 'bold'}
+                <span class="upcast">{entry.value}</span>
+            {:else if entry?.type === 'newline'}
+                <br>
             {:else}
-                <span class="highlighted">{entry}</span>
+                {entry}
             {/if}
         {/each}
     </p>
@@ -141,10 +167,14 @@
         <p>
             <span class="upcast">At Higher Levels.</span>
             {#each formatted as entry, i}
-                {#if i % 2 === 0}
-                    {entry}
+                {#if entry?.type === 'damage' || entry?.type === 'highlighted'}
+                    <span class="highlighted">{entry.value}</span>
+                {:else if entry?.type === 'bold'}
+                    <span class="upcast">{entry.value}</span>
+                {:else if entry?.type === 'newline'}
+                    <br>
                 {:else}
-                    <span class="highlighted">{entry}</span>
+                    {entry}
                 {/if}
             {/each}
         </p>
