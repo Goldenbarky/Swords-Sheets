@@ -6,7 +6,6 @@
     import SpellcastingPage from "$lib/Pages/CharacterSheet/SpellcastingPage.svelte";
     import StatsPage from "$lib/Pages/CharacterSheet/StatsPage.svelte";
     import ThemePage from '../ThemePage.svelte';
-    import { fade } from 'svelte/transition';
     import CampaignInfo from '$lib/Components/CampaignInfo.svelte';
     import { CharacterController, DatabaseClient, SiteState } from '$lib/Database.svelte';
     import SaveIndicator from '$lib/Components/Helpers/SaveIndicator.svelte';
