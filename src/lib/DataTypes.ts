@@ -86,7 +86,8 @@ type CharacterSheet = {
         "Spell_Slots":SpellSlotCount,
         "Slots_Expended":SpellSlotCount
     },
-    "Campaign":string
+    "Campaign":string,
+    "Private":boolean
 }
 
 type AbilityScoreType = {

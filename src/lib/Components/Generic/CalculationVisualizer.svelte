@@ -49,7 +49,6 @@
 </div>
 <style>
     .custom-title {
-        
         font-size: medium;
         justify-content: center;
         text-align: center;
@@ -88,7 +87,7 @@
         visibility: hidden;
         position: absolute;
         margin-top: 5px;
-        z-index: 1;
+        z-index: 2;
     }
     .tooltip-text {
         visibility: hidden;

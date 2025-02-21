@@ -2,15 +2,16 @@
     interface Props {
         title: string;
         toggle?: boolean;
+        on_update?: Function;
     }
 
-    let { title, toggle = $bindable(false) }: Props = $props();
+    let { title, toggle = $bindable(), on_update }: Props = $props();
 </script>
 
 <div style="display: flex; flex-direction: row">
     <div class="custom-title" style="padding-right: 0.5rem;">{title}</div>
     <label class="switch">
-        <input type="checkbox" bind:checked={toggle}/>
+        <input type="checkbox" bind:checked={toggle} onchange={() => on_update?.()}/>
         <span class="slider round"></span>
     </label>
 </div>

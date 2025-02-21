@@ -6,7 +6,6 @@
     import SummaryPage from './SummaryPage.svelte';
     import CombatPage from './CombatPage.svelte';
     import ThemePage from '../ThemePage.svelte';
-    import { fade } from 'svelte/transition';
     import "$lib/../app.css";
     import EditCampaign from '$lib/Components/EditCampaign.svelte';
 
@@ -80,27 +79,6 @@
 />
 
 <style>
-    .save-indicator {
-        position: absolute;
-        width: 2rem;
-        height: 2rem;
-        border-radius: 25px;
-        overflow: clip;
-        border: solid black 2px;
-        top: 20px;
-        left: 50%;
-        color: black;
-        transition: background-color 0.5s ease-in;
-    }
-    .save-indicator:has(.save-saving) {
-        background-color: yellow;
-    }
-    .save-indicator:has(.save-saved) {
-        background-color: green;
-    }
-    .save-indicator:has(.save-errored) {
-        background-color: red;
-    }
     .custom-title {
         color: white;
         margin:0;
