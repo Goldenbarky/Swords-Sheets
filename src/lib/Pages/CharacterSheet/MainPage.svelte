@@ -9,6 +9,7 @@
     import CampaignInfo from '$lib/Components/CampaignInfo.svelte';
     import { CharacterController, DatabaseClient, SiteState } from '$lib/Database.svelte';
     import SaveIndicator from '$lib/Components/Helpers/SaveIndicator.svelte';
+    import ToggleSwitch from '$lib/Components/Generic/ToggleSwitch.svelte';
 
     let { spells } = $props();
 
@@ -53,6 +54,15 @@
                 <div style="display: flex; flex-direction: column;">
                     <button class="custom-box custom-button" onclick={() => campaignInfoShown = true}>Campaign Info</button>
                 </div>
+                {#if dbClient.user && sheet.owner_id === dbClient.user.id}
+                    <div style="display: flex; flex-direction: row;">
+                        <ToggleSwitch
+                            title="Private?"
+                            bind:toggle={sheet.data.Private}
+                            on_update={() => siteState.save()}
+                        />
+                    </div>
+                {/if}
             </div>
             <div class="column custom-column" style="flex: none;">
                 <div style="display: flex; flex-direction: column;">
@@ -92,7 +102,11 @@
         </div>
     </div>
 </section>
-{#if activeTab==="Stats"}
+{#if (!dbClient.user || sheet.owner_id !== dbClient.user.id) && sheet.data.Private }
+    <div style="display: flex; align-content: center; justify-content: center; height: 40rem;">
+        <img src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExc2Y0NGJ2ODJvMmttbm1yMWRldmV1aGpkcGp2MjBscmZqcjBoY3oyaSZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/wSSooF0fJM97W/giphy.gif" alt="Jurassic park not allowed gif">
+    </div>
+{:else if activeTab==="Stats"}
     <StatsPage
         bind:character={sheet.data}
     />

@@ -1,6 +1,7 @@
 {
-    "Version":1.1,
+    "Version":1.2,
     "Name": "New Character",
+    "Private": false,
     "Class": "Undefined",
     "Level": 0,
     "Stats": {

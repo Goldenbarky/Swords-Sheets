@@ -168,6 +168,7 @@
                 <ToggleSwitch
                     title="Show Known Count?"
                     bind:toggle={character.Spellcasting.Learned_Caster}
+                    on_update={() => siteState.save()}
                 />
             </div>
         {/if}
@@ -187,6 +188,7 @@
                 <ToggleSwitch
                     title="Show Prepared Count?"
                     bind:toggle={character.Spellcasting.Prepared_Caster}
+                    on_update={() => siteState.save()}
                 />
             </div>
         {/if}

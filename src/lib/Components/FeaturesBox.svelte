@@ -52,6 +52,7 @@
             <ToggleSwitch
                 title="Reorder?"
                 bind:toggle={reorderable}
+                on_update={() => siteState.save()}
             />
         </div>
     {/if}
