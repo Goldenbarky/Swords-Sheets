@@ -2,53 +2,56 @@
     import SpellDescription from "./SpellDescription.svelte";
     import StringLabel from "./Generic/StringLabel.svelte";
     import { CharacterController, SiteState } from "$lib/Database.svelte";
+    import { tick } from "svelte";
 
     interface Props {
         //@ts-nocheck
         spell: {
-        name:string,
-        school:keyof typeof schools,
-        level:number,
-        meta:{
-            ritual:boolean
-        }
-        time:{
-            number:number,
-            unit:string
-        }[],
-        components:Record<string, boolean>,
-        range:{
-            type:string,
-            distance:{
-                type:string,
-                amount:number
-            }
-        },
-        duration:{
-            duration:{
-                type:string,
-                amount:number
-            },
-            type:string,
-            concentration:boolean
-        }[],
-        entries:string[],
-        entriesHigherLevel:{
-            entries:string[],
             name:string,
-            type:string
-        }[]
-    };
+            school:keyof typeof schools,
+            level:number,
+            meta:{
+                ritual:boolean
+            }
+            time:{
+                number:number,
+                unit:string
+            }[],
+            components:Record<string, boolean>,
+            range:{
+                type:string,
+                distance:{
+                    type:string,
+                    amount:number
+                }
+            },
+            duration:{
+                duration:{
+                    type:string,
+                    amount:number
+                },
+                type:string,
+                concentration:boolean
+            }[],
+            entries:string[],
+            entriesHigherLevel:{
+                entries:string[],
+                name:string,
+                type:string
+            }[]
+        };
         prepared?: string;
         onChange: Function;
         removeFunction: Function;
+        onExpand?: Function;
     }
 
     let {
         spell,
         prepared = $bindable("false"),
         onChange,
-        removeFunction
+        removeFunction,
+        onExpand,
     }: Props = $props();
 
     const getComponents = () => {
@@ -56,10 +59,13 @@
     }
 
     const getRange = () => {
-        if(spell.range.distance.type === "self") return "Self"
+        if(spell.range.type === "cone" || spell.range.type === "line") return `Self (${spell.range.distance.amount}-${spell.range.distance.type} ${spell.range.type})`
+        else if(spell.range.type === "point" && spell.range.distance?.amount) return `${spell.range.distance.amount} ${spell.range.distance.type}`;
+        else if(spell.range.type === "radius" && spell.range.distance?.amount) return `${spell.range.distance.amount} ${spell.range.distance.type} ${spell.range.type}`;
+        else if(spell.range.type === "point") return `${spell.range.distance.type}`;
+        else if(spell.range.type === "special") return `Special`;
+        else if(spell.range.distance.type === "self") return "Self"
         else if(spell.range.distance.type === "touch") return "Touch"
-        else if(spell.range.type === "cone" || spell.range.type === "line") return `Self (${spell.range.distance.amount}-${spell.range.distance.type} ${spell.range.type})`
-        else if(spell.range.type === "point") return `${spell.range.distance.amount} ${spell.range.distance.type}`
         else return "Error, please report"
     }
 
@@ -114,104 +120,113 @@
 </script>
 
 <div class="container">
-    <div class="custom-box" style="flex-grow: 1; padding-right: 0.25rem; min-width: fit-content; max-width: 30rem;">
-        <div class="row">
-            {#if spell.level === 0}
-                <div class="custom-subtitle cantrip">{spell["name"]}</div>
-            {:else if prepared === "always"}
-                <div class="custom-subtitle cantrip always-prepared">{spell["name"]}</div>
-            {:else}
-                <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                <div class="custom-subtitle {characterController?.mode !== "use" ? "disable" : ""}" onclick={() => {
-                    prepared = prepared === "true" ? "false" : "true";
-                    siteState.save();
-                    onChange(prepared);
-                }}>
-                {#if String(prepared) !== "false"}<span class="highlighted">{spell["name"]}</span>
-                {:else}{spell["name"]}
-                {/if}
-                </div>
-            {/if}
+    <svelte:boundary onerror={onerror}>
+        <div class="custom-box" style="flex-grow: 1; padding-right: 0.25rem; min-width: fit-content; max-width: 30rem;">
             <div class="row">
-                {#each getDetails() as detail}
-                    <div class="spell-detail">{detail}
-                        <div class="box tooltip-box">
-                            <div class="tooltip-text">
-                                {#if detail === "C"} Concentration
-                                {:else if detail === "R"} Ritual
-                                {/if}
+                {#if spell.level === 0}
+                    <div class="custom-subtitle cantrip">{spell["name"]}</div>
+                {:else if prepared === "always"}
+                    <div class="custom-subtitle cantrip always-prepared">{spell["name"]}</div>
+                {:else}
+                    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                    <div class="custom-subtitle {characterController?.mode !== "use" ? "disable" : ""}" onclick={() => {
+                        prepared = prepared === "true" ? "false" : "true";
+                        siteState.save();
+                        onChange(prepared);
+                    }}>
+                    {#if String(prepared) !== "false"}<span class="highlighted">{spell["name"]}</span>
+                    {:else}{spell["name"]}
+                    {/if}
+                    </div>
+                {/if}
+                <div class="row">
+                    {#each getDetails() as detail}
+                        <div class="spell-detail">{detail}
+                            <div class="box tooltip-box">
+                                <div class="tooltip-text">
+                                    {#if detail === "C"} Concentration
+                                    {:else if detail === "R"} Ritual
+                                    {/if}
+                                </div>
                             </div>
                         </div>
-                    </div>
-                {/each}
-                {#if characterController?.mode === "edit"}
-                    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                    <div class="spell-detail custom-button {prepared === "always" ? "" : "not-selected"}" onclick={() => {
-                        if(prepared === "always") {
-                            prepared = "false";
-                        } else {
-                            onChange(prepared, true);
-                            prepared = "always";
-                        }
-                        
-                        siteState.save();
-                    }}>A
-                        <div class="box tooltip-box">
-                            <div class="tooltip-text">Always Prepared</div>
+                    {/each}
+                    {#if characterController?.mode === "edit"}
+                        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                        <div class="spell-detail custom-button {prepared === "always" ? "" : "not-selected"}" onclick={() => {
+                            if(prepared === "always") {
+                                prepared = "false";
+                            } else {
+                                onChange(prepared, true);
+                                prepared = "always";
+                            }
+                            
+                            siteState.save();
+                        }}>A
+                            <div class="box tooltip-box">
+                                <div class="tooltip-text">Always Prepared</div>
+                            </div>
                         </div>
-                    </div>
-                    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
-                    <div class="spell-detail custom-button" onclick={() => removeFunction(spell)}>X
-                        <div class="box tooltip-box">
-                            <div class="tooltip-text">Remove Spell</div>
+                        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
+                        <div class="spell-detail custom-button" onclick={() => removeFunction(spell)}>X
+                            <div class="box tooltip-box">
+                                <div class="tooltip-text">Remove Spell</div>
+                            </div>
                         </div>
-                    </div>
+                    {/if}
+                </div>
+            </div>
+            <p><i>
+                {#if spell.level === 0} {schools[spell.school]} Cantrip
+                {:else}
+                    {getlevel()}-Level {schools[spell.school]}
                 {/if}
+            </i></p>
+        </div>
+        {#if shown}
+            <div class="box custom-box dropdown" style="max-width: 28.5rem;">
+                <div class="container">
+                    <StringLabel
+                    label="Casting Time"
+                    value={`${spell.time[0].number} ${spell.time[0].unit}`}
+                    />
+                    <StringLabel
+                        label="Range"
+                        value={getRange()}
+                    />
+                    <StringLabel
+                        label="Components"
+                        value={getComponents()}
+                    />
+                    <StringLabel
+                        label="Duration"
+                        value={getDuration()}
+                    />
+                    <SpellDescription
+                        entries={spell.entries}
+                        upcast={getUpcast()}
+                        level={spell.level}
+                    />
+                </div>
+            </div>
+        {/if}
+        <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
+        <div class="custom-box bubble" onclick={async () => {
+            shown = !shown
+            await tick()
+            onExpand?.();
+            console.log(spell);
+            }}>
+            <div style="margin-top: -0.6rem; user-select: none">
+                {shown ? "-" : "+"}
             </div>
         </div>
-        <p><i>
-            {#if spell.level === 0} {schools[spell.school]} Cantrip
-            {:else}
-                {getlevel()}-Level {schools[spell.school]}
-            {/if}
-        </i></p>
-    </div>
-    {#if shown}
-        <div class="box custom-box dropdown" style="max-width: 28.5rem;">
-            <div class="container">
-                <StringLabel
-                label="Casting Time"
-                value={`${spell.time[0].number} ${spell.time[0].unit}`}
-                />
-                <StringLabel
-                    label="Range"
-                    value={getRange()}
-                />
-                <StringLabel
-                    label="Components"
-                    value={getComponents()}
-                />
-                <StringLabel
-                    label="Duration"
-                    value={getDuration()}
-                />
-                <SpellDescription
-                    entries={spell.entries}
-                    upcast={getUpcast()}
-                    level={spell.level}
-                />
-            </div>
-        </div>
-    {/if}
-    <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions-->
-    <div class="custom-box bubble" onclick={() => {
-        shown = !shown
-        }}>
-        <div style="margin-top: -0.6rem; user-select: none">
-            {shown ? "-" : "+"}
-        </div>
-    </div>
+    </svelte:boundary>
 </div>
+
+{#snippet onerror(e: any)}
+    <div>Bad spell: {spell.name} with error: {e}</div>
+{/snippet}
 
 <style>
     .custom-box {

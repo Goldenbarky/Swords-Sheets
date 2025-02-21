@@ -67,7 +67,7 @@ print {
 .columns {
     margin-left: -.75rem;
     margin-right: -.75rem;
-    margin-top: -.75rem;
+    margin-top: -.05rem;
 }
 
 .title:not(.is-spaced)+.subtitle {
