@@ -184,7 +184,7 @@
             </i></p>
         </div>
         {#if shown}
-            <div class="box custom-box dropdown" style="max-width: 28.5rem;">
+            <div class="custom-box dropdown" style="max-width: 28.5rem;">
                 <div class="container">
                     <StringLabel
                     label="Casting Time"
