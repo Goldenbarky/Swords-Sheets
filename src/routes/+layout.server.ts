@@ -8,7 +8,7 @@
 
 // src/routes/+layout.server.ts
 import type { LayoutServerLoad } from "./$types";
-export const load: LayoutServerLoad = async ({ url, locals: { supabase, safeGetSession }, fetch }) => {
+export const load: LayoutServerLoad = async ({ url, locals: { supabase, safeGetSession }, fetch, cookies }) => {
 
     const { session, user } = await safeGetSession();
 
@@ -36,6 +36,7 @@ export const load: LayoutServerLoad = async ({ url, locals: { supabase, safeGetS
     return {
         session,
         user,
-        spells: spellsCombined
+        spells: spellsCombined,
+        cookies: cookies.getAll(),
     };
 };

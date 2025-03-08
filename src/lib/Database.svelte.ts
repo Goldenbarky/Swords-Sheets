@@ -1,15 +1,16 @@
 
 import { browser } from '$app/environment';
-import { PUBLIC_SITE_URL } from '$env/static/public';
+import { PUBLIC_SITE_URL, PUBLIC_SUPABASE_ANON_KEY, PUBLIC_SUPABASE_URL } from '$env/static/public';
 import type { Session, User } from '@supabase/gotrue-js';
 import type { PostgrestSingleResponse, SupabaseClient } from "@supabase/supabase-js";
 import { getContext, setContext } from 'svelte';
 import ThemeTemplate from '$lib/Data/ThemeTemplate.json';
 import { createNewCampaign, createNewCharacter, skill_score_dictionary } from './GenericFunctions';
 import { Calculation } from './Components/Classes/DataClasses';
+import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
 
 export class CampaignController {
-    #campaign: CampaignDataRow = $state()!;
+    readonly #campaign: CampaignDataRow = $state()!;
 
     mode: 'view' | 'use' | 'edit' = $state('view');
 
@@ -33,7 +34,7 @@ export class CampaignController {
 }
 
 export class CharacterController {
-    #character: CharacterDataRow = $state()!;
+    readonly #character: CharacterDataRow = $state()!;
 
     mode: 'view' | 'use' | 'edit' = $state('view');
 
@@ -233,9 +234,10 @@ export class CharacterController {
 }
 
 export class SiteState {
+    readonly #dbCtx: DatabaseClient;
+    
     #campaignController: CampaignController | null = $state(null);
     #characterController: CharacterController | null = $state(null);
-    #dbCtx: DatabaseClient;
     #originalTheme: Theme = ThemeTemplate;
     #saveStatus: 'NOT' | 'SAVING' | 'FAILED' | 'SUCCEEDED' = $state('NOT');
     
@@ -274,13 +276,13 @@ export class SiteState {
         this.#saveStatus = 'SAVING';
         if (this.#characterController) {
             const resp = await this.#dbCtx.saveCharacter(this.#characterController.character);
-            this.#saveStatus = !!resp ? 'SUCCEEDED' : 'FAILED';
+            this.#saveStatus = resp ? 'SUCCEEDED' : 'FAILED';
             return resp;
         }
 
         if (this.#campaignController) {
             const resp = await this.#dbCtx.saveCampaign(this.#campaignController.campaign);
-            this.#saveStatus = !!resp ? 'SUCCEEDED' : 'FAILED';
+            this.#saveStatus = resp ? 'SUCCEEDED' : 'FAILED';
             return resp;
         }
 
@@ -291,7 +293,8 @@ export class SiteState {
     async pullCharacter(name: string): Promise<CharacterController | null> {
         const character = await this.#dbCtx.getCharacterByName(name);
 
-        if (!!character) {
+        if (character) {
+            console.log(character);
             this.#characterController = new CharacterController(character);
         }
         this.#originalTheme = $state.snapshot(this.#characterController?.character.theme) ?? ThemeTemplate;
@@ -301,7 +304,7 @@ export class SiteState {
     async pullCampaign(id: string): Promise<CampaignController | null> {
         const campaign = await this.#dbCtx.getCampaignById(id);
 
-        if (!!campaign) {
+        if (campaign) {
             this.#campaignController = new CampaignController(campaign);
         }
         this.#originalTheme = $state.snapshot(this.#campaignController?.campaign.theme) ?? ThemeTemplate;
@@ -320,8 +323,20 @@ export class SiteState {
     }
 }
 
+type Cookies = Array<{
+    name: string;
+    value: string;
+}>;
+
+type Fetch = {
+    (input: RequestInfo | URL, init?: RequestInit): Promise<Response>;
+    (input: string | URL | globalThis.Request, init?: RequestInit): Promise<Response>;
+};
+
 export class DatabaseClient {
     #db: SupabaseClient;
+    readonly #fetch: Fetch;
+    readonly #cookies: Cookies;
     #session: Session | null = $state(null);
     #user: User | null = $state(null);
 
@@ -335,23 +350,45 @@ export class DatabaseClient {
         return v;
     }
 
-    constructor(db: SupabaseClient, session?: Session | null, user?: User | null) {
-        this.#db = db;
-        this.#session = session!;
+    constructor(user: User | null, cookies: Cookies, fetch: Fetch) {
         this.#user = user!;
-        
-        if (browser) {
-            this.#db.auth.onAuthStateChange((event, session) => {
-                if (event === 'SIGNED_OUT' || !session) {
-                    this.#user = null;
-                }
+        this.#fetch = fetch;
+        this.#cookies = cookies;
 
-                if (session) {
-                    this.#session = session;
-                    this.#user = session.user;
-                }
-            });
-        }
+        this.#db = this.#createClients();
+    }
+
+    #createClients() {
+        let cookies = this.#cookies;
+        let fetch = this.#fetch;
+        return isBrowser()
+        ? createBrowserClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+            global: {
+                fetch,
+            },
+        })
+        : createServerClient(PUBLIC_SUPABASE_URL, PUBLIC_SUPABASE_ANON_KEY, {
+            global: {
+                fetch,
+            },
+            cookies: {
+                getAll() {
+                    return cookies;
+                },
+            },
+        });
+    }
+
+    setupHooks(): () => void {
+        const { data } = this.#db.auth.onAuthStateChange((_, newSession) => {
+            if (newSession?.expires_at !== this.#session?.expires_at) {
+                this.#db = this.#createClients();
+            }
+            this.#session = newSession;
+            this.#user = newSession?.user!;
+        });
+
+        return data.subscription.unsubscribe;
     }
 
     get session() {
@@ -360,6 +397,10 @@ export class DatabaseClient {
 
     get user() {
         return this.#user;
+    }
+
+    async getSession(): Promise<Session | null> {
+        return (await this.#db.auth.getSession()).data.session;
     }
 
     async getAllCampaigns(): Promise<CampaignDataRow[] | null> {
@@ -428,6 +469,8 @@ export class DatabaseClient {
             return null;
         }
 
+        if (campaign_ids.length <= 0) return null;
+
         const { data: campaigns, error: e2 } = await this.#db
             .from("campaigns")
             .select("*")
@@ -482,7 +525,7 @@ export class DatabaseClient {
                 character_invited: id,
             })));
 
-        if (!!error) {
+        if (error) {
             console.error('failed to invite characters', error);
             return false;
         }
@@ -505,7 +548,7 @@ export class DatabaseClient {
                 character_invited: character_id,
             });
 
-        if (!!error) {
+        if (error) {
             console.error('failed to invite character', error);
             return false;
         }

@@ -34,7 +34,8 @@
   },
   "type": "module",
   "dependencies": {
-    "@supabase/ssr": "^0.3.0",
+    "@supabase/ssr": "^0.5.2",
+    "@supabase/supabase-js": "^2.49.1",
     "source-map-support": "^0.5.21"
   },
   "trustedDependencies": [

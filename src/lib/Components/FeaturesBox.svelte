@@ -20,7 +20,7 @@
     const characterController = CharacterController.getContext();
 </script>
 
-<div class="box custom-box">
+<div class="">
     <div class="custom-title">{title}</div>
     {#each features as feature, i (feature)}
         <TitleDescription
