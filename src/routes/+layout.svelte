@@ -1,8 +1,14 @@
 <script lang="ts">
+  import { onMount } from 'svelte';
+
     let { data, children } = $props();
 
     data.dbClient.setContext();
     data.siteState.setContext();
+    
+    onMount(() => {
+        return data.dbClient.setupHooks();
+    });
 </script>
 
 <svelte:boundary>
