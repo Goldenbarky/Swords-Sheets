@@ -7,9 +7,7 @@ import { getContext, setContext } from 'svelte';
 import ThemeTemplate from '$lib/Data/ThemeTemplate.json';
 import { createNewCampaign, createNewCharacter, skill_score_dictionary } from './GenericFunctions';
 import { Calculation } from './Components/Classes/DataClasses';
-import { uuid } from '@supabase/gotrue-js/dist/module/lib/helpers';
 import { createBrowserClient, createServerClient, isBrowser } from '@supabase/ssr';
-import { invalidate } from '$app/navigation';
 
 export class CampaignController {
     readonly #campaign: CampaignDataRow = $state()!;
