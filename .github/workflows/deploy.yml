@@ -17,6 +17,7 @@ jobs:
         #script_path: ./DnDSheets/scripts/rebuild.sh
         script: |
           cd /home/kennedjustin7/DnDSheets
+          git checkout .
           git pull
           /home/kennedjustin7/.bun/bin/bun i
           /home/kennedjustin7/.bun/bin/bun pm trust --all
