@@ -14,3 +14,4 @@ vite.config.ts.timestamp-*
 .env.**
 !.env.production
 bun.lockb
+/src/routes/testing/*

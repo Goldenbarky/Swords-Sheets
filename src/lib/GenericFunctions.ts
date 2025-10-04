@@ -18,15 +18,15 @@ export let abilities = [
 ] as (keyof AbilityScoreType)[];
 
 export let spell_slot_levels = [
-    "1",
-    "2",
-    "3",
-    "4",
-    "5",
-    "6",
-    "7",
-    "8",
-    "9"
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8,
+    9
 ] as (keyof SpellSlotCount)[];
 
 export let skills = [

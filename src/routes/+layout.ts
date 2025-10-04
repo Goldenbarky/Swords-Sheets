@@ -22,6 +22,6 @@ export const load: LayoutLoad = async ({ fetch, data }) => {
     user: data.user,
     dbClient,
     siteState,
-    spells: data.spells,
+    sourcebookData: data.sourcebookData,
   };
 };

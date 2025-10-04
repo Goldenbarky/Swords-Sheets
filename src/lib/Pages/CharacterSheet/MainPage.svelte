@@ -11,7 +11,7 @@
     import SaveIndicator from '$lib/Components/Helpers/SaveIndicator.svelte';
     import ToggleSwitch from '$lib/Components/Generic/ToggleSwitch.svelte';
 
-    let { spells } = $props();
+    let { sourcebookData }: { sourcebookData:SourcebookDataStructs } = $props();
 
     function save() {
         siteState.save();
@@ -121,7 +121,7 @@
 {:else if activeTab==="Spellcasting"}
     <SpellcastingPage
         bind:character={sheet.data}
-        spells={spells}
+        sourcebookData={sourcebookData}
     />
 {:else if activeTab==="Notes"}
     <div>words</div>

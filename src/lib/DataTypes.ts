@@ -34,7 +34,7 @@ type CharacterSheet = {
     "Version":number,
     "Name":string,
     "Class":string,
-    "Level":number,
+    "Level":string,
     "Stats":{
         "Ability_Scores":AbilityScoreType,
         "Proficiencies":Proficiencies,
@@ -68,18 +68,7 @@ type CharacterSheet = {
     "Spellcasting":{
         "Ability":string,
         "Bonus":number,
-        "Spells":{
-            "0":Spell[],
-            "1":Spell[],
-            "2":Spell[],
-            "3":Spell[],
-            "4":Spell[],
-            "5":Spell[],
-            "6":Spell[],
-            "7":Spell[],
-            "8":Spell[],
-            "9":Spell[],
-        },
+        "Spells":SpellLevels,
         "Max_Prepared":number,
         "Prepared_Caster":boolean,
         "Learned_Caster":boolean,
@@ -187,9 +176,103 @@ type MagicItem = {
     "Entries":TitleDescriptionType[]
 }
 
-type Spell = {
+type SpellSchools = {
+    A: string;
+    C: string;
+    D: string;
+    E: string;
+    V: string;
+    I: string;
+    N: string;
+    T: string;
+}
+
+type CharacterSpell = {
     "Spell_Name":string,
-    "Prepared":string
+    "Prepared":string,
+    "Source":string
+}
+
+type SourceSpell = {
+    name:string,
+    school:keyof SpellSchools,
+    level:keyof SpellLevels,
+    meta:{
+        ritual:boolean
+    }
+    time:{
+        number:number,
+        unit:string
+    }[],
+    components:Record<string, boolean>,
+    range:{
+        type:string,
+        distance:{
+            type:string,
+            amount:number
+        }
+    },
+    duration:{
+        duration:{
+            type:string,
+            amount:number
+        },
+        type:string,
+        concentration:boolean
+    }[],
+    entries:string[],
+    entriesHigherLevel:{
+        entries:string[],
+        name:string,
+        type:string
+    }[],
+    source:string
+}
+
+type SpellSlotCount = {
+    1:number,
+    2:number,
+    3:number,
+    4:number,
+    5:number,
+    6:number,
+    7:number,
+    8:number,
+    9:number,
+}
+
+type SpellLevels = {
+    0:CharacterSpell[],
+    1:CharacterSpell[],
+    2:CharacterSpell[],
+    3:CharacterSpell[],
+    4:CharacterSpell[],
+    5:CharacterSpell[],
+    6:CharacterSpell[],
+    7:CharacterSpell[],
+    8:CharacterSpell[],
+    9:CharacterSpell[],
+}
+
+type ClassData = {
+    "Name":string,
+    "Subclasses":string[]
+}
+
+type SourcebookDataStructs = {
+    spellsList:SourceSpell[],
+    spellsByClass:Record<string, Record<string, SpellSourceTable>>,
+    classes:ClassData[],
+    bookNames:{
+        id:string,
+        name:string
+    }[]
+};
+
+type SpellSourceTable = {
+    "class": Record<string, Record<string, boolean>>
+    "subclass": Record<string, Record<string, Record<string, Record<string, {name:string}>>>>
+    "classVariant": Record<string, Record<string, unknown>>
 }
 
 type TitleDescriptionType = {
@@ -203,18 +286,6 @@ type TitleDescriptionType = {
         "Max":number,
         "Used":number
     }
-}
-
-type SpellSlotCount = {
-    "1":number,
-    "2":number,
-    "3":number,
-    "4":number,
-    "5":number,
-    "6":number,
-    "7":number,
-    "8":number,
-    "9":number,
 }
 
 type Variable = {

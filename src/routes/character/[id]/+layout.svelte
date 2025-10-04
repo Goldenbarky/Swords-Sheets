@@ -16,7 +16,7 @@
     {@render children()}
     {#if data.siteState.characterController?.character}
         <MainPage
-            spells={data.spells}
+            sourcebookData={data.sourcebookData}
         />
     {/if}
 </div>
@@ -28,7 +28,6 @@
         width: 100vw;
         height: 100vh;
         background-color: var(--background);
-        //overflow: clip;
     }
     :global(.custom-box) {
         border: 2px solid var(--border);

@@ -231,6 +231,33 @@ export class CharacterController {
     getWeaponToHitBonusCalc(weapon:Weapon): Calculation {
         return CharacterController.calcWeaponToHit(this.#character.data, weapon);
     }
+
+    addSpellToSheet(spell:SourceSpell): void {
+        if (
+            !this.#character.data.Spellcasting.Spells[
+                spell.level
+            ].find(
+                (x) =>
+                    spell.name === x.Spell_Name &&
+                    spell.source === x.Source,
+            )
+        ) {
+            this.#character.data.Spellcasting.Spells[
+                spell.level
+            ].push({
+                Spell_Name: spell.name,
+                Prepared: "false",
+                Source: spell.source,
+            });
+            this.#character.data.Spellcasting.Spells[
+                spell.level
+            ].sort((a, b) =>
+                a.Spell_Name.localeCompare(
+                    b.Spell_Name,
+                ),
+            );
+        }
+    }
 }
 
 export class SiteState {

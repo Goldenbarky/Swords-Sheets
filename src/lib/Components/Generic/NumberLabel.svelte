@@ -17,7 +17,7 @@
         vertical_margins = true,
         calculation,
     }: {
-        number: number;
+        number: number | string;
         label: string;
         label_placeholder?: string;
         bold_label?: boolean;
@@ -48,7 +48,7 @@
                 class="custom-box custom-button custom-tiny-button"
                 style="font-size: {number_font_size}"
                 onclick={() => {
-                    number--;
+                    number = (number as number) - 1;
                     siteState.save();
                 }}
             >
@@ -68,7 +68,7 @@
                 class="custom-box custom-button custom-tiny-button"
                 style="font-size: {number_font_size}"
                 onclick={() => {
-                    number++;
+                    number = (number as number) + 1;
                     siteState.save();
                 }}
             >

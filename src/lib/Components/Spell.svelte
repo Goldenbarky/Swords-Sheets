@@ -5,41 +5,7 @@
     import { tick } from "svelte";
 
     interface Props {
-        //@ts-nocheck
-        spell: {
-            name:string,
-            school:keyof typeof schools,
-            level:number,
-            meta:{
-                ritual:boolean
-            }
-            time:{
-                number:number,
-                unit:string
-            }[],
-            components:Record<string, boolean>,
-            range:{
-                type:string,
-                distance:{
-                    type:string,
-                    amount:number
-                }
-            },
-            duration:{
-                duration:{
-                    type:string,
-                    amount:number
-                },
-                type:string,
-                concentration:boolean
-            }[],
-            entries:string[],
-            entriesHigherLevel:{
-                entries:string[],
-                name:string,
-                type:string
-            }[]
-        };
+        spell: SourceSpell;
         prepared?: string;
         onChange: Function;
         removeFunction: Function;

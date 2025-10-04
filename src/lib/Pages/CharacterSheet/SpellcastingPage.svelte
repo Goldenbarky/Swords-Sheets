@@ -5,16 +5,17 @@
     import NumberLabel from "$lib/Components/Generic/NumberLabel.svelte";
     import ToggleSwitch from "$lib/Components/Generic/ToggleSwitch.svelte";
     import Divider from "$lib/Components/Helpers/Divider.svelte";
+    import MassAddSpells from "$lib/Components/MassAddSpells.svelte";
     import Spell from "$lib/Components/Spell.svelte";
     import { CharacterController, SiteState } from "$lib/Database.svelte";
     import { levenshteinDistance } from "$lib/GenericFunctions";
+    import { onMount } from "svelte";
 
     let {
         character = $bindable(),
-        spells,
-    }: { character: CharacterSheet; spells?: Record<string, unknown> } =
+        sourcebookData,
+    }: { character: CharacterSheet; sourcebookData:SourcebookDataStructs } =
         $props();
-
     const siteState = SiteState.getContext();
     const characterController = CharacterController.getContext();
 
@@ -31,7 +32,7 @@
         "Ninth Level",
     ];
 
-    const removeSpell = (spell: any) => {
+    const removeSpell = (spell:SourceSpell) => {
         character.Spellcasting.Spells[spell.level] =
             character.Spellcasting.Spells[spell.level].filter(
                 (x) =>
@@ -45,11 +46,15 @@
         siteState.save();
     };
 
+    const inheritSpellList = (spellList: string) => {
+        console.log(sourcebookData?.spellsByClass);
+    };
+
     const calcKnown = () => {
         let num = 0;
 
         for (let i = 1; i <= 9; i++) {
-            character.Spellcasting.Spells[i].forEach((x) => num++);
+            character.Spellcasting.Spells[i as keyof SpellLevels].forEach((x) => num++);
         }
 
         return num;
@@ -60,7 +65,7 @@
 
         Object.keys(character.Spellcasting.Spells).forEach((level) => {
             if (level !== "0") {
-                character.Spellcasting.Spells[level].forEach((spell) => {
+                character.Spellcasting.Spells[level as unknown as keyof SpellLevels].forEach((spell:CharacterSpell) => {
                     if (String(spell.Prepared) === "true") prepared++;
                 });
             }
@@ -69,10 +74,14 @@
         return prepared;
     };
 
+    let spellList:SourceSpell[] = $state(sourcebookData!.spellsList);
+
     let num_prepared = $state(calcPrepared());
     let attack_modifier = $state(characterController.getSpellToHitBonusCalc());
     let save_dc = $state(characterController.getSaveDcCalc());
     let spells_known = $state(calcKnown());
+
+    let massAddShown= $state(false);
 
     const changePrepared = (
         prepared: string,
@@ -92,7 +101,7 @@
         save_dc = characterController.getSaveDcCalc();
     };
 
-    const spell_names = $derived(spells ? Object.values(spells) : []);
+    const spell_names = $derived(sourcebookData ? Object.values(sourcebookData.spellsList) : []);
     let spell_query = $state("");
 
     const filter_array = $derived(
@@ -137,7 +146,13 @@
     $effect(() => {
         characterController.mode;
         editSizes();
-    })
+    });
+
+    onMount(() => {
+        (async () => {
+            console.log(sourcebookData?.spellsByClass);
+        })();
+    });
 </script>
 
 <div
@@ -221,7 +236,12 @@
                 class="custom-box"
                 style="width:100%; margin-top: 1rem; margin-bottom: 0px;"
             >
-                <div class="custom-title">Add A New Spell</div>
+                <div class="custom-title" style="position: relative;">
+                    Add A New Spell
+                    <button class="custom-box custom-button" style="display: inline; position: absolute; top: 3px; right: 0px;"
+                        onclick={() => massAddShown = true}
+                    >!</button>
+                </div>
                 <input bind:value={spell_query} />
                 {#if spell_query.length > 0}
                     <Divider orientation="horizontal" />
@@ -330,11 +350,11 @@
                                 onclick={() => {
                                     if (
                                         character.Spellcasting.Spell_Slots[
-                                            i + 1
+                                            (i + 1) as keyof SpellSlotCount
                                         ] > 0
                                     ) {
                                         character.Spellcasting.Spell_Slots[
-                                            i + 1
+                                            (i + 1) as keyof SpellSlotCount
                                         ]--;
                                         siteState.save();
                                     }
@@ -354,11 +374,11 @@
                                 onclick={() => {
                                     if (
                                         character.Spellcasting.Spell_Slots[
-                                            i + 1
+                                            (i + 1) as keyof SpellSlotCount
                                         ] < 10
                                     ) {
                                         character.Spellcasting.Spell_Slots[
-                                            i + 1
+                                            (i + 1) as keyof SpellSlotCount
                                         ]++;
                                         siteState.save();
                                     }
@@ -377,10 +397,11 @@
                                 color={siteState.theme.secondary}
                                 checked={j <
                                     character.Spellcasting.Slots_Expended[
-                                        i + 1
+                                        (i + 1) as keyof SpellSlotCount
                                     ]}
-                                bind:checked_counter={character.Spellcasting
-                                    .Slots_Expended[i + 1]}
+                                bind:checked_counter={
+                                    character.Spellcasting.Slots_Expended[(i + 1) as keyof SpellSlotCount]
+                                }
                             />
                         {/each}
                     </div>
@@ -405,15 +426,15 @@
                                 {spell_levels[i] + " Spells"}
                             </div>
                             <div class="grid">
-                                {#if spells}
+                                {#if sourcebookData}
                                     {#each level as item (item)}
-                                        {@const spell = spells.find(
-                                            (x) =>
-                                                x["name"] === item.Spell_Name &&
-                                                x["source"] ===
-                                                    (item.Source ??
-                                                        x["source"]),
-                                        )}
+                                        {@const spell = sourcebookData.spellsList.find(
+                                            (x:SourceSpell) =>
+                                                x["name"].toLowerCase() === item.Spell_Name.toLowerCase() &&
+                                                x["source"].toLowerCase() ===
+                                                    (item.Source?.toLowerCase() ??
+                                                        x["source"].toLowerCase()),
+                                        )!}
                                         <Spell
                                             {spell}
                                             bind:prepared={item.Prepared}
@@ -431,6 +452,10 @@
         </div>
     </div>
     <div class="edge"></div>
+    <MassAddSpells
+        bind:shown = {massAddShown}
+        sourcebookData = {sourcebookData}
+    />
 </div>
 
 <style>
