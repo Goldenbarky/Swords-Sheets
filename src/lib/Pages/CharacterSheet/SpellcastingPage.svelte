@@ -83,6 +83,8 @@
 
     let massAddShown= $state(false);
 
+    let slotChanged = $state(false);
+
     const changePrepared = (
         prepared: string,
         changeToAlways: boolean = false,
@@ -383,19 +385,22 @@
                             ? 'disable'
                             : ''}"
                     >
-                        {#each Array(slots) as _, j}
-                            <CheckedBox
-                                checkmark="X"
-                                color={siteState.theme.secondary}
-                                checked={j <
-                                    character.Spellcasting.Slots_Expended[
-                                        (i + 1) as keyof SpellSlotCount
-                                    ]}
-                                bind:checked_counter={
-                                    character.Spellcasting.Slots_Expended[(i + 1) as keyof SpellSlotCount]
-                                }
-                            />
-                        {/each}
+                        {#key slotChanged}
+                            {#each Array(slots) as _, j (j)}
+                                <CheckedBox
+                                    checkmark="X"
+                                    color={siteState.theme.secondary}
+                                    checked={j <
+                                        character.Spellcasting.Slots_Expended[
+                                            (i + 1) as keyof SpellSlotCount
+                                        ]}
+                                    bind:checked_counter={
+                                        character.Spellcasting.Slots_Expended[(i + 1) as keyof SpellSlotCount]
+                                    }
+                                    onChange={() => slotChanged = !slotChanged}
+                                />
+                            {/each}
+                        {/key}
                     </div>
                     {#if Object.values(character.Spellcasting.Spell_Slots)[i + 1] !== 0}
                         <div style="height:0.5rem;"></div>

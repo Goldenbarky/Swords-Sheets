@@ -23,7 +23,7 @@
 <div class="checkbox-container" style="{checked ? `outline-color: ${color}` : ""}">
     <!-- svelte-ignore a11y_click_events_have_key_events, a11y_no_static_element_interactions -->
     <div class="checkmark" onclick={async () => {
-        checked = !checked
+        checked = !checked;
         onChange?.();
         if(checked_counter !== -1) {
             if(checked) checked_counter++;
