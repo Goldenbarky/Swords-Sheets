@@ -2,7 +2,7 @@
     import SpellDescription from "./SpellDescription.svelte";
     import StringLabel from "./Generic/StringLabel.svelte";
     import { CharacterController, SiteState } from "$lib/Database.svelte";
-    import { tick } from "svelte";
+    import { getContext, onMount, tick } from "svelte";
 
     interface Props {
         spell: SourceSpell;
@@ -80,6 +80,12 @@
     }
 
     let shown = $state(false);
+
+    let expandListener = getContext<() => { receivers:((expand:boolean) => void)[]}>("spellDropdownDispatcher")
+
+    onMount(() => {
+        expandListener().receivers.push((expansion:boolean) => {shown = expansion});
+    });
 
     const siteState = SiteState.getContext();
     const characterController = CharacterController.getContext();

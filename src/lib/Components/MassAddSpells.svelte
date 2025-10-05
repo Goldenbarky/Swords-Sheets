@@ -227,15 +227,6 @@
         cursor: pointer;
         height: 1.25rem;
     }
-    .custom-tiny-button {
-        display: flex;
-        width: 0.1rem;
-        height: 1rem;
-        padding: 0rem 0.4rem 0rem 0.4rem;
-        justify-content: flex-end;
-        margin-top: 0.2rem;
-        margin-right: 0.3rem;
-    }
     .custom-button:hover {
         background-color: var(--background_hover);
     }

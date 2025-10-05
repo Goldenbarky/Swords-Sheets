@@ -9,7 +9,7 @@
     import Spell from "$lib/Components/Spell.svelte";
     import { CharacterController, SiteState } from "$lib/Database.svelte";
     import { levenshteinDistance } from "$lib/GenericFunctions";
-    import { onMount } from "svelte";
+    import { onMount, setContext } from "svelte";
 
     let {
         character = $bindable(),
@@ -141,6 +141,18 @@
                 element.style.marginLeft = `0`;
             }
         });
+    }
+
+    let spellDropdownDispatcher:{ receivers:((expand:boolean) => void)[]} = $state({
+        receivers: []
+    });
+    
+    setContext("spellDropdownDispatcher", () => spellDropdownDispatcher);
+
+    const cascadeExpansion = (expand:boolean) => {
+        for(const receiver of spellDropdownDispatcher.receivers) {
+            receiver?.(expand);
+        }
     }
 
     $effect(() => {
@@ -414,7 +426,33 @@
     </div>
     <div class="column custom-column center">
         <div class="" style="width:100%;">
-            <div class="custom-title" bind:this={spellNameEl}>Spells</div>
+            <div class="custom-title row" style="position: relative;" bind:this={spellNameEl}>
+                Spells
+                <button 
+                    class="custom-box custom-button" 
+                    style="position: absolute; right: 1.5rem; bottom: 0; bottom: 0; padding-left: 0.25rem; padding-right: 0.25rem;"
+                    onclick={() => {
+                        cascadeExpansion(true);
+                    }}
+                >
+                    &#9660;
+                    <div class="box tooltip-box">
+                        <div class="tooltip-text">Expand All</div>
+                    </div>
+                </button>
+                <button 
+                    class="custom-box custom-button" 
+                    style="position: absolute; right: 0; bottom: 0; padding-left: 0.25rem; padding-right: 0.25rem;"
+                    onclick={() => {
+                        cascadeExpansion(false);
+                    }}
+                >
+                    &#9650;
+                    <div class="box tooltip-box">
+                        <div class="tooltip-text">Collapse All</div>
+                    </div>
+                </button>
+            </div> 
             {#key character.Spellcasting.Spells}
                 {#each Object.values(character.Spellcasting.Spells) as level, i (i)}
                     <div bind:this={elems[i]}>
@@ -553,5 +591,30 @@
         border: 1px solid var(--border);
         border-radius: 6px;
         backdrop-filter: brightness(75%);
+    }
+    .tooltip-box {
+        visibility: hidden;
+        border: 2px solid var(--border);
+        padding: 0.75rem;
+        padding-bottom: 0.25rem;
+        padding-top: 0.25rem;
+        background-color: var(--background);
+        height: fit-content;
+        width: fit-content;
+        margin-bottom: 0px;
+        position: absolute;
+        margin-top: 5px;
+        z-index: 1;
+    }
+    .tooltip-text {
+        visibility: hidden;
+        text-align: right;
+        color: var(--secondary)
+    }
+    .custom-button:hover .tooltip-box {
+        visibility: visible;
+    }
+    .custom-button:hover .tooltip-text {
+        visibility: visible;
     }
 </style>
