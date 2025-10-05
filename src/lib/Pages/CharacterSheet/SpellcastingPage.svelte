@@ -263,33 +263,13 @@
                             class="custom-button"
                             style="font-size:medium;"
                             onclick={() => {
-                                if (
-                                    !character.Spellcasting.Spells[
-                                        spell.level
-                                    ].find(
-                                        (x) =>
-                                            spell.name === x.Spell_Name &&
-                                            spell.source === x.Source,
-                                    )
-                                ) {
-                                    character.Spellcasting.Spells[
-                                        spell.level
-                                    ].push({
-                                        Spell_Name: spell.name,
-                                        Prepared: "false",
-                                        Source: spell.source,
-                                    });
-                                    character.Spellcasting.Spells[
-                                        spell.level
-                                    ].sort((a, b) =>
-                                        a.Spell_Name.localeCompare(
-                                            b.Spell_Name,
-                                        ),
-                                    );
-                                    if (spell.level !== 0) spells_known++;
-                                    siteState.save();
+                                    let success = characterController.addSpellToSheet(spell);
+                                    if (success && spell.level !== 0) {
+                                        spells_known++;
+                                        siteState.save();
+                                    }
                                 }
-                            }}
+                            }
                         >
                             {spell.name} <b>{spell.source}</b>
                         </div>
@@ -479,6 +459,7 @@
                                             onChange={changePrepared}
                                             removeFunction={removeSpell}
                                             onExpand={editSizes}
+                                            sourcebookData={sourcebookData}
                                         />
                                     {/each}
                                 {/if}

@@ -10,6 +10,7 @@
         onChange: Function;
         removeFunction: Function;
         onExpand?: Function;
+        sourcebookData: SourcebookDataStructs;
     }
 
     let {
@@ -18,6 +19,7 @@
         onChange,
         removeFunction,
         onExpand,
+        sourcebookData
     }: Props = $props();
 
     const getComponents = () => {
@@ -148,12 +150,31 @@
                     {/if}
                 </div>
             </div>
-            <p><i>
-                {#if spell.level === 0} {schools[spell.school]} Cantrip
-                {:else}
-                    {getlevel()}-Level {schools[spell.school]}
+            <div class="row">
+                <p><i>
+                    {#if spell.level === 0} {schools[spell.school]} Cantrip
+                    {:else}
+                        {getlevel()}-Level {schools[spell.school]}
+                    {/if}
+                </i></p>
+                {#if shown}
+                    <div class="source-text">
+                        {#if sourcebookData}
+                            {#if spell.source === "KibblesGenericElementalSpells"}
+                                KGES
+                                <div class="box tooltip-box" style="top: 1.3rem;">
+                                    <div class="tooltip-text">Kibbles Generic Elemental Spells</div>
+                                </div>
+                            {:else}
+                                {spell.source}
+                                <div class="box tooltip-box" style="top: 1.3rem;">
+                                    <div class="tooltip-text">{sourcebookData.bookNames.find(x => x.id === spell.source.toLowerCase())?.name}</div>
+                                </div>
+                            {/if}
+                        {/if}
+                    </div>
                 {/if}
-            </i></p>
+            </div>
         </div>
         {#if shown}
             <div class="custom-box dropdown" style="max-width: 28.5rem;">
@@ -253,7 +274,6 @@
         color: var(--secondary);
     }
     .custom-subtitle {
-        
         font-size: large;
         width: fit-content;
         color: var(--text);
@@ -317,5 +337,18 @@
     }
     .custom-button:hover {
         background-color: var(--background_hover);
+    }
+    .source-text {
+        font-size: medium;
+        width: fit-content;
+        color: var(--secondary);
+        text-align: left;
+        user-select: none;
+    }
+    .source-text:hover .tooltip-box {
+        visibility: visible;
+    }
+    .source-text:hover .tooltip-text {
+        visibility: visible;
     }
 </style>

@@ -232,14 +232,14 @@ export class CharacterController {
         return CharacterController.calcWeaponToHit(this.#character.data, weapon);
     }
 
-    addSpellToSheet(spell:SourceSpell): void {
+    addSpellToSheet(spell:SourceSpell): boolean {
         if (
             !this.#character.data.Spellcasting.Spells[
                 spell.level
             ].find(
                 (x) =>
-                    spell.name === x.Spell_Name &&
-                    spell.source === x.Source,
+                    spell.name.toLowerCase() === x.Spell_Name.toLowerCase() &&
+                    spell.source.toLowerCase() === x.Source.toLowerCase(),
             )
         ) {
             this.#character.data.Spellcasting.Spells[
@@ -256,7 +256,11 @@ export class CharacterController {
                     b.Spell_Name,
                 ),
             );
+
+            return true;
         }
+
+        return false;
     }
 }
 
